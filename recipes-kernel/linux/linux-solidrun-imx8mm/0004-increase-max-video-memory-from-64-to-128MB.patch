@@ -1,0 +1,28 @@
+From 7e4d26807448750228323e1bd905ebdbf08f2af7 Mon Sep 17 00:00:00 2001
+From: sebastian suesens <sebastian.suesens@baslerweb.com>
+Date: Tue, 14 May 2019 13:27:10 +0200
+Subject: [PATCH] increase max video memory from 64 to 128MB
+
+imx8mq:
+4 video buffers are needed to get 13MP@21fps
+without the patch only to 2 buffers at 13MP are supported
+---
+ drivers/media/platform/mxc/capture/mx6s_capture.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/media/platform/mxc/capture/mx6s_capture.c b/drivers/media/platform/mxc/capture/mx6s_capture.c
+index d4aa00e2d2e0..eba55cc9c1fb 100755
+--- a/drivers/media/platform/mxc/capture/mx6s_capture.c
++++ b/drivers/media/platform/mxc/capture/mx6s_capture.c
+@@ -57,7 +57,7 @@
+ #define MX6S_CAM_VERSION "0.0.1"
+ #define MX6S_CAM_DRIVER_DESCRIPTION "i.MX6S_CSI"
+ 
+-#define MAX_VIDEO_MEM 64
++#define MAX_VIDEO_MEM 128
+ 
+ /* reset values */
+ #define CSICR1_RESET_VAL	0x40000800
+-- 
+2.21.0
+

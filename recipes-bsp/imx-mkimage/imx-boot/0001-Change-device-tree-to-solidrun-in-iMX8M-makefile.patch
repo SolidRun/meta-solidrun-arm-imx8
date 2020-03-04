@@ -1,0 +1,26 @@
+From ce7a3985bd8f62c67ccedea0c48ddd511bd68421 Mon Sep 17 00:00:00 2001
+From: TalPilo <tal.pilo@solid-run.com>
+Date: Tue, 25 Feb 2020 15:37:16 +0200
+Subject: [PATCH] Change device tree to solidrun in iMX8M makefile
+
+Signed-off-by: TalPilo <tal.pilo@solid-run.com>
+---
+ iMX8M/soc.mak | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/iMX8M/soc.mak b/iMX8M/soc.mak
+index d714259..2a0b839 100644
+--- a/iMX8M/soc.mak
++++ b/iMX8M/soc.mak
+@@ -111,7 +111,7 @@ u-boot-atf-tee.bin: u-boot.bin bl31.bin tee.bin
+ clean:
+ 	@rm -f $(MKIMG) u-boot-atf.bin u-boot-atf-tee.bin u-boot-spl-ddr.bin u-boot.itb u-boot.its u-boot-ddr3l.itb u-boot-ddr3l.its u-boot-spl-ddr3l.bin u-boot-ddr4.itb u-boot-ddr4.its u-boot-spl-ddr4.bin u-boot-ddr4-evk.itb u-boot-ivt.itb u-boot-ddr4-evk.its $(OUTIMG)
+ 
+-dtbs = fsl-$(PLAT)-evk.dtb
++dtbs = fsl-imx8mm-solidrun.dtb
+ u-boot.itb: $(dtbs)
+ 	./$(PAD_IMAGE) bl31.bin
+ 	./$(PAD_IMAGE) u-boot-nodtb.bin $(dtbs)
+-- 
+2.17.1
+

@@ -1,0 +1,35 @@
+From f1646515cdfa5be9b58cd7b1965d1a43795f3282 Mon Sep 17 00:00:00 2001
+From: TalPilo <tal.pilo@solid-run.com>
+Date: Thu, 21 Nov 2019 12:43:41 +0200
+Subject: [PATCH]  Add DSI support for uboot- change to right addresess
+
+Signed-off-by: TalPilo <tal.pilo@solid-run.com>
+---
+ board/solidrun/imx8mm_solidrun/imx8mm_solidrun.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/board/solidrun/imx8mm_solidrun/imx8mm_solidrun.c b/board/solidrun/imx8mm_solidrun/imx8mm_solidrun.c
+index aec4447753..45d8f69925 100644
+--- a/board/solidrun/imx8mm_solidrun/imx8mm_solidrun.c
++++ b/board/solidrun/imx8mm_solidrun/imx8mm_solidrun.c
+@@ -351,7 +351,7 @@ int mmc_map_to_kernel_blk(int devno)
+ 
+ #ifdef CONFIG_VIDEO_MXS
+ 
+-#define ADV7535_MAIN 0x3d
++#define ADV7535_MAIN 0x39
+ #define ADV7535_DSI_CEC 0x3c
+ 
+ static const struct sec_mipi_dsim_plat_data imx8mm_mipi_dsim_plat_data = {
+@@ -398,7 +398,7 @@ static int adv7535_i2c_reg_read(struct udevice *dev, uint8_t addr, uint8_t *data
+ static void adv7535_init(void)
+ {
+ 	struct udevice *bus, *main_dev, *cec_dev;
+-	int i2c_bus = 1;
++	int i2c_bus = 2;
+ 	int ret;
+ 	uint8_t val;
+ 
+-- 
+2.17.1
+

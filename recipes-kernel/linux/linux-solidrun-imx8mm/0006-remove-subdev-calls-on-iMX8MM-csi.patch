@@ -1,0 +1,115 @@
+diff --git a/drivers/media/platform/mxc/capture/mxc_mipi_csi.c b/drivers/media/platform/mxc/capture/mxc_mipi_csi.c
+index a7964b7b8345..e93d0f5f8bdb 100644
+--- a/drivers/media/platform/mxc/capture/mxc_mipi_csi.c
++++ b/drivers/media/platform/mxc/capture/mxc_mipi_csi.c
+@@ -712,10 +712,8 @@ static int mipi_csis_s_stream(struct v4l2_subdev *mipi_sd, int enable)
+ 			goto unlock;
+ 		}
+ 		mipi_csis_start_stream(state);
+-		v4l2_subdev_call(state->sensor_sd, video, s_stream, true);
+ 		state->flags |= ST_STREAMING;
+ 	} else {
+-		v4l2_subdev_call(state->sensor_sd, video, s_stream, false);
+ 		mipi_csis_stop_stream(state);
+ 		state->flags &= ~ST_STREAMING;
+ 		if (debug > 0)
+@@ -738,10 +736,6 @@ static int mipi_csis_enum_mbus_code(struct v4l2_subdev *mipi_sd,
+ 	struct csis_pix_format const *csis_fmt;
+ 	int ret;
+ 
+-	ret = v4l2_subdev_call(sensor_sd, pad, enum_mbus_code, NULL, code);
+-	if (ret < 0)
+-		return -EINVAL;
+-
+ 	csis_fmt = find_csis_format(code->code);
+ 	if (csis_fmt == NULL) {
+ 		dev_err(state->dev, "format not match\n");
+@@ -767,8 +761,6 @@ static int mipi_csis_set_fmt(struct v4l2_subdev *mipi_sd,
+ 	if (csis_fmt == NULL)
+ 		csis_fmt = &mipi_csis_formats[0];
+ 
+-	v4l2_subdev_call(sensor_sd, pad, set_fmt, NULL, format);
+-
+ 	mf->code = csis_fmt->code;
+ 	v4l_bound_align_image(&mf->width, 1, CSIS_MAX_PIX_WIDTH,
+ 			      csis_fmt->pix_width_alignment,
+@@ -789,19 +781,6 @@ static int mipi_csis_set_fmt(struct v4l2_subdev *mipi_sd,
+ 	return 0;
+ }
+ 
+-static int mipi_csis_get_fmt(struct v4l2_subdev *mipi_sd,
+-			     struct v4l2_subdev_pad_config *cfg,
+-			     struct v4l2_subdev_format *format)
+-{
+-	struct csi_state *state = mipi_sd_to_csi_state(mipi_sd);
+-	struct v4l2_subdev *sensor_sd = state->sensor_sd;
+-
+-	if (format->pad)
+-		return -EINVAL;
+-
+-	return v4l2_subdev_call(sensor_sd, pad, get_fmt, NULL, format);
+-}
+-
+ static int mipi_csis_s_rx_buffer(struct v4l2_subdev *mipi_sd, void *buf,
+ 			       unsigned int *size)
+ {
+@@ -818,42 +797,6 @@ static int mipi_csis_s_rx_buffer(struct v4l2_subdev *mipi_sd, void *buf,
+ 	return 0;
+ }
+ 
+-static int mipi_csis_s_parm(struct v4l2_subdev *mipi_sd, struct v4l2_streamparm *a)
+-{
+-	struct csi_state *state = mipi_sd_to_csi_state(mipi_sd);
+-	struct v4l2_subdev *sensor_sd = state->sensor_sd;
+-
+-	return v4l2_subdev_call(sensor_sd, video, s_parm, a);
+-}
+-
+-static int mipi_csis_g_parm(struct v4l2_subdev *mipi_sd, struct v4l2_streamparm *a)
+-{
+-	struct csi_state *state = mipi_sd_to_csi_state(mipi_sd);
+-	struct v4l2_subdev *sensor_sd = state->sensor_sd;
+-
+-	return v4l2_subdev_call(sensor_sd, video, g_parm, a);
+-}
+-
+-static int mipi_csis_enum_framesizes(struct v4l2_subdev *mipi_sd,
+-		struct v4l2_subdev_pad_config *cfg,
+-		struct v4l2_subdev_frame_size_enum *fse)
+-{
+-	struct csi_state *state = mipi_sd_to_csi_state(mipi_sd);
+-	struct v4l2_subdev *sensor_sd = state->sensor_sd;
+-
+-	return v4l2_subdev_call(sensor_sd, pad, enum_frame_size, NULL, fse);
+-}
+-
+-static int mipi_csis_enum_frameintervals(struct v4l2_subdev *mipi_sd,
+-		struct v4l2_subdev_pad_config *cfg,
+-		struct v4l2_subdev_frame_interval_enum *fie)
+-{
+-	struct csi_state *state = mipi_sd_to_csi_state(mipi_sd);
+-	struct v4l2_subdev *sensor_sd = state->sensor_sd;
+-
+-	return v4l2_subdev_call(sensor_sd, pad, enum_frame_interval, NULL, fie);
+-}
+-
+ static int mipi_csis_log_status(struct v4l2_subdev *mipi_sd)
+ {
+ 	struct csi_state *state = mipi_sd_to_csi_state(mipi_sd);
+@@ -874,16 +817,10 @@ static struct v4l2_subdev_core_ops mipi_csis_core_ops = {
+ static struct v4l2_subdev_video_ops mipi_csis_video_ops = {
+ 	.s_rx_buffer = mipi_csis_s_rx_buffer,
+ 	.s_stream = mipi_csis_s_stream,
+-
+-	.s_parm = mipi_csis_s_parm,
+-	.g_parm = mipi_csis_g_parm,
+ };
+ 
+ static const struct v4l2_subdev_pad_ops mipi_csis_pad_ops = {
+-	.enum_frame_size       = mipi_csis_enum_framesizes,
+-	.enum_frame_interval   = mipi_csis_enum_frameintervals,
+ 	.enum_mbus_code        = mipi_csis_enum_mbus_code,
+-	.get_fmt               = mipi_csis_get_fmt,
+ 	.set_fmt               = mipi_csis_set_fmt,
+ };
+ 

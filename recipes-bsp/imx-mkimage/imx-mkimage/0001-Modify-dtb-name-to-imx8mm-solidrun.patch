@@ -1,0 +1,26 @@
+From 5dc08be29b3d61d8fc0827628381488cd03f22af Mon Sep 17 00:00:00 2001
+From: TalPilo <tal.pilo@solid-run.com>
+Date: Tue, 7 Jan 2020 14:55:39 +0200
+Subject: [PATCH] Modify dtb name to imx8mm-solidrun
+
+Signed-off-by: TalPilo <tal.pilo@solid-run.com>
+---
+ iMX8M/soc.mak | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/iMX8M/soc.mak b/iMX8M/soc.mak
+index bc6acc1..9440f93 100644
+--- a/iMX8M/soc.mak
++++ b/iMX8M/soc.mak
+@@ -97,7 +97,7 @@ u-boot-atf-tee.bin: u-boot.bin bl31.bin tee.bin
+ clean:
+ 	@rm -f $(MKIMG) u-boot-atf.bin u-boot-atf-tee.bin u-boot-spl-ddr.bin u-boot.itb u-boot.its u-boot-ddr3l.itb u-boot-ddr3l.its u-boot-spl-ddr3l.bin u-boot-ddr4.itb u-boot-ddr4.its u-boot-spl-ddr4.bin u-boot-ddr4-evk.itb u-boot-ddr4-evk.its $(OUTIMG)
+ 
+-dtbs = fsl-$(PLAT)-evk.dtb
++dtbs = fsl-imx8mm-solidrun.dtb
+ u-boot.itb: $(dtbs)
+ 	./$(PAD_IMAGE) bl31.bin
+ 	TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) ./mkimage_fit_atf.sh $(dtbs) > u-boot.its
+-- 
+2.17.1
+

@@ -1,0 +1,27 @@
+From a41c2552d6a8c8969fef631b43c9d3b92130782b Mon Sep 17 00:00:00 2001
+From: TalPilo <tal.pilo@solid-run.com>
+Date: Sun, 9 Feb 2020 11:38:48 +0200
+Subject: [PATCH] Fix PCIe - disable gpio search
+
+Signed-off-by: TalPilo <tal.pilo@solid-run.com>
+---
+ drivers/pci/controller/dwc/pci-imx6.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/drivers/pci/controller/dwc/pci-imx6.c b/drivers/pci/controller/dwc/pci-imx6.c
+index a39bdaaa3253..890d0b7d7bd2 100644
+--- a/drivers/pci/controller/dwc/pci-imx6.c
++++ b/drivers/pci/controller/dwc/pci-imx6.c
+@@ -2340,8 +2340,7 @@ static int imx_pcie_probe(struct platform_device *pdev)
+ 	}
+ 	imx_pcie->dis_gpio = of_get_named_gpio(node, "disable-gpio", 0);
+ 	if (gpio_is_valid(imx_pcie->dis_gpio)) {
+-		ret = devm_gpio_request_one(&pdev->dev, imx_pcie->dis_gpio,
+-					    GPIOF_OUT_INIT_HIGH, "PCIe DIS");
++		ret = 0;
+ 		if (ret) {
+ 			dev_err(&pdev->dev, "unable to get disable gpio\n");
+ 			return ret;
+-- 
+2.17.1
+

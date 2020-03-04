@@ -1,0 +1,37 @@
+From 456be93e120005fd0df11f8c762a4696bb24d36d Mon Sep 17 00:00:00 2001
+From: Rabeeh Khoury <rabeeh@solid-run.com>
+Date: Mon, 19 Aug 2019 12:55:27 +0300
+Subject: [PATCH 1/5] imx8mm: add SolidRun i.mx8mm SOM
+
+Signed-off-by: Rabeeh Khoury <rabeeh@solid-run.com>
+---
+ arch/arm/mach-imx/imx8m/Kconfig | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/arch/arm/mach-imx/imx8m/Kconfig b/arch/arm/mach-imx/imx8m/Kconfig
+index 249436c33e..0b7b4b20cd 100644
+--- a/arch/arm/mach-imx/imx8m/Kconfig
++++ b/arch/arm/mach-imx/imx8m/Kconfig
+@@ -60,6 +60,12 @@ config TARGET_IMX8MM_DDR4_EVK
+ 	select SUPPORT_SPL
+ 	select IMX8M_DDR4
+ 
++config TARGET_IMX8MM_SOLIDRUN
++	bool "SolidRun imx8mm based SOM"
++	select IMX8MM
++	select SUPPORT_SPL
++	select IMX8M_LPDDR4
++
+ endchoice
+ 
+ config SYS_SOC
+@@ -70,5 +76,6 @@ source "board/freescale/imx8mq_arm2/Kconfig"
+ source "board/freescale/imx8mq_phanbell/Kconfig"
+ source "board/freescale/imx8mm_evk/Kconfig"
+ source "board/freescale/imx8mm_val/Kconfig"
++source "board/solidrun/imx8mm_solidrun/Kconfig"
+ 
+ endif
+-- 
+2.17.1
+
