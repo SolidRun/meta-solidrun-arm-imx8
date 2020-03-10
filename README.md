@@ -22,25 +22,26 @@ use with OpenEmbedded and Yocto Freescale's BSP layer.
 		$ DISTRO=fsl-imx-xwayland MACHINE=imx8mmsolidrun source fsl-setup-release.sh -b build-imx8mm-solidrun
 		
 4. Add the meta-solidrun-arm-imx8 layer (curent git repository) into the sources directory, the directory layout should be like this:
-.
-├── sources                    
-│   ├── base          
-│   ├── meta-browser        
-│   ├── meta-freescale        
-│   ├── meta-freescale-3rdparty        
-│   ├── meta-freescale-distro        
-│   ├── meta-fsl-bsp-release        
-│   ├── meta-openembedded        
-│   ├── meta-qt5        
-│   ├── meta-rust        
-│   ├── meta-solidrun-arm-imx8        
-│   ├── meta-timesys        
-│   └── poky                
-|
-├── downloads   
-├── build-imx8mm-solidrun  
-└── ...
-		
+<pre>
+	.
+	├── sources                    
+	│   	├── base          
+	│   	├── meta-browser        
+	│   	├── meta-freescale        
+	│   	├── meta-freescale-3rdparty        
+	│   	├── meta-freescale-distro        
+	│   	├── meta-fsl-bsp-release        
+	│   	├── meta-openembedded        
+	│   	├── meta-qt5        
+	│   	├── meta-rust        
+	│   	├── meta-solidrun-arm-imx8        
+	│   	├── meta-timesys        
+	│   	└── poky 
+	│
+	├── downloads   
+	├── build-imx8mm-solidrun  
+	└── ...
+</pre>
 5. Appned the following line into <ROOTDIR>/build-imx8mm-solidrun/conf/bblayers.conf
 
 		BBLAYERS += "${BSPDIR}/sources/meta-solidrun-arm-imx8"
@@ -81,6 +82,9 @@ TOOLCHAIN_TARGET_TASK_append = " kernel-devsrc"
 
 		$ bitbake imx-image-multimedia
 	
-8. The image will be ready at ${ROOTDIR}/build-imx8mm-solidrun/tmp/deploy/images/imx8mmsolidrun.
+The image will be ready at <ROOTDIR>/build-imx8mm-solidrun/tmp/deploy/images/imx8mmsolidrun and should look as follow:
+		imx-image-multimedia-imx8mmsolidrun-<build-time>.rootfs.wic.bz2
+
+	
 
 
