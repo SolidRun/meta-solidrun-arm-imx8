@@ -42,12 +42,12 @@ use with OpenEmbedded and Yocto Freescale's BSP layer.
 	├── build-imx8mm-solidrun  
 	└── ...
 </pre>
-5. Appned the following line into <ROOTDIR>/build-imx8mm-solidrun/conf/bblayers.conf
+5. Appned the following line into \<ROOTDIR\>/build-imx8mm-solidrun/conf/bblayers.conf
 
 		BBLAYERS += "${BSPDIR}/sources/meta-solidrun-arm-imx8"
 
 6. The following action will add support for several packages required by Gyfalcon SDK/Demo and othe helpfull packages.
-   Append the following lines into <ROOTDIR>/build-imx8mm-solidrun/conf/local.conf:
+   Append the following lines into \<ROOTDIR\>/build-imx8mm-solidrun/conf/local.conf:
 		
 <pre> 
 IMAGE_INSTALL_append = " \
@@ -77,13 +77,13 @@ IMAGE_INSTALL_append = " \
 "
 TOOLCHAIN_TARGET_TASK_append = " kernel-devsrc"
 </pre>
-7. Build Yocto image for imx8mm solidrun, In <ROOTDIR>/build-imx8mm-solidrun run:
+7. Build Yocto image for imx8mm solidrun, In \<ROOTDIR\>/build-imx8mm-solidrun run:
 (**The following command can take several hours**)
 
 		$ bitbake imx-image-multimedia
 	
-The image will be ready at <ROOTDIR>/build-imx8mm-solidrun/tmp/deploy/images/imx8mmsolidrun and should look as follow:
-		imx-image-multimedia-imx8mmsolidrun-<build-time>.rootfs.wic.bz2
+The image will be ready at \<ROOTDIR\>/build-imx8mm-solidrun/tmp/deploy/images/imx8mmsolidrun and should look as follow:
+		imx-image-multimedia-imx8mmsolidrun-\<build-time\>.rootfs.wic.bz2
 
 	
 
