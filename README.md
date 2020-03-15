@@ -10,35 +10,48 @@ use with OpenEmbedded and Yocto Freescale's BSP layer.
 
 		$ mkdir imx-yocto
 		$ cd imx-yocto
-		$ ROOTDIR=$(pwd)
 
 2. Get NXP Ycoto sources(require repo app):
 
 		$ repo init -u https://source.codeaurora.org/external/imx/imx-manifest -b imx-linux-warrior -m imx-4.19.35-1.1.0.xml
 		$ repo sync
-		
-3. Add meta-solidrun to sources and configurations by cloning the current branch into sources directory
 
-		#Add meta-solidrun to sources and configurations
-		$ cd $(ROOTDIR)/sources & git clone ${curr-git} -b ${curr-branch}
+3. Configure imx8mmsolidrun board, Distro for xwayland support and create the build environment:
+**After running the following commands, you need to accept the EULA (scrool down and run "y")**
 
-4. Configure imx8mmsolidrun board, Distro for xwayland support and create the build environment:
-**After running the following commands, you need to accept the EULA(scrool down and run "y")**
-
-		$ cd $(ROOTDIR)
 		$ DISTRO=fsl-imx-xwayland MACHINE=imx8mmsolidrun source fsl-setup-release.sh -b build-imx8mm-solidrun
 		
-5. Appned the following line into $(ROOTDIR)/build-imx8mm-solidrun/conf/bblayers.conf
+4. Add the meta-solidrun-arm-imx8 layer (curent git repository) into the sources directory, the directory layout should be like this:
+<pre>
+	.
+	├── sources                    
+	│   	├── base          
+	│   	├── meta-browser        
+	│   	├── meta-freescale        
+	│   	├── meta-freescale-3rdparty        
+	│   	├── meta-freescale-distro        
+	│   	├── meta-fsl-bsp-release        
+	│   	├── meta-openembedded        
+	│   	├── meta-qt5        
+	│   	├── meta-rust        
+	│   	├── meta-solidrun-arm-imx8        
+	│   	├── meta-timesys        
+	│   	└── poky 
+	│
+	├── downloads   
+	├── build-imx8mm-solidrun  
+	└── ...
+</pre>
+5. Appned the following line into \<ROOTDIR\>/build-imx8mm-solidrun/conf/bblayers.conf
 
 		BBLAYERS += "${BSPDIR}/sources/meta-solidrun-arm-imx8"
 
 6. The following action will add support for several packages required by Gyfalcon SDK/Demo and othe helpfull packages.
-   Append the following lines into $(ROOTDIR)/build-imx8mm-solidrun/conf/local.conf:
+   Append the following lines into \<ROOTDIR\>/build-imx8mm-solidrun/conf/local.conf:
 		
 <pre> 
 IMAGE_INSTALL_append = " \
 	cmake   \
-	pciutils        \
 	packagegroup-core-buildessential        \
 	libgomp-dev     \
 	libgomp \
@@ -58,20 +71,20 @@ IMAGE_INSTALL_append = " \
 	kernel-dev      \
 	kernel-modules  \
 	kernel-devsrc   \
-	xterm           \
-"
-#python libs:
-IMAGE_INSTALL_append = " \
 	python-numpy    \
 	python-protobuf \
+	gti-module      \
 "
 TOOLCHAIN_TARGET_TASK_append = " kernel-devsrc"
 </pre>
-7. Build Yocto image for imx8mm solidrun (**The following command can take several hours**)
+7. Build Yocto image for imx8mm solidrun, In \<ROOTDIR\>/build-imx8mm-solidrun run:
+(**The following command can take several hours**)
 
-		#In ${ROOTDIR}/build-imx8mm-solidrun run:
 		$ bitbake imx-image-multimedia
 	
-8. The image will be ready at ${ROOTDIR}/build-imx8mm-solidrun/tmp/deploy/images/imx8mmsolidrun.
+The image will be ready at \<ROOTDIR\>/build-imx8mm-solidrun/tmp/deploy/images/imx8mmsolidrun and should look as follow:
+		imx-image-multimedia-imx8mmsolidrun-\<build-time\>.rootfs.wic.bz2
+
+	
 
 
