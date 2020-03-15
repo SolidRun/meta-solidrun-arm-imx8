@@ -25,6 +25,7 @@ SRC_URI += " \
 	file://imx8mm_kernel_fragment_file.cfg \
 	file://0001-Add-imx8mm-solidrun-device-tree.patch \
 	file://0002-Fix-PCIe-disable-gpio-search.patch \
+	file://0003-pci-spr2803-hack-pcie-resources-allocation.patch	\
 	"
 
 
