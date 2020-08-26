@@ -1,0 +1,31 @@
+From 637d83084da8868d1efb952be3ef47f9d018be4d Mon Sep 17 00:00:00 2001
+From: Lilit Yenokyan <lilit.yenokyan@solid-run.com>
+Date: Thu, 20 Aug 2020 17:40:50 +0300
+Subject: [PATCH] add wifi support imx8mm dts
+
+Signed-off-by: Lilit Yenokyan <lilit.yenokyan@solid-run.com>
+---
+ .../arm64/boot/dts/freescale/imx8mm-hummingboard-pulse.dts | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-hummingboard-pulse.dts b/arch/arm64/boot/dts/freescale/imx8mm-hummingboard-pulse.dts
+index d0f4ef2f643d..dd5ccf7ed7b3 100755
+--- a/arch/arm64/boot/dts/freescale/imx8mm-hummingboard-pulse.dts
++++ b/arch/arm64/boot/dts/freescale/imx8mm-hummingboard-pulse.dts
+@@ -892,6 +892,13 @@
+         non-removable;
+ 	reset-gpio = <&gpio2 10 GPIO_ACTIVE_LOW>;
+         status = "okay";
++        brcmf: brcmf@1 {
++                reg = <1>;
++                compatible = "brcm,bcm4329-fmac";
++                interrupts = <1 IRQ_TYPE_LEVEL_HIGH>;
++                interrupt-names = "host-wake";
++        };
++
+ };
+ 
+ &usdhc2 {
+-- 
+2.17.1
+
