@@ -1,0 +1,286 @@
+From 5d7c7c034bc9c59e998b6c66ceda36dc59903219 Mon Sep 17 00:00:00 2001
+From: Rabeeh Khoury <rabeeh@solid-run.com>
+Date: Thu, 10 Dec 2020 15:53:53 +0200
+Subject: [PATCH 4/4] arm64: dts: imx8mp based hummingboard pulse
+
+Device tree modifications to accomodate the following -
+1. Removed mt25qu256aba@0 flash which was copied from the imx8mp evk
+2. Add Basler daA3840 camera support to MIPI CSI0 connected to the carrier board camera.
+   When daA3840 camera is connected the I2C3 bus becomes non-functional
+   for all devices connected to it (like MIPI DSI to HDMI transceiver);
+   except the camera.
+3. Beutify the code by replacing the spaces with tabs
+
+Signed-off-by: Rabeeh Khoury <rabeeh@solid-run.com>
+---
+ .../freescale/imx8mp-hummingboard-pulse.dts   | 155 +++++++++++-------
+ 1 file changed, 94 insertions(+), 61 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dts b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dts
+index b87206631..dc333452c 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dts
++++ b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dts
+@@ -205,21 +205,10 @@
+         };
+ };
+ 
+-/*check*/
+ &flexspi {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_flexspi0>;
+ 	status = "okay";
+-
+-	flash0: mt25qu256aba@0 {
+-		reg = <0>;
+-		#address-cells = <1>;
+-		#size-cells = <1>;
+-		compatible = "jedec,spi-nor";
+-		spi-max-frequency = <80000000>;
+-		spi-tx-bus-width = <4>;
+-		spi-rx-bus-width = <4>;
+-	};
+ };
+ 
+ &i2c1 {
+@@ -358,6 +347,35 @@
+ 	};
+ };
+ 
++&mipi_csi_0 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	status = "okay";
++
++	port@0 {
++		reg = <0>;
++		mipi_csi0_ep: endpoint {
++			remote-endpoint = <&basler_ep_0>;
++			data-lanes = <4>;
++			csis-hs-settle = <16>;
++		};
++	};
++
++};
++
++
++&isp_0 {
++	status = "okay";
++};
++
++&isp_1 {
++	status = "disabled";
++};
++
++&dewarp {
++	status = "okay";
++};
++
+ &i2c3 {
+ 	clock-frequency = <100000>;
+ 	pinctrl-names = "default";
+@@ -371,42 +389,55 @@
+ 		abracon,tc-resistor = <3>;
+ 	};
+ 
+-	adv_bridge: adv7535@39 {
+-                compatible = "adi,adv7533";
+-                reg = <0x3d>;
+-                adi,addr-cec = <0x3c>;
++	adv_bridge: adv7535@3d {
++		compatible = "adi,adv7533";
++		reg = <0x3d>;
++		adi,addr-cec = <0x3c>;
+ 		adi,addr-edid = <0x3b>;
+-                adi,dsi-lanes = <4>;
++		adi,dsi-lanes = <4>;
+ 		gpio = <&gpio1 8 GPIO_ACTIVE_HIGH>;
+-                status = "okay";		
++		status = "okay";
+ 
+                 port {
+-                        adv7535_from_dsim: endpoint {
+-                                remote-endpoint = <&dsim_to_adv7535>;
+-                        };
+-                };
+-        };
++			adv7535_from_dsim: endpoint {
++				remote-endpoint = <&dsim_to_adv7535>;
++			};
++		};
++	};
+ 
+ 	eeprom_carrier: eeprom@57 {
+ 		compatible = "st,24c02", "atmel,24c02";
+ 		reg = <0x57>;
+ 		pagesize = <16>;
+ 	};
+-};
++	basler_camera_vvcam@36 {
++		compatible = "basler,basler-camera-vvcam", "basler-camera-vvcam";
++		reg = <0x36>;
++                csi_id = <0x00>;
++		status = "okay";
+ 
++		port {
++			basler_ep_0: endpoint {
++				data-lanes = <1 2 3 4>;
++				clock-lanes = <0>;
++				link-frequencies = /bits/ 64 <248000000>;
++				remote-endpoint = <&mipi_csi0_ep>;
++			};
++		};
++	};
++};
+ 
+ &i2c4 {
+-        clock-frequency = <100000>;
+-        pinctrl-names = "default";
+-        pinctrl-0 = <&pinctrl_i2c4>;
+-        status = "okay";
++	clock-frequency = <100000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_i2c4>;
++	status = "okay";
+ };
+ 
+ &irqsteer_hdmi {
+ 	status = "okay";
+ };
+ 
+-
+ &hdmimix_clk {
+ 	status = "okay";
+ };
+@@ -474,7 +505,6 @@
+ 	status = "disabled";
+ };
+ 
+-
+ &pcie{
+         pinctrl-names = "default";
+         pinctrl-0 = <&pinctrl_pcie>;
+@@ -625,13 +655,13 @@
+ 	pinctrl-0 = <&pinctrl_hog>;
+ 
+ 	pinctrl_hog: hoggrp {
+-                fsl,pins = <
+-                        MX8MP_IOMUXC_HDMI_DDC_SCL__HDMIMIX_HDMI_SCL     0x400001c3
+-                        MX8MP_IOMUXC_HDMI_DDC_SDA__HDMIMIX_HDMI_SDA     0x400001c3
+-                        MX8MP_IOMUXC_HDMI_HPD__HDMIMIX_HDMI_HPD         0x40000019
+-                        MX8MP_IOMUXC_HDMI_CEC__HDMIMIX_HDMI_CEC         0x40000019
+-                >;
+-        };
++		fsl,pins = <
++			MX8MP_IOMUXC_HDMI_DDC_SCL__HDMIMIX_HDMI_SCL	0x400001c3
++			MX8MP_IOMUXC_HDMI_DDC_SDA__HDMIMIX_HDMI_SDA	0x400001c3
++			MX8MP_IOMUXC_HDMI_HPD__HDMIMIX_HDMI_HPD		0x40000019
++			MX8MP_IOMUXC_HDMI_CEC__HDMIMIX_HDMI_CEC		0x40000019
++		>;
++	};
+ 
+ 	pinctrl_pwm4: pwm4grp {
+ 		fsl,pins = <
+@@ -749,11 +779,11 @@
+ 	};
+ 
+ 	pinctrl_i2c4: i2c4grp {
+-                fsl,pins = <
+-                        MX8MP_IOMUXC_I2C4_SCL__I2C4_SCL                 0x400001c3
+-                        MX8MP_IOMUXC_I2C4_SDA__I2C4_SDA                 0x400001c3
+-                >;
+-        };
++		fsl,pins = <
++			MX8MP_IOMUXC_I2C4_SCL__I2C4_SCL			0x400001c3
++			MX8MP_IOMUXC_I2C4_SDA__I2C4_SDA			0x400001c3
++		>;
++	};
+ 
+ 	pinctrl_mipi_dsi_en: mipi_dsi_en {
+ 		fsl,pins = <
+@@ -791,16 +821,16 @@
+ 			MX8MP_IOMUXC_SAI1_MCLK__GPIO4_IO20	0x16
+ 		>;
+ 	};
+-	
++
+ 	pinctrl_pdm: pdmgrp {
+-                fsl,pins = <
+-                        MX8MP_IOMUXC_SAI5_RXC__AUDIOMIX_PDM_CLK                 0xd6
+-                        MX8MP_IOMUXC_SAI5_RXD0__AUDIOMIX_PDM_BIT_STREAM00       0xd6
+-                        MX8MP_IOMUXC_SAI5_RXD1__AUDIOMIX_PDM_BIT_STREAM01       0xd6
+-                        MX8MP_IOMUXC_SAI5_RXD2__AUDIOMIX_PDM_BIT_STREAM02       0xd6
+-                        MX8MP_IOMUXC_SAI5_RXD3__AUDIOMIX_PDM_BIT_STREAM03       0xd6
+-                >;
+-        };
++		fsl,pins = <
++			MX8MP_IOMUXC_SAI5_RXC__AUDIOMIX_PDM_CLK			0xd6
++			MX8MP_IOMUXC_SAI5_RXD0__AUDIOMIX_PDM_BIT_STREAM00	0xd6
++			MX8MP_IOMUXC_SAI5_RXD1__AUDIOMIX_PDM_BIT_STREAM01	0xd6
++			MX8MP_IOMUXC_SAI5_RXD2__AUDIOMIX_PDM_BIT_STREAM02	0xd6
++			MX8MP_IOMUXC_SAI5_RXD3__AUDIOMIX_PDM_BIT_STREAM03	0xd6
++		>;
++	};
+ 
+ 	pinctrl_sai3: sai3grp {
+ 		fsl,pins = <
+@@ -1000,12 +1030,12 @@
+ 			MX8MP_IOMUXC_SD1_STROBE__GPIO2_IO11	0x19
+ 		>;
+ 	};*/
+-	
++
+ 	pinctrl_csi0_rst: csi0_rst_grp {
+-                fsl,pins = <
+-                        MX8MP_IOMUXC_GPIO1_IO06__GPIO1_IO06             0x19
+-                >;
+-        };
++		fsl,pins = <
++			MX8MP_IOMUXC_GPIO1_IO06__GPIO1_IO06		0x19
++		>;
++	};
+ };
+ 
+ &vpu_g1 {
+@@ -1023,7 +1053,7 @@
+ &ocotp {
+ 	status = "okay";
+ };
+-/*
++
+ &gpu_3d {
+ 	status = "okay";
+ };
+@@ -1040,14 +1070,15 @@
+ 	status = "okay";
+ };
+ 
+-
+ &cameradev {
+ 	status = "okay";
+ };
+-*/
+-&isi_0 {
+-	status = "okay";
+ 
++&isi_0 {
++	status = "disabled";
++	dma-coherent;
++	bsl,dma-invalidate;
++	fsl,chain_buf;
+ 	cap_device {
+ 		status = "okay";
+ 	};
+@@ -1059,7 +1090,9 @@
+ 
+ &isi_1 {
+ 	status = "disabled";
+-
++	dma-coherent;
++	bsl,dma-invalidate;
++	fsl,chain_buf;
+ 	cap_device {
+ 		status = "okay";
+ 	};
+-- 
+2.25.1
+

@@ -1,0 +1,39 @@
+From 40a49485022bc47374adf37529bc4334cb828ae7 Mon Sep 17 00:00:00 2001
+From: TalPilo <tal.pilo@solid-run.com>
+Date: Sun, 4 Oct 2020 15:12:25 +0300
+Subject: [PATCH 1/2] Enable I2C in PMIC
+
+Signed-off-by: TalPilo <tal.pilo@solid-run.com>
+---
+ drivers/mfd/pca9450.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/drivers/mfd/pca9450.c b/drivers/mfd/pca9450.c
+index 85ce6e3eef68..30f5507a72e8 100644
+--- a/drivers/mfd/pca9450.c
++++ b/drivers/mfd/pca9450.c
+@@ -234,6 +234,13 @@ static int pca9450_i2c_probe(struct i2c_client *i2c,
+ 			__func__);
+ 		goto err;
+ 	}
++
++	ret = pca9450_reg_write(pca9450, PCA9450_CONFIG2, 11);
++	if (ret < 0) {
++                dev_err(pca9450->dev, "%s(): write PCA9450_CONFIG2 failed!\n",
++                        __func__);
++                goto err;
++        }
+ 	dev_info(pca9450->dev, "Device ID=0x%X\n", ret);
+ 
+ 	pca9450_irq_init(pca9450, of_pmic_plat_data);
+@@ -293,6 +300,7 @@ static int __init pca9450_i2c_init(void)
+ /* init early so consumer devices can complete system boot */
+ subsys_initcall(pca9450_i2c_init);
+ 
++
+ static void __exit pca9450_i2c_exit(void)
+ {
+ 	i2c_del_driver(&pca9450_i2c_driver);
+-- 
+2.25.1
+

@@ -1,0 +1,26 @@
+From e619c8cb7143617570ff08c92b300569354e1646 Mon Sep 17 00:00:00 2001
+From: Rabeeh Khoury <rabeeh@solid-run.com>
+Date: Mon, 21 Dec 2020 11:41:22 +0200
+Subject: [PATCH] Replace default evk.dtb with imx8mp-solidrun.dtb
+
+Signed-off-by: Rabeeh Khoury <rabeeh@solid-run.com>
+---
+ iMX8M/soc.mak | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/iMX8M/soc.mak b/iMX8M/soc.mak
+index b7b3986..1d65896 100644
+--- a/iMX8M/soc.mak
++++ b/iMX8M/soc.mak
+@@ -133,7 +133,7 @@ u-boot-atf-tee.bin: u-boot.bin bl31.bin tee.bin
+ clean:
+ 	@rm -f $(MKIMG) u-boot-atf.bin u-boot-atf-tee.bin u-boot-spl-ddr.bin u-boot.itb u-boot.its u-boot-ddr3l.itb u-boot-ddr3l.its u-boot-spl-ddr3l.bin u-boot-ddr4.itb u-boot-ddr4.its u-boot-spl-ddr4.bin u-boot-ddr4-evk.itb u-boot-ivt.itb u-boot-ddr4-evk.its $(OUTIMG)
+ 
+-dtbs = evk.dtb
++dtbs = imx8mp-solidrun.dtb
+ $(dtbs):
+ 	./$(DTB_PREPROC) $(PLAT)-evk.dtb $(dtbs)
+ 
+-- 
+2.25.1
+
