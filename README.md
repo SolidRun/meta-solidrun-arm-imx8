@@ -49,11 +49,11 @@ use with OpenEmbedded and Yocto Freescale's BSP layer.
 (**The following command can take several hours**)
 
     $ bitbake core-image-minimal
-		$ bitbake imx-image-multimedia
+    $ bitbake imx-image-full
 
 The image will be ready at tmp/deploy/images/imx8mpsolidrun and should look as follow:
 
-		tmp/deploy/images/imx8mpsolidrun/core-image-minimal-imx8mpsolidrun.wic.bz2
+    tmp/deploy/images/imx8mpsolidrun/core-image-minimal-imx8mpsolidrun.wic.bz2
 
 or
 
