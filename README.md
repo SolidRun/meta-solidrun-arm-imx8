@@ -1,7 +1,7 @@
-OpenEmbedded/Yocto BSP layer for SolidRun's iMX8MPlus based platforms
+OpenEmbedded/Yocto BSP layer for SolidRun's iMX8MN based platforms
 ================================================================
 
-This layer provides support for SolidRun's iMX8mp based platforms for
+This layer provides support for SolidRun's iMX8mn based platforms for
 use with OpenEmbedded and Yocto Freescale's BSP layer.
 
 
@@ -36,32 +36,32 @@ use with OpenEmbedded and Yocto Freescale's BSP layer.
 					├── downloads
 					└── ...
 				</pre>
-4. Configure imx8mpsolidrun board, Distro for xwayland support and create the build environment:
+4. Configure imx8mnsolidrun board, Distro for xwayland support and create the build environment:
 **After running the following commands, you need to accept the EULA (scrool down and run "y")**
 
-		$ DISTRO=fsl-imx-xwayland MACHINE=imx8mpsolidrun source imx-setup-release.sh -b build-xwayland-imx8mpsolidrun
+		$ DISTRO=fsl-imx-xwayland MACHINE=imx8mnsolidrun source imx-setup-release.sh -b build-xwayland-imx8mnsolidrun
 
 5. Appned the following line into conf/bblayers.conf
 
 		BBLAYERS += "${BSPDIR}/sources/meta-solidrun-arm-imx8"
 
-6. Build Yocto image for imx8mp solidrun, by running the first, which is a minimal image (lacks firmwares) and then second which is full image including demos:
+6. Build Yocto image for imx8mn solidrun, by running the first, which is a minimal image (lacks firmwares) and then second which is full image including demos:
 (**The following command can take several hours**)
 
     $ bitbake core-image-minimal
     $ bitbake imx-image-full
 
-The image will be ready at tmp/deploy/images/imx8mpsolidrun and should look as follow:
+The image will be ready at tmp/deploy/images/imx8mnsolidrun and should look as follow:
 
-    tmp/deploy/images/imx8mpsolidrun/core-image-minimal-imx8mpsolidrun.wic.bz2
+    tmp/deploy/images/imx8mnsolidrun/core-image-minimal-imx8mnsolidrun.wic.bz2
 
 or
 
-    tmp/deploy/images/imx8mpsolidrun/imx-image-full-imx8mpsolidrun.wic.bz2
+    tmp/deploy/images/imx8mnsolidrun/imx-image-full-imx8mnsolidrun.wic.bz2
 
 To flash the image to a micro SD run -
 
-	bunzip2 -c tmp/deploy/images/imx8mpsolidrun/imx-image-full-imx8mpsolidrun.wic.bz2 | sudo dd of=/dev/sdX bs=1M
+	bunzip2 -c tmp/deploy/images/imx8mnsolidrun/imx-image-full-imx8mnsolidrun.wic.bz2 | sudo dd of=/dev/sdX bs=1M
 
 (**Notice that /dev/sdX is the block device points to your micro SD**)
 
@@ -83,10 +83,10 @@ Follow the commands below to; first clone this branch and run the following comm
 
 ## Spin a container and mount your working directory into it
 
-    docker run --rm -it -v /home/<username>/work/imx8mp/:/home/<username>/work/imx8mp/ yocto-build-image:latest /bin/bash
+    docker run --rm -it -v /home/<username>/work/imx8mn/:/home/<username>/work/imx8mn/ yocto-build-image:latest /bin/bash
     git config --global user.name "Your Name"
     git config --global user.email "you@example.com"
     wget https://storage.googleapis.com/git-repo-downloads/repo
 		chmod a+x repo
 
-and then follow the above instructions on how to build (**Notice that /home/<username>/work/imx8mp directory now is shared between the container and the outside deplelopment environment**)
+and then follow the above instructions on how to build (**Notice that /home/<username>/work/imx8mn directory now is shared between the container and the outside deplelopment environment**)
