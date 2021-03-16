@@ -1,0 +1,24 @@
+From 2b891299acb88472d1eb4838f84ee5d0d1e68ca5 Mon Sep 17 00:00:00 2001
+From: Yazan Shhady <yazan.shhady@solid-run.com>
+Date: Wed, 24 Feb 2021 09:36:40 +0200
+Subject: [PATCH 1/2] imx8mn: Add imx8mn-solidrun device tree to the Makfile
+
+---
+ arch/arm/dts/Makefile | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
+index 0d24acd4..7e18d93c 100644
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -790,6 +790,7 @@ dtb-$(CONFIG_ARCH_IMX8M) += \
+ 	imx8mm-verdin.dtb \
+ 	imx8mn-ddr3l-evk.dtb \
+ 	imx8mn-ddr4-evk.dtb \
++	imx8mn-solidrun.dtb \
+ 	imx8mn-evk.dtb \
+ 	imx8mq-ddr3l-val.dtb \
+ 	imx8mq-ddr4-val.dtb \
+-- 
+2.25.1
+

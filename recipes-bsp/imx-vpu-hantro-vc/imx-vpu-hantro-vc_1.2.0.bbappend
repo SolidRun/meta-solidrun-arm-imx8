@@ -1,1 +1,1 @@
-COMPATIBLE_MACHINE = "(imx8mpsolidrun)"
+COMPATIBLE_MACHINE = "(imx8mnsolidrun)"
