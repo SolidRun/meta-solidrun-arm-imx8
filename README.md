@@ -36,16 +36,22 @@ use with OpenEmbedded and Yocto Freescale's BSP layer.
 					├── downloads
 					└── ...
 				</pre>
-4. Configure imx8mnsolidrun board, Distro for xwayland support and create the build environment:
+4. Install the U-boot and the Linux kernel patches from here https://github.com/SolidRun/imx8mp_build/tree/imx8mn/patches
+	- copy the U-boot patches under meta-solidrun-arm-imx8/recipes-bsp/u-boot/u-boot-imx/ 
+	- update the meta-solidrun-arm-imx8/recipes-bsp/u-boot/u-boot-imx_2020.04.bbappend in accordance
+	- copy the Linux patches under meta-solidrun-arm-imx8/recipes-kernel/linux/linux-imx/
+	- update the meta-solidrun-arm-imx8/recipes-kernel/linux/linux-imx_5.4.bbappend in accordance
+
+5. Configure imx8mnsolidrun board, Distro for xwayland support and create the build environment:
 **After running the following commands, you need to accept the EULA (scrool down and run "y")**
 
 		$ DISTRO=fsl-imx-xwayland MACHINE=imx8mnsolidrun source imx-setup-release.sh -b build-xwayland-imx8mnsolidrun
 
-5. Appned the following line into conf/bblayers.conf
+6. Appned the following line into conf/bblayers.conf
 
 		BBLAYERS += "${BSPDIR}/sources/meta-solidrun-arm-imx8"
 
-6. Build Yocto image for imx8mn solidrun, by running the first, which is a minimal image (lacks firmwares) and then second which is full image including demos:
+7. Build Yocto image for imx8mn solidrun, by running the first, which is a minimal image (lacks firmwares) and then second which is full image including demos:
 (**The following command can take several hours**)
 
     $ bitbake core-image-minimal
