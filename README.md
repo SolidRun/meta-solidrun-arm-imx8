@@ -16,7 +16,7 @@ use with OpenEmbedded and Yocto Freescale's BSP layer.
 		$ repo init -u https://source.codeaurora.org/external/imx/imx-manifest -b imx-linux-zeus -m imx-5.4.47-2.2.0.xml
 		$ repo sync
 
-3. Add the meta-solidrun-arm-imx8 layer (curent git repository) into the sources directory, the directory layout should be like this:
+3. Add the meta-solidrun-arm-imx8 layer https://github.com/SolidRun/meta-solidrun-arm-imx8/tree/zeus-imx8mn into the sources directory, the directory layout should be like this:
 				<pre>
 					.
 					├── sources
