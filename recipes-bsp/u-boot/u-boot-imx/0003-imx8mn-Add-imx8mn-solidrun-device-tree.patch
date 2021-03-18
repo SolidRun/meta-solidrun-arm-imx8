@@ -1,19 +1,19 @@
-From cd617d558a698c2dcb4185ff5711ae4c66389fcd Mon Sep 17 00:00:00 2001
+From ffbae4ab974071cd2d18416b9d3a0b615559e6f0 Mon Sep 17 00:00:00 2001
 From: Yazan Shhady <yazan.shhady@solid-run.com>
-Date: Wed, 24 Feb 2021 09:40:07 +0200
-Subject: [PATCH 2/2] imx8mn: Add imx8mn-solidrun device tree
+Date: Wed, 17 Mar 2021 22:38:44 +0200
+Subject: [PATCH 3/3] imx8mn: Add imx8mn-solidrun device tree
 
 ---
- arch/arm/dts/imx8mn-solidrun.dts | 569 +++++++++++++++++++++++++++++++
- 1 file changed, 569 insertions(+)
+ arch/arm/dts/imx8mn-solidrun.dts | 570 +++++++++++++++++++++++++++++++
+ 1 file changed, 570 insertions(+)
  create mode 100644 arch/arm/dts/imx8mn-solidrun.dts
 
 diff --git a/arch/arm/dts/imx8mn-solidrun.dts b/arch/arm/dts/imx8mn-solidrun.dts
 new file mode 100644
-index 00000000..8f27549b
+index 0000000000..f712835fab
 --- /dev/null
 +++ b/arch/arm/dts/imx8mn-solidrun.dts
-@@ -0,0 +1,569 @@
+@@ -0,0 +1,570 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 +/*
 + * Copyright 2019 NXP
@@ -36,12 +36,12 @@ index 00000000..8f27549b
 +	reg_usdhc2_vmmc: regulator-usdhc2 {
 +		compatible = "regulator-fixed";
 +		pinctrl-names = "default";
-+		pinctrl-0 = <&pinctrl_reg_usdhc2_vmmc>;
++		//pinctrl-0 = <&pinctrl_reg_usdhc2_vmmc>;
 +		regulator-name = "VSD_3V3";
 +		regulator-min-microvolt = <3300000>;
 +		regulator-max-microvolt = <3300000>;
-+		gpio = <&gpio2 19 GPIO_ACTIVE_HIGH>;
-+		enable-active-high;
++		//gpio = <&gpio2 19 GPIO_ACTIVE_HIGH>;
++		//enable-active-high;
 +		startup-delay-us = <100>;
 +		off-on-delay-us = <12000>;
 +	};
@@ -551,9 +551,10 @@ index 00000000..8f27549b
 +	pinctrl-0 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>;
 +	pinctrl-1 = <&pinctrl_usdhc2_100mhz>, <&pinctrl_usdhc2_gpio>;
 +	pinctrl-2 = <&pinctrl_usdhc2_200mhz>, <&pinctrl_usdhc2_gpio>;
-+	cd-gpios = <&gpio1 15 GPIO_ACTIVE_LOW>;
++	//cd-gpios = <&gpio1 15 GPIO_ACTIVE_LOW>;
 +	bus-width = <4>;
-+	vmmc-supply = <&reg_usdhc2_vmmc>;
++	non-removable;
++	//vmmc-supply = <&reg_usdhc2_vmmc>;
 +	status = "okay";
 +};
 +

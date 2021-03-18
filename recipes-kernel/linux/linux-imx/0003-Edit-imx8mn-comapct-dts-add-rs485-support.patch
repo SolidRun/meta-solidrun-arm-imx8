@@ -1,0 +1,68 @@
+From 8390f53bdd70ede299196092c03ab2d2f635e124 Mon Sep 17 00:00:00 2001
+From: Yazan Shhady <yazan.shhady@solid-run.com>
+Date: Thu, 18 Mar 2021 02:04:44 +0200
+Subject: [PATCH] Edit imx8mn comapct dts: add rs485 support
+
+---
+ .../boot/dts/freescale/imx8mn-compact.dts     | 29 ++++++++++++++-----
+ 1 file changed, 22 insertions(+), 7 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mn-compact.dts b/arch/arm64/boot/dts/freescale/imx8mn-compact.dts
+index f7d291a76e18..884d73b338fb 100755
+--- a/arch/arm64/boot/dts/freescale/imx8mn-compact.dts
++++ b/arch/arm64/boot/dts/freescale/imx8mn-compact.dts
+@@ -259,13 +259,22 @@
+ 
+ 	pinctrl_uart3: uart3grp {
+ 		fsl,pins = <
+-			MX8MN_IOMUXC_ECSPI1_SCLK_UART3_DCE_RX		0x140
+-			MX8MN_IOMUXC_ECSPI1_MOSI_UART3_DCE_TX		0x140
+-			MX8MN_IOMUXC_ECSPI1_SS0_UART3_DCE_RTS_B		0x140
+-			MX8MN_IOMUXC_ECSPI1_MISO_UART3_DCE_CTS_B	0x140
++			MX8MN_IOMUXC_ECSPI1_MOSI_UART3_DTE_RX     0x140
++			MX8MN_IOMUXC_ECSPI1_SCLK_UART3_DTE_TX     0x140
++			MX8MN_IOMUXC_ECSPI1_MISO_UART3_DTE_RTS_B  0x140
++			MX8MN_IOMUXC_ECSPI1_SS0_UART3_DTE_CTS_B   0x140
+ 		>;
+ 	};
+ 
++        pinctrl_uart4: uart4grp {
++                fsl,pins = <
++                        MX8MN_IOMUXC_UART4_TXD_UART4_DTE_RX             0x140
++                        MX8MN_IOMUXC_UART4_RXD_UART4_DTE_TX             0x140                     
++		        //MX8MN_IOMUXC_UART4_RXD_UART4_DCE_RX             0x140
++                        //MX8MN_IOMUXC_UART4_TXD_UART4_DCE_TX             0x140
++                >;
++        };
++
+ 	pinctrl_usdhc1_gpio: usdhc1grpgpio {
+ 		fsl,pins = <
+ 			MX8MN_IOMUXC_SD1_RESET_B_GPIO2_IO10	0x41
+@@ -593,15 +602,21 @@
+ 	status = "okay";
+ };
+ 
+-&uart3 {
++&uart3 { /* RS485 */
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_uart3>;
+-	assigned-clocks = <&clk IMX8MN_CLK_UART3>;
+-	assigned-clock-parents = <&clk IMX8MN_SYS_PLL1_80M>;
++	//assigned-clocks = <&clk IMX8MN_CLK_UART3>;
++	//assigned-clock-parents = <&clk IMX8MN_SYS_PLL1_80M>;
+ 	fsl,uart-has-rtscts;
+ 	status = "okay";
+ };
+ 
++&uart4 { /* U-BLOX Nina B1 */
++        pinctrl-names = "default";
++        pinctrl-0 = <&pinctrl_uart4>;
++        //fsl,uart-has-rtscts;
++        status = "okay";
++};
+ 
+ &usdhc1 {
+         #address-cells = <1>;
+-- 
+2.25.1
+
