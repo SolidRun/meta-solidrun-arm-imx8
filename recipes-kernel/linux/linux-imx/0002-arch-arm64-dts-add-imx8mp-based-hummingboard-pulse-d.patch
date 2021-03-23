@@ -1,31 +1,18 @@
-From 7eede0f9b6b550dd33b7e8ca57cc7d188396f5d8 Mon Sep 17 00:00:00 2001
-From: TalPilo <tal.pilo@solid-run.com>
-Date: Sun, 1 Nov 2020 17:23:50 +0200
-Subject: [PATCH] Add IMX8MP device tree
+From 9cd4049d94dc3e6931be5c540a3b29eb22632e44 Mon Sep 17 00:00:00 2001
+From: Rabeeh Khoury <rabeeh@solid-run.com>
+Date: Tue, 2 Feb 2021 10:54:33 +0200
+Subject: [PATCH 2/2] arch: arm64: dts: add imx8mp based hummingboard pulse
+ device tree
 
-Signed-off-by: TalPilo <tal.pilo@solid-run.com>
+Signed-off-by: Rabeeh Khoury <rabeeh@solid-run.com>
 ---
- arch/arm64/boot/dts/freescale/Makefile        |    2 +-
  .../freescale/imx8mp-hummingboard-pulse.dts   | 1070 +++++++++++++++++
- 2 files changed, 1071 insertions(+), 1 deletion(-)
+ 1 file changed, 1070 insertions(+)
  create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dts
 
-diff --git a/arch/arm64/boot/dts/freescale/Makefile b/arch/arm64/boot/dts/freescale/Makefile
-index 7b27addc9603..986a3f5486e4 100644
---- a/arch/arm64/boot/dts/freescale/Makefile
-+++ b/arch/arm64/boot/dts/freescale/Makefile
-@@ -63,7 +63,7 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mn-evk.dtb imx8mn-evk-rm67191.dtb imx8mn-ddr4-evk.
- 			  imx8mn-evk-ak5558.dtb imx8mn-evk-rpmsg.dtb imx8mn-evk-8mic-revE.dtb
- dtb-$(CONFIG_ARCH_MXC) += imx8mn-ddr4-evk-root.dtb imx8mn-ddr4-evk-inmate.dtb imx8mn-evk-root.dtb imx8mn-evk-inmate.dtb
- dtb-$(CONFIG_ARCH_MXC) += imx8mn-ab2.dtb imx8mn-ddr4-ab2.dtb
--dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk.dtb imx8mp-evk-root.dtb imx8mp-evk-inmate.dtb imx8mp-evk-rpmsg.dtb \
-+dtb-$(CONFIG_ARCH_MXC) += imx8mp-hummingboard-pulse.dtb imx8mp-evk.dtb imx8mp-evk-root.dtb imx8mp-evk-inmate.dtb imx8mp-evk-rpmsg.dtb \
- 			  imx8mp-evk-rm67191.dtb imx8mp-evk-flexcan2.dtb imx8mp-evk-it6263-lvds-dual-channel.dtb \
- 			  imx8mp-evk-jdi-wuxga-lvds-panel.dtb imx8mp-ab2.dtb imx8mp-evk-sof-wm8960.dtb \
- 			  imx8mp-evk-dsp.dtb imx8mp-evk-ov2775.dtb imx8mp-evk-basler.dtb imx8mp-evk-pcie-ep.dtb \
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dts b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dts
 new file mode 100644
-index 000000000000..b87206631653
+index 000000000..b87206631
 --- /dev/null
 +++ b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dts
 @@ -0,0 +1,1070 @@

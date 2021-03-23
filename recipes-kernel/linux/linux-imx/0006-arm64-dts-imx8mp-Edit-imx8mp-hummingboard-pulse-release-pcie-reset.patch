@@ -1,0 +1,25 @@
+From a55f51590f4209436dede46d20ed4a1575735952 Mon Sep 17 00:00:00 2001
+From: Yazan Shhady <yazan.shhady@solid-run.com>
+Date: Thu, 11 Feb 2021 21:12:21 +0200
+Subject: [PATCH] arm64: dts: imx8mp: Edit imx8mp-hummingboard-pulse: releas
+ pcie reset gpio
+
+---
+ arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dts | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dts b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dts
+index dc333452c117..5f9b24547c50 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dts
++++ b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dts
+@@ -839,7 +839,6 @@
+ 			MX8MP_IOMUXC_SAI3_RXD__AUDIOMIX_SAI3_RX_DATA00	0xd6
+ 			MX8MP_IOMUXC_SAI3_TXD__AUDIOMIX_SAI3_TX_DATA00	0xd6
+ 			MX8MP_IOMUXC_SAI3_MCLK__AUDIOMIX_SAI3_MCLK	0xd6
+-			MX8MP_IOMUXC_SAI3_RXFS__GPIO4_IO28		0xd6
+ 			MX8MP_IOMUXC_SAI3_RXC__GPIO4_IO29		0xd6
+ 		>;
+ 	};
+-- 
+2.25.1
+

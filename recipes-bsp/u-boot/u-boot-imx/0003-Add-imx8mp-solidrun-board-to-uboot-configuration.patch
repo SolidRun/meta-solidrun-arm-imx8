@@ -1,6 +1,6 @@
-From 1d0c59eff0ee48cdbf27eaf8514df477f3f788ea Mon Sep 17 00:00:00 2001
+From ffb315cf084c3ecb86716c1d14594969ea6a4d7f Mon Sep 17 00:00:00 2001
 From: Rabeeh Khoury <rabeeh@solid-run.com>
-Date: Mon, 23 Nov 2020 15:38:23 +0200
+Date: Mon, 1 Feb 2021 19:33:05 +0200
 Subject: [PATCH 3/3] Add imx8mp solidrun board to uboot configuration
 
 Signed-off-by: Rabeeh Khoury <rabeeh@solid-run.com>
@@ -11,7 +11,7 @@ Signed-off-by: Rabeeh Khoury <rabeeh@solid-run.com>
  3 files changed, 8 insertions(+)
 
 diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-index 377aaeebb7..94e08b23e8 100644
+index 377aaeeb..94e08b23 100644
 --- a/arch/arm/Kconfig
 +++ b/arch/arm/Kconfig
 @@ -1822,6 +1822,7 @@ source "arch/arm/cpu/armv8/Kconfig"
@@ -23,24 +23,24 @@ index 377aaeebb7..94e08b23e8 100644
  source "board/bosch/guardian/Kconfig"
  source "board/CarMediaLab/flea3/Kconfig"
 diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
-index 81ac2569c6..851e041af1 100644
+index 0d24acd4..30dbf744 100644
 --- a/arch/arm/dts/Makefile
 +++ b/arch/arm/dts/Makefile
-@@ -793,6 +793,7 @@ dtb-$(CONFIG_ARCH_IMX8M) += \
- 	imx8mq-ddr4-val.dtb \
+@@ -796,6 +796,7 @@ dtb-$(CONFIG_ARCH_IMX8M) += \
  	imx8mq-evk.dtb \
+ 	imx8mp-ddr4-evk.dtb \
  	imx8mp-evk.dtb \
 +	imx8mp-solidrun.dtb \
  	imx8mm-ddr4-ab2.dtb \
  	imx8mm-ab2.dtb \
  	imx8mn-ddr4-ab2.dtb \
 diff --git a/arch/arm/mach-imx/imx8m/Kconfig b/arch/arm/mach-imx/imx8m/Kconfig
-index 450cecb675..f2ba8c1acc 100644
+index 41c68a49..2cd0e06a 100644
 --- a/arch/arm/mach-imx/imx8m/Kconfig
 +++ b/arch/arm/mach-imx/imx8m/Kconfig
-@@ -106,6 +106,12 @@ config TARGET_IMX8MP_EVK
+@@ -124,6 +124,12 @@ config TARGET_IMX8MP_DDR4_EVK
  	select SUPPORT_SPL
- 	select IMX8M_LPDDR4
+ 	select IMX8M_DDR4
  
 +config TARGET_IMX8MP_SOLIDRUN
 +	bool "SolidRun imx8mp based products"
