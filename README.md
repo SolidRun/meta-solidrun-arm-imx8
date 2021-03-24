@@ -13,7 +13,7 @@ use with OpenEmbedded and Yocto Freescale's BSP layer.
 
 2. Get NXP Ycoto sources(require repo app):
 
-		$ repo init -u https://source.codeaurora.org/external/imx/imx-manifest -b imx-linux-zeus -m imx-5.4.47-2.2.0.xml
+		$ repo init -u https://source.codeaurora.org/external/imx/imx-manifest -b imx-linux-zeus -m imx-5.4.70-2.3.0.xml
 		$ repo sync
 
 3. Add the meta-solidrun-arm-imx8 layer (curent git repository) into the sources directory, the directory layout should be like this:
@@ -36,14 +36,16 @@ use with OpenEmbedded and Yocto Freescale's BSP layer.
 					├── downloads
 					└── ...
 				</pre>
+				git clone -b zeus-imx8mp https://github.com/SolidRun/meta-solidrun-arm-imx8.git sources/meta-solidrun-arm-imx8
+
 4. Configure imx8mpsolidrun board, Distro for xwayland support and create the build environment:
 **After running the following commands, you need to accept the EULA (scrool down and run "y")**
 
 		$ DISTRO=fsl-imx-xwayland MACHINE=imx8mpsolidrun source imx-setup-release.sh -b build-xwayland-imx8mpsolidrun
 
-5. Appned the following line into conf/bblayers.conf
+5. Append the following line into conf/bblayers.conf with
 
-		BBLAYERS += "${BSPDIR}/sources/meta-solidrun-arm-imx8"
+		echo 'BBLAYERS += "${BSPDIR}/sources/meta-solidrun-arm-imx8" >> conf/bblayers.conf
 
 6. Build Yocto image for imx8mp solidrun, by running the first, which is a minimal image (lacks firmwares) and then second which is full image including demos:
 (**The following command can take several hours**)
