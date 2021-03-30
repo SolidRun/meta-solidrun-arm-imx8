@@ -7,4 +7,6 @@ SRC_URI += " \
 	file://0004-fix-name-of-dtb-file-for-i.MX8MP-HummingBoard-Pulse.patch  \
 	file://0005-imx8mp-add-eqos-ethernet-port-and-disable-fec.patch  \
 	file://0006-imx8mp-add-memory-size-detection.patch \
+	file://0007-edit-imx8mp-solidrun-mmc-uboot-environment.patch \
+	file://0008-imx8mp-Samsung-LPDDR4-uses-a-single-zq-resistor.patch \
 "

@@ -1,0 +1,76 @@
+From c9a848e09d7497214a7f1e0da9f85a2483d85e09 Mon Sep 17 00:00:00 2001
+From: Rabeeh Khoury <rabeeh@solid-run.com>
+Date: Tue, 30 Mar 2021 13:32:29 +0300
+Subject: [PATCH 8/8] imx8mp: Samsung LPDDR4 uses a single zq resistor
+
+Samsung LPDDR4 uses a shared zq resistor for calibration.
+This patch fixes memtester failures that were observed with the previous
+calibration when using Samsung LPDDR4 1GByte system memory.
+
+Signed-off-by: Rabeeh Khoury <rabeeh@solid-run.com>
+---
+ .../imx8mp_solidrun/lpddr4_timing_1gb_samsung.c     | 13 ++++++-------
+ 1 file changed, 6 insertions(+), 7 deletions(-)
+
+diff --git a/board/solidrun/imx8mp_solidrun/lpddr4_timing_1gb_samsung.c b/board/solidrun/imx8mp_solidrun/lpddr4_timing_1gb_samsung.c
+index efc81678..24bf5dcb 100644
+--- a/board/solidrun/imx8mp_solidrun/lpddr4_timing_1gb_samsung.c
++++ b/board/solidrun/imx8mp_solidrun/lpddr4_timing_1gb_samsung.c
+@@ -30,8 +30,8 @@ static struct dram_cfg_param ddr_ddrc_cfg[] = {
+ 	{ 0x3d4000e0, 0x330000 },
+ 	{ 0x3d4000e8, 0x660048 },
+ 	{ 0x3d4000ec, 0x160048 },
+-	{ 0x3d400100, 0x201e222a }, /*tFaw=30 at 2GHz 0x2028222a },*/
+-	{ 0x3d400104, 0x807bf },
++	{ 0x3d400100, 0x201e222a },
++	{ 0x3d400104, 0x8083f },
+ 	{ 0x3d40010c, 0xe0e000 },
+ 	{ 0x3d400110, 0x12040a12 },
+ 	{ 0x3d400114, 0x2050f0f },
+@@ -41,7 +41,7 @@ static struct dram_cfg_param ddr_ddrc_cfg[] = {
+ 	{ 0x3d400134, 0xe100002 },
+ 	{ 0x3d400138, 0xbc },
+ 	{ 0x3d400144, 0xc80064 },
+-	{ 0x3d400180, 0x3e8001e },
++	{ 0x3d400180, 0x23e8001e },
+ 	{ 0x3d400184, 0x3207a12 },
+ 	{ 0x3d400188, 0x0 },
+ 	{ 0x3d400190, 0x49f820e },
+@@ -82,7 +82,7 @@ static struct dram_cfg_param ddr_ddrc_cfg[] = {
+ 	{ 0x3d4020e0, 0x330000 },
+ 	{ 0x3d4020e8, 0x660048 },
+ 	{ 0x3d4020ec, 0x160048 },
+-	{ 0x3d402100, 0xa040305 },
++	{ 0x3d402100, 0xa030305 },
+ 	{ 0x3d402104, 0x30407 },
+ 	{ 0x3d402108, 0x203060b },
+ 	{ 0x3d40210c, 0x505000 },
+@@ -94,7 +94,7 @@ static struct dram_cfg_param ddr_ddrc_cfg[] = {
+ 	{ 0x3d402134, 0xa100002 },
+ 	{ 0x3d402138, 0x13 },
+ 	{ 0x3d402144, 0x14000a },
+-	{ 0x3d402180, 0x640004 },
++	{ 0x3d402180, 0x20640004 },
+ 	{ 0x3d402190, 0x3818200 },
+ 	{ 0x3d402194, 0x80303 },
+ 	{ 0x3d4021b4, 0x100 },
+@@ -119,7 +119,7 @@ static struct dram_cfg_param ddr_ddrc_cfg[] = {
+ 	{ 0x3d403134, 0xa100002 },
+ 	{ 0x3d403138, 0x5 },
+ 	{ 0x3d403144, 0x50003 },
+-	{ 0x3d403180, 0x190004 },
++	{ 0x3d403180, 0x20190004 },
+ 	{ 0x3d403190, 0x3818200 },
+ 	{ 0x3d403194, 0x80303 },
+ 	{ 0x3d4031b4, 0x100 },
+@@ -1190,7 +1190,6 @@ static struct dram_cfg_param ddr_fsp0_2d_cfg[] = {
+ 	{ 0x54008, 0x61 },
+ 	{ 0x54009, 0xc8 },
+ 	{ 0x5400b, 0x2 },
+-	{ 0x5400d, 0x100 },
+ 	{ 0x5400f, 0x100 },
+ 	{ 0x54010, 0x1f7f },
+ 	{ 0x54012, 0x110 },
+-- 
+2.25.1
+
