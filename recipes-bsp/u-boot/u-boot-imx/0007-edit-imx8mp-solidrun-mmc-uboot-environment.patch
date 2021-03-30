@@ -1,0 +1,26 @@
+From 4bb6e8849646094103bc87a2b8c1cea74d7893d6 Mon Sep 17 00:00:00 2001
+From: Yazan Shhady <yazan.shhady@solid-run.com>
+Date: Sun, 28 Mar 2021 16:28:12 +0300
+Subject: [PATCH] Edit imx8mp solidrun mmc uboot environment
+
+Signed-off-by: Yazan Shhady <yazan.shhady@solid-run.com>
+---
+ include/configs/imx8mp_solidrun.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/configs/imx8mp_solidrun.h b/include/configs/imx8mp_solidrun.h
+index e7206e56f7..9265ece5e2 100644
+--- a/include/configs/imx8mp_solidrun.h
++++ b/include/configs/imx8mp_solidrun.h
+@@ -258,7 +258,7 @@
+ 
+ #define BOOT_TARGET_DEVICES(func) \
+         func(MMC, mmc, 1) \
+-        func(MMC, mmc, 0) \
++        func(MMC, mmc, 2) \
+         func(USB, usb, 0) \
+         func(PXE, pxe, na) \
+         func(DHCP, dhcp, na)
+-- 
+2.25.1
+
