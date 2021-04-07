@@ -1,7 +1,7 @@
-From e02fca2616a2ee314ba288e08822177b9d10ae82 Mon Sep 17 00:00:00 2001
+From 791c3cefdf9d543a82c2058c1fd4dc5ce9bb0e1b Mon Sep 17 00:00:00 2001
 From: Rabeeh Khoury <rabeeh@solid-run.com>
-Date: Tue, 2 Feb 2021 10:54:08 +0200
-Subject: [PATCH 1/2] Add imx8mp device tree
+Date: Tue, 30 Mar 2021 17:12:09 +0300
+Subject: [PATCH] Add imx8mp device tree
 
 Signed-off-by: Rabeeh Khoury <rabeeh@solid-run.com>
 ---
@@ -9,18 +9,18 @@ Signed-off-by: Rabeeh Khoury <rabeeh@solid-run.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/arch/arm64/boot/dts/freescale/Makefile b/arch/arm64/boot/dts/freescale/Makefile
-index 27d3bbdc6..4f9080533 100644
+index acbe1e366ca8..0fe636ec0f82 100644
 --- a/arch/arm64/boot/dts/freescale/Makefile
 +++ b/arch/arm64/boot/dts/freescale/Makefile
-@@ -67,7 +67,7 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mn-evk.dtb imx8mn-evk-rm67191.dtb imx8mn-ddr4-evk.
- 			  imx8mn-evk-iqaudio-dacplus.dtb imx8mn-evk-iqaudio-dacpro.dtb imx8mn-evk-hifiberry-dacplus.dtb
- dtb-$(CONFIG_ARCH_MXC) += imx8mn-ddr4-evk-root.dtb imx8mn-ddr4-evk-inmate.dtb imx8mn-evk-root.dtb imx8mn-evk-inmate.dtb
- dtb-$(CONFIG_ARCH_MXC) += imx8mn-ab2.dtb imx8mn-ddr4-ab2.dtb
--dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk.dtb imx8mp-evk-root.dtb imx8mp-evk-inmate.dtb imx8mp-evk-rpmsg.dtb \
-+dtb-$(CONFIG_ARCH_MXC) += imx8mp-hummingboard-pulse.dtb imx8mp-evk.dtb imx8mp-evk-root.dtb imx8mp-evk-inmate.dtb imx8mp-evk-rpmsg.dtb \
- 			  imx8mp-evk-rm67191.dtb imx8mp-evk-flexcan2.dtb imx8mp-evk-it6263-lvds-dual-channel.dtb \
- 			  imx8mp-evk-jdi-wuxga-lvds-panel.dtb imx8mp-ab2.dtb imx8mp-evk-sof-wm8960.dtb \
- 			  imx8mp-evk-dsp.dtb imx8mp-evk-ov2775.dtb imx8mp-evk-basler.dtb imx8mp-evk-pcie-ep.dtb \
+@@ -94,7 +94,7 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mq-evk-ak4497.dtb imx8mq-evk-audio-tdm.dtb imx8mq-
+ dtb-$(CONFIG_ARCH_MXC) += imx8mq-evk-root.dtb imx8mq-evk-inmate.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mq-evk-lcdif-rm67191.dtb imx8mq-evk-lcdif-adv7535.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mq-evk-lcdif-rm67199.dtb
+-dtb-$(CONFIG_ARCH_MXC) += imx8mq-hummingboard-pulse.dtb
++dtb-$(CONFIG_ARCH_MXC) += imx8mq-hummingboard-pulse.dtb imx8mp-hummingboard-pulse.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mq-evk-dcss-rm67191.dtb imx8mq-evk-dcss-adv7535.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mq-evk-dcss-rm67199.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mq-evk-dual-display.dtb
 -- 
 2.25.1
 
