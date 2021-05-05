@@ -1,0 +1,49 @@
+From 0ab5c9eee069788b944badeb661db857e03c5026 Mon Sep 17 00:00:00 2001
+From: Rabeeh Khoury <rabeeh@solid-run.com>
+Date: Tue, 4 May 2021 19:00:46 +0300
+Subject: [PATCH] arch: arm64: imx8mpsolidrun: fix bluetooth bt_reg_on
+
+Correctly use modem_reset to enable bt_reg_on.
+With this being done automatically hciattach works without setting the
+gpio2/10 manually.
+
+For example -
+
+Signed-off-by: Rabeeh Khoury <rabeeh@solid-run.com>
+---
+ arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dts | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dts b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dts
+index a6c120027271..5a179a841a89 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dts
++++ b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dts
+@@ -41,7 +41,7 @@ leds {
+ 
+ 	modem_reset: modem-reset {
+ 		compatible = "gpio-reset";
+-		reset-gpios = <&gpio2 6 GPIO_ACTIVE_LOW>;
++		reset-gpios = <&gpio2 10 GPIO_ACTIVE_LOW>;
+ 		reset-delay-us = <2000>;
+ 		reset-post-delay-ms = <40>;
+ 		#reset-cells = <0>;
+@@ -850,6 +850,7 @@ MX8MP_IOMUXC_UART1_RXD__UART1_DCE_RX	0x140
+ 			MX8MP_IOMUXC_UART1_TXD__UART1_DCE_TX	0x140
+ 			MX8MP_IOMUXC_UART3_RXD__UART1_DCE_CTS	0x140
+ 			MX8MP_IOMUXC_UART3_TXD__UART1_DCE_RTS	0x140
++			MX8MP_IOMUXC_SD1_RESET_B__GPIO2_IO10	0x19
+ 		>;
+ 	};
+ 
+@@ -884,7 +885,7 @@ MX8MP_IOMUXC_GPIO1_IO14__GPIO1_IO14	0x19
+ 	pinctrl_usdhc1_gpio: usdhc1grp-gpio {
+ 		fsl,pins = <
+ 			MX8MP_IOMUXC_SD1_STROBE__GPIO2_IO11	0x41 /* WL_REG_ON*/
+-			MX8MP_IOMUXC_SD1_RESET_B__GPIO2_IO10	0x41/* BT_REG_ON*/
++			/*MX8MP_IOMUXC_SD1_RESET_B__GPIO2_IO10	0x41*//* BT_REG_ON*/
+ 			/*MX8MP_IOMUXC_SD1_DATA5__GPIO2_IO07	0x41*//*BT_DEV_WAKE*/ 
+ 		>;
+ 	};
+-- 
+2.25.1
+
