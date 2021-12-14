@@ -9,4 +9,6 @@ SRC_URI += " \
 	file://0006-imx8mp-add-memory-size-detection.patch \
 	file://0007-edit-imx8mp-solidrun-mmc-uboot-environment.patch \
 	file://0008-imx8mp-Samsung-LPDDR4-uses-a-single-zq-resistor.patch \
+	file://0009-Edit-u-boot-configurations.patch \
+	file://0010-imx8mp-Remove-Unused-Clock-in-spl.c.patch \
 "

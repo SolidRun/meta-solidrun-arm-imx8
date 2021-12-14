@@ -1,0 +1,35 @@
+From 02f31974c86d9a937ae37cb61d73f39eed9fead8 Mon Sep 17 00:00:00 2001
+From: Yazan Shhady <yazan.shhady@solid-run.com>
+Date: Tue, 11 Jan 2022 16:01:11 +0200
+Subject: [PATCH] imx8mp: Remove Unused Clock in spl.c
+
+---
+ board/solidrun/imx8mp_solidrun/spl.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/board/solidrun/imx8mp_solidrun/spl.c b/board/solidrun/imx8mp_solidrun/spl.c
+index 54a9c12695..3564bc4db7 100644
+--- a/board/solidrun/imx8mp_solidrun/spl.c
++++ b/board/solidrun/imx8mp_solidrun/spl.c
+@@ -202,7 +202,7 @@ void board_init_f(ulong dummy)
+ 		debug("spl_early_init() failed: %d\n", ret);
+ 		hang();
+ 	}
+-
++/*
+ 	ret = uclass_get_device_by_name(UCLASS_CLK,
+ 					"clock-controller@30380000",
+ 					&dev);
+@@ -210,7 +210,8 @@ void board_init_f(ulong dummy)
+ 		printf("Failed to find clock node. Check device tree\n");
+ 		hang();
+ 	}
+-
++*/
++	printf("Ignore -> Failed to find clock node. Check device tree ... !!!\n");
+ 	enable_tzc380();
+ 
+ 	power_init_board();
+-- 
+2.25.1
+

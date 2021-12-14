@@ -1,9 +1,8 @@
-From ffb315cf084c3ecb86716c1d14594969ea6a4d7f Mon Sep 17 00:00:00 2001
-From: Rabeeh Khoury <rabeeh@solid-run.com>
-Date: Mon, 1 Feb 2021 19:33:05 +0200
-Subject: [PATCH 3/3] Add imx8mp solidrun board to uboot configuration
+From 31255b35117e030fa27d3b49c9ec11e463c56048 Mon Sep 17 00:00:00 2001
+From: yazan shhady <yazan.shhady@solid-run.com>
+Date: Tue, 21 Dec 2021 18:12:13 +0200
+Subject: [PATCH] Add imx8mp solidrun board to uboot configuration
 
-Signed-off-by: Rabeeh Khoury <rabeeh@solid-run.com>
 ---
  arch/arm/Kconfig                | 1 +
  arch/arm/dts/Makefile           | 1 +
@@ -11,42 +10,42 @@ Signed-off-by: Rabeeh Khoury <rabeeh@solid-run.com>
  3 files changed, 8 insertions(+)
 
 diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-index 377aaeeb..94e08b23 100644
+index dc2d122998..8248090cf1 100644
 --- a/arch/arm/Kconfig
 +++ b/arch/arm/Kconfig
-@@ -1822,6 +1822,7 @@ source "arch/arm/cpu/armv8/Kconfig"
- 
- source "arch/arm/mach-imx/Kconfig"
- 
+@@ -2040,6 +2040,7 @@ source "board/variscite/dart_6ul/Kconfig"
+ source "board/vscom/baltos/Kconfig"
+ source "board/phytium/durian/Kconfig"
+ source "board/xen/xenguest_arm64/Kconfig"
 +source "board/solidrun/imx8mp_solidrun/Kconfig"
- source "board/bosch/shc/Kconfig"
- source "board/bosch/guardian/Kconfig"
- source "board/CarMediaLab/flea3/Kconfig"
+ 
+ source "arch/arm/Kconfig.debug"
+ 
 diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
-index 0d24acd4..30dbf744 100644
+index 24a387fb60..737c38ea87 100644
 --- a/arch/arm/dts/Makefile
 +++ b/arch/arm/dts/Makefile
-@@ -796,6 +796,7 @@ dtb-$(CONFIG_ARCH_IMX8M) += \
- 	imx8mq-evk.dtb \
+@@ -875,6 +875,7 @@ dtb-$(CONFIG_ARCH_IMX8M) += \
+ 	imx8mn-beacon-kit.dtb \
+ 	imx8mq-phanbell.dtb \
  	imx8mp-ddr4-evk.dtb \
- 	imx8mp-evk.dtb \
 +	imx8mp-solidrun.dtb \
- 	imx8mm-ddr4-ab2.dtb \
- 	imx8mm-ab2.dtb \
- 	imx8mn-ddr4-ab2.dtb \
+ 	imx8mp-evk.dtb \
+ 	imx8mp-phyboard-pollux-rdk.dtb \
+ 	imx8mq-pico-pi.dtb \
 diff --git a/arch/arm/mach-imx/imx8m/Kconfig b/arch/arm/mach-imx/imx8m/Kconfig
-index 41c68a49..2cd0e06a 100644
+index 245b085499..f00ca6a3c2 100644
 --- a/arch/arm/mach-imx/imx8m/Kconfig
 +++ b/arch/arm/mach-imx/imx8m/Kconfig
-@@ -124,6 +124,12 @@ config TARGET_IMX8MP_DDR4_EVK
- 	select SUPPORT_SPL
- 	select IMX8M_DDR4
+@@ -180,6 +180,12 @@ config TARGET_IMX8MP_DDR4_EVK
+ 	select MISC
+ 	select SPL_CRYPTO_SUPPORT if SPL
  
 +config TARGET_IMX8MP_SOLIDRUN
-+	bool "SolidRun imx8mp based products"
-+	select IMX8MP
-+	select SUPPORT_SPL
-+	select IMX8M_LPDDR4
++       bool "SolidRun imx8mp based products"
++       select IMX8MP
++       select SUPPORT_SPL
++       select IMX8M_LPDDR4
 +
  config TARGET_IMX8MM_AB2
  	bool "imx8mm LPDDR4 Audio board 2.0"
