@@ -90,3 +90,16 @@ Follow the commands below to; first clone this branch and run the following comm
 		chmod a+x repo
 
 and then follow the above instructions on how to build (**Notice that /home/<username>/work/imx8mp directory now is shared between the container and the outside deplelopment environment**)
+
+## Include NetworkManager and ModemManager for network control
+If you prefer to use NetworkManager and ModemManager rather than the default Yocto configuration of connman and ofono please add the following snippet to your local.conf
+	
+	IMAGE_INSTALL_remove += " ofono connman connman-gnome connman-conf"
+	IMAGE_INSTALL_remove += " packagegroup-core-tools-testapps"
+	PACKAGE_EXCLUDE += "ofono connman connman-gnome connman-conf"
+	PACKAGE_EXCLUDE += "connman-client connman-tools"
+	PACKAGE_EXCLUDE += "packagegroup-core-tools-testapps"
+	DISTRO_FEATURES_remove = " 3g"
+	IMAGE_INSTALL_append = " networkmanager networkmanager-nmcli modemmanager"
+	IMAGE_INSTALL_append = " networkmanager-bash-completion"
+	PACKAGECONFIG_append_pn-networkmanager = " modemmanager ppp"
