@@ -1,0 +1,71 @@
+From cea287d2f5635a2f1df04f1de7cdbc2b5bc565bd Mon Sep 17 00:00:00 2001
+From: Jon Nettleton <jon@solid-run.com>
+Date: Mon, 7 Feb 2022 16:07:42 +0100
+Subject: [PATCH 06/10] ASoC: fsl: Break the audio cpu dai into its own module
+
+The SOC dai cpu driver is written as its own platform
+module, which works fine if everything is built directly into
+the kernel, however if the audio drivers are built as modules
+they will fail to compile because there are multiple platform
+module init routines. We can make the cpu portion of the
+driver its own module to fix this.
+
+Signed-off-by: Jon Nettleton <jon@solid-run.com>
+---
+ sound/soc/fsl/Kconfig  | 9 +++++++--
+ sound/soc/fsl/Makefile | 4 ++--
+ 2 files changed, 9 insertions(+), 4 deletions(-)
+
+diff --git a/sound/soc/fsl/Kconfig b/sound/soc/fsl/Kconfig
+index bb5aac95f548..c7aa0ff493d5 100644
+--- a/sound/soc/fsl/Kconfig
++++ b/sound/soc/fsl/Kconfig
+@@ -105,8 +105,8 @@ config SND_SOC_FSL_XCVR
+ 
+ config SND_SOC_FSL_DSP
+ 	tristate "dsp module support"
+-	select SND_SOC_COMPRESS
+ 	select SND_SOC_FSL_DSP_AUDIOMIX
++	select SND_SOC_COMPRESS
+ 	help
+ 	  Say Y if you want to add hifi 4 support for the Freescale CPUs.
+ 	  which is a DSP core for audio processing.
+@@ -119,6 +119,12 @@ config SND_SOC_FSL_DSP_AUDIOMIX
+ 	help
+ 	  Say Y if you want to add Audio MIX helper for DSP
+ 
++config SND_SOC_FSL_DSP_CPU
++	tristate "SOC CPU DSP helper"
++	select SND_SOC_COMPRESS
++	help
++	  Say Y if you want to add the CPU DAI helper for DSP
++
+ config SND_SOC_FSL_ESAI_CLIENT
+ 	tristate "NXP ESAI CLIENT module support"
+ 	select SND_SOC_IMX_PCM_DMA if SND_IMX_SOC != n
+@@ -515,7 +521,6 @@ config SND_SOC_IMX_PCM512X
+ config SND_SOC_IMX_DSP
+ 	tristate "SoC Audio support for i.MX boards with DSP port"
+ 	select SND_SOC_FSL_DSP
+-	select SND_SOC_COMPRESS
+ 	help
+ 	  SoC Audio support for i.MX boards with DSP audio
+ 	  Say Y if you want to add support for SoC audio on an i.MX board with
+diff --git a/sound/soc/fsl/Makefile b/sound/soc/fsl/Makefile
+index 98bf58311964..17614dfab523 100644
+--- a/sound/soc/fsl/Makefile
++++ b/sound/soc/fsl/Makefile
+@@ -17,8 +17,8 @@ snd-soc-fsl-asoc-card-objs := fsl-asoc-card.o
+ snd-soc-fsl-dsp-audiomix-objs := fsl_dsp_audiomix.o
+ snd-soc-fsl-asrc-objs := fsl_asrc.o fsl_asrc_dma.o
+ snd-soc-fsl-dsp-objs := fsl_dsp.o fsl_dsp_proxy.o fsl_dsp_pool.o \
+-	fsl_dsp_library_load.o fsl_dsp_xaf_api.o fsl_dsp_cpu.o \
+-	fsl_dsp_platform_compress.o
++	fsl_dsp_library_load.o fsl_dsp_xaf_api.o fsl_dsp_platform_compress.o
++snd-soc-fsl-dsp-cpu-objs := fsl_dsp_cpu.o
+ snd-soc-fsl-sai-objs := fsl_sai.o fsl_sai_sysfs.o
+ snd-soc-fsl-ssi-y := fsl_ssi.o
+ snd-soc-fsl-ssi-$(CONFIG_DEBUG_FS) += fsl_ssi_dbg.o
+-- 
+2.35.1
+
