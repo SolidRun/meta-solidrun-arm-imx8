@@ -543,7 +543,7 @@ index 000000000000..b2983cee79f1
 +
 +	spidev1: spi@0 {
 +		reg = <0>;
-+		compatible = "spidev";
++		compatible = "linux,spidev";
 +		spi-max-frequency = <10000000>;
 +	};
 +};
