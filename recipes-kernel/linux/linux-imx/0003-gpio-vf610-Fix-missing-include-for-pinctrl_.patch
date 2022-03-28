@@ -1,7 +1,7 @@
 From 97bc2c034a1de79227ce6e0c82e22a047aeb59bd Mon Sep 17 00:00:00 2001
 From: Jon Nettleton <jon@solid-run.com>
 Date: Sun, 6 Feb 2022 10:07:09 +0100
-Subject: [PATCH 03/10] gpio: vf610: Fix missing include for pinctrl_*
+Subject: [PATCH 03/11] gpio: vf610: Fix missing include for pinctrl_*
 
 Fixes a build error when defconfig is changed to not include
 all surrounding modules.

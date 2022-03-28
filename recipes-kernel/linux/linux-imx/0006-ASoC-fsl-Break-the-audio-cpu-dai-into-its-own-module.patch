@@ -1,7 +1,7 @@
 From cea287d2f5635a2f1df04f1de7cdbc2b5bc565bd Mon Sep 17 00:00:00 2001
 From: Jon Nettleton <jon@solid-run.com>
 Date: Mon, 7 Feb 2022 16:07:42 +0100
-Subject: [PATCH 06/10] ASoC: fsl: Break the audio cpu dai into its own module
+Subject: [PATCH 06/11] ASoC: fsl: Break the audio cpu dai into its own module
 
 The SOC dai cpu driver is written as its own platform
 module, which works fine if everything is built directly into

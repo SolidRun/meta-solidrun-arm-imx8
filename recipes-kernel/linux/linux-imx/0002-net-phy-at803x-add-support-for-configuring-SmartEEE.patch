@@ -1,7 +1,7 @@
 From d93538f2f73d2a8a552271834199d3d0e2394e2b Mon Sep 17 00:00:00 2001
 From: Russell King <rmk+kernel@armlinux.org.uk>
 Date: Thu, 14 Jan 2021 10:45:49 +0000
-Subject: [PATCH 02/10] net: phy: at803x: add support for configuring SmartEEE
+Subject: [PATCH 02/11] net: phy: at803x: add support for configuring SmartEEE
 
 SmartEEE for the atheros phy was deemed buggy by Freescale and commits
 were added to disable it for their boards.

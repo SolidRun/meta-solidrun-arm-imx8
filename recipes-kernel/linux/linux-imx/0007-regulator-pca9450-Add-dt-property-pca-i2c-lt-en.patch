@@ -1,7 +1,7 @@
 From 2d7da45180e602ab920578714546fd78b5093bb6 Mon Sep 17 00:00:00 2001
 From: Jon Nettleton <jon@solid-run.com>
 Date: Tue, 8 Feb 2022 15:22:12 +0100
-Subject: [PATCH 07/10] regulator: pca9450: Add dt property pca,i2c-lt-en
+Subject: [PATCH 07/11] regulator: pca9450: Add dt property pca,i2c-lt-en
 
 The PCA9450 (at least the DS version) has a built in level
 translator that allows I2C lines to be shifted from 3.3V to 1.8V.

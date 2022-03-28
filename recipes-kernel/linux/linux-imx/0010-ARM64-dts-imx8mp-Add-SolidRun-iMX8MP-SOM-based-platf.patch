@@ -1,7 +1,7 @@
 From ef902eb8225df8ed4b06e4fb27e1cff8b32312b0 Mon Sep 17 00:00:00 2001
 From: Jon Nettleton <jon@solid-run.com>
 Date: Fri, 26 Mar 2021 11:37:34 +0100
-Subject: [PATCH 10/10] ARM64: dts: imx8mp: Add SolidRun iMX8MP SOM based
+Subject: [PATCH 10/11] ARM64: dts: imx8mp: Add SolidRun iMX8MP SOM based
  platforms
 
 This adds the initial port of the iMX8MP based SolidRun SOM
@@ -543,7 +543,7 @@ index 000000000000..b2983cee79f1
 +
 +	spidev1: spi@0 {
 +		reg = <0>;
-+		compatible = "linux,spidev";
++		compatible = "spidev";
 +		spi-max-frequency = <10000000>;
 +	};
 +};
