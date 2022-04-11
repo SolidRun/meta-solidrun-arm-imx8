@@ -87,7 +87,7 @@ Follow the commands below to; first clone this branch and run the following comm
     git config --global user.name "Your Name"
     git config --global user.email "you@example.com"
     wget https://storage.googleapis.com/git-repo-downloads/repo
-		chmod a+x repo
+    chmod a+x repo
 
 and then follow the above instructions on how to build (**Notice that /home/<username>/work/imx8mp directory now is shared between the container and the outside deplelopment environment**)
 
