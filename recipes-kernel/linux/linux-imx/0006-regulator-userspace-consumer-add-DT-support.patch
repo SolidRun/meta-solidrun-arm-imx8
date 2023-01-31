@@ -1,7 +1,7 @@
-From 3b648926f052c41d91343bcdfd71a18c40fede6c Mon Sep 17 00:00:00 2001
+From bf8602357e0c729494b69d4ac6c76d00e342c607 Mon Sep 17 00:00:00 2001
 From: Laxman Dewangan <ldewangan@...dia.com>
 Date: Wed, 30 Jul 2014 19:23:59 +0530
-Subject: [PATCH 09/11] regulator: userspace-consumer: add DT support
+Subject: [PATCH 6/8] regulator: userspace-consumer: add DT support
 
 Add DT support of the regulator driver userspace-consumer.
 The supply names for this driver is provided through DT properties
@@ -13,7 +13,7 @@ Signed-off-by: Laxman Dewangan <ldewangan@...dia.com>
  1 file changed, 48 insertions(+)
 
 diff --git a/drivers/regulator/userspace-consumer.c b/drivers/regulator/userspace-consumer.c
-index 8e3b5a67cfd8..0b8d9b66699d 100644
+index 8ca28664776e..3d08197beee2 100644
 --- a/drivers/regulator/userspace-consumer.c
 +++ b/drivers/regulator/userspace-consumer.c
 @@ -18,6 +18,7 @@
@@ -98,5 +98,5 @@ index 8e3b5a67cfd8..0b8d9b66699d 100644
  };
  
 -- 
-2.35.1
+2.39.0
 

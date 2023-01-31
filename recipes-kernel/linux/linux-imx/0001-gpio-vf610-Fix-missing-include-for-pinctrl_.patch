@@ -1,7 +1,7 @@
-From 97bc2c034a1de79227ce6e0c82e22a047aeb59bd Mon Sep 17 00:00:00 2001
+From 2fdf7407ddc9176476a51ad7d6a87484ee1a2ded Mon Sep 17 00:00:00 2001
 From: Jon Nettleton <jon@solid-run.com>
 Date: Sun, 6 Feb 2022 10:07:09 +0100
-Subject: [PATCH 03/11] gpio: vf610: Fix missing include for pinctrl_*
+Subject: [PATCH 1/8] gpio: vf610: Fix missing include for pinctrl_*
 
 Fixes a build error when defconfig is changed to not include
 all surrounding modules.
@@ -12,7 +12,7 @@ Signed-off-by: Jon Nettleton <jon@solid-run.com>
  1 file changed, 1 insertion(+)
 
 diff --git a/drivers/gpio/gpio-vf610.c b/drivers/gpio/gpio-vf610.c
-index b99f4968bd5f..b78877f76af0 100644
+index edb28af7ba3b..3d0d573f9a12 100644
 --- a/drivers/gpio/gpio-vf610.c
 +++ b/drivers/gpio/gpio-vf610.c
 @@ -15,6 +15,7 @@
@@ -24,5 +24,5 @@ index b99f4968bd5f..b78877f76af0 100644
  #include <linux/of.h>
  #include <linux/of_device.h>
 -- 
-2.35.1
+2.39.0
 

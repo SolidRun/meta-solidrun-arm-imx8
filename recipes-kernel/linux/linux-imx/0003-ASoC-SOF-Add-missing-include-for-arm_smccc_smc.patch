@@ -1,7 +1,7 @@
-From e342bdbbf1a355dab9fbd74e4811dd0da6644513 Mon Sep 17 00:00:00 2001
+From 5dd359eee04b0af7bef1b3aae0f8f7609e1eb452 Mon Sep 17 00:00:00 2001
 From: Jon Nettleton <jon@solid-run.com>
 Date: Sun, 6 Feb 2022 10:42:24 +0100
-Subject: [PATCH 05/11] ASoC: SOF: Add missing include for arm_smccc_smc
+Subject: [PATCH 3/8] ASoC: SOF: Add missing include for arm_smccc_smc
 
 Signed-off-by: Jon Nettleton <jon@solid-run.com>
 ---
@@ -9,7 +9,7 @@ Signed-off-by: Jon Nettleton <jon@solid-run.com>
  1 file changed, 1 insertion(+)
 
 diff --git a/sound/soc/sof/imx/imx8ulp.c b/sound/soc/sof/imx/imx8ulp.c
-index f020c5c138ad..db899d3f8038 100644
+index 0a82495a128e..2c67e1fcbbb0 100644
 --- a/sound/soc/sof/imx/imx8ulp.c
 +++ b/sound/soc/sof/imx/imx8ulp.c
 @@ -6,6 +6,7 @@
@@ -21,5 +21,5 @@ index f020c5c138ad..db899d3f8038 100644
  #include <linux/firmware.h>
  #include <linux/of_platform.h>
 -- 
-2.35.1
+2.39.0
 

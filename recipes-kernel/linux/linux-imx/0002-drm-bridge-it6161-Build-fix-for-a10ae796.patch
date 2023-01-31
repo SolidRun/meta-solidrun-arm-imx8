@@ -1,7 +1,7 @@
-From ab49c94dbb07187b3a87e4872d094812fe25f9d8 Mon Sep 17 00:00:00 2001
+From e89aa19952f1e399812d7fad5a5def6e9426d2ec Mon Sep 17 00:00:00 2001
 From: Jon Nettleton <jon@solid-run.com>
 Date: Sun, 6 Feb 2022 10:23:51 +0100
-Subject: [PATCH 04/11] drm: bridge: it6161: Build fix for a10ae796
+Subject: [PATCH 2/8] drm: bridge: it6161: Build fix for a10ae796
 
 Must include the gpio/consumer.h header
 
@@ -11,7 +11,7 @@ Signed-off-by: Jon Nettleton <jon@solid-run.com>
  1 file changed, 1 insertion(+)
 
 diff --git a/drivers/gpu/drm/bridge/it6161.c b/drivers/gpu/drm/bridge/it6161.c
-index da0f62d14faa..187e4017b4d9 100644
+index a06ec2544a42..0bdc25e46f1f 100644
 --- a/drivers/gpu/drm/bridge/it6161.c
 +++ b/drivers/gpu/drm/bridge/it6161.c
 @@ -9,6 +9,7 @@
@@ -23,5 +23,5 @@ index da0f62d14faa..187e4017b4d9 100644
  #include <sound/hdmi-codec.h>
  
 -- 
-2.35.1
+2.39.0
 

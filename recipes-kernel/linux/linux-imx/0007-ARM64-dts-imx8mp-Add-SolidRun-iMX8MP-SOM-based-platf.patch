@@ -1,7 +1,7 @@
-From ef902eb8225df8ed4b06e4fb27e1cff8b32312b0 Mon Sep 17 00:00:00 2001
+From 2af72f7252cec61fda52205fb82450f9b7f88d8e Mon Sep 17 00:00:00 2001
 From: Jon Nettleton <jon@solid-run.com>
 Date: Fri, 26 Mar 2021 11:37:34 +0100
-Subject: [PATCH 10/11] ARM64: dts: imx8mp: Add SolidRun iMX8MP SOM based
+Subject: [PATCH 7/8] ARM64: dts: imx8mp: Add SolidRun iMX8MP SOM based
  platforms
 
 This adds the initial port of the iMX8MP based SolidRun SOM
@@ -12,18 +12,18 @@ Signed-off-by: Jon Nettleton <jon@solid-run.com>
 ---
  arch/arm64/boot/dts/freescale/Makefile        |   1 +
  .../boot/dts/freescale/imx8mp-cubox-m.dts     | 300 ++++++++
- .../freescale/imx8mp-hummingboard-pulse.dts   | 673 ++++++++++++++++++
- .../boot/dts/freescale/imx8mp-sr-som.dtsi     | 623 ++++++++++++++++
- 4 files changed, 1597 insertions(+)
+ .../freescale/imx8mp-hummingboard-pulse.dts   | 684 ++++++++++++++++++
+ .../boot/dts/freescale/imx8mp-sr-som.dtsi     | 684 ++++++++++++++++++
+ 4 files changed, 1669 insertions(+)
  create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-cubox-m.dts
  create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dts
  create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-sr-som.dtsi
 
 diff --git a/arch/arm64/boot/dts/freescale/Makefile b/arch/arm64/boot/dts/freescale/Makefile
-index 49642e6f35b5..2aaeab0c6200 100644
+index b7060bfe3af0..c0f160c65c21 100644
 --- a/arch/arm64/boot/dts/freescale/Makefile
 +++ b/arch/arm64/boot/dts/freescale/Makefile
-@@ -106,6 +106,7 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk.dtb imx8mp-evk-rm67191.dtb imx8mp-evk-it626
+@@ -132,6 +132,7 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-phyboard-pollux-rdk.dtb
  dtb-$(CONFIG_ARCH_MXC) += imx8mq-evk.dtb imx8mq-evk-rpmsg.dtb imx8mp-ab2.dtb
  dtb-$(CONFIG_ARCH_MXC) += imx8mp-ddr4-evk.dtb
  dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-ndm.dtb
@@ -339,10 +339,10 @@ index 000000000000..e43a5194f2fd
 +};
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dts b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dts
 new file mode 100644
-index 000000000000..b2983cee79f1
+index 000000000000..03903a50235e
 --- /dev/null
 +++ b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dts
-@@ -0,0 +1,673 @@
+@@ -0,0 +1,684 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 +/*
 + * Copyright 2019 NXP
@@ -527,6 +527,10 @@ index 000000000000..b2983cee79f1
 +	status = "okay";
 +};
 +
++&basler_1 {
++        status = "okay";
++};
++
 +&easrc {
 +	fsl,asrc-rate  = <48000>;
 +	status = "okay";
@@ -543,7 +547,7 @@ index 000000000000..b2983cee79f1
 +
 +	spidev1: spi@0 {
 +		reg = <0>;
-+		compatible = "spidev";
++		compatible = "linux,spidev";
 +		spi-max-frequency = <10000000>;
 +	};
 +};
@@ -629,7 +633,7 @@ index 000000000000..b2983cee79f1
 +	eeprom_carrier: eeprom@57 {
 +		compatible = "st,24c02", "atmel,24c02";
 +		reg = <0x57>;
-+		pagesize = <16>;
++		pagesize = <8>;
 +	};
 +
 +	rtc: rtc@69 {
@@ -690,7 +694,6 @@ index 000000000000..b2983cee79f1
 +&mipi_csi_0 {
 +	#address-cells = <1>;
 +	#size-cells = <0>;
-+	status = "okay";
 +	clock-frequency = <266000000>;
 +	assigned-clock-parents = <&clk IMX8MP_SYS_PLL1_266M>;
 +	assigned-clock-rates = <266000000>;
@@ -780,7 +783,12 @@ index 000000000000..b2983cee79f1
 +};
 +
 +&usb3_phy0 {
-+	fsl,phy-tx-preemp-amp-tune = <2>;
++        fsl,phy-tx-vref-tune = <0xe>;
++        fsl,phy-tx-preemp-amp-tune = <3>;
++        fsl,phy-tx-vboost-level = <5>;
++        fsl,phy-comp-dis-tune = <7>;
++        fsl,pcs-tx-deemph-3p5db = <0x21>;
++        fsl,phy-pcs-tx-swing-full = <0x7f>;
 +	status = "okay";
 +};
 +
@@ -790,11 +798,14 @@ index 000000000000..b2983cee79f1
 +
 +&usb_dwc3_0 {
 +	dr_mode = "host";
++        snps,dis-u1-entry-quirk;
++        snps,dis-u2-entry-quirk;
 +	status = "okay";
 +};
 +
 +&usb3_phy1 {
-+	fsl,phy-tx-preemp-amp-tune = <2>;
++        fsl,phy-tx-preemp-amp-tune = <3>;
++        fsl,phy-tx-vref-tune = <0xb>;
 +	status = "okay";
 +};
 +
@@ -1018,10 +1029,10 @@ index 000000000000..b2983cee79f1
 +};
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp-sr-som.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-sr-som.dtsi
 new file mode 100644
-index 000000000000..02aa6e6c3101
+index 000000000000..a83e66ef2a82
 --- /dev/null
 +++ b/arch/arm64/boot/dts/freescale/imx8mp-sr-som.dtsi
-@@ -0,0 +1,623 @@
+@@ -0,0 +1,684 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 +/*
 + * Copyright 2019 NXP
@@ -1114,6 +1125,9 @@ index 000000000000..02aa6e6c3101
 +	pinctrl-0 = <&pinctrl_eqos>;
 +	phy-mode = "rgmii-id";
 +	phy-handle = <&ethphy0>;
++	snps,force_thresh_dma_mode;
++	snps,mtl-tx-config = <&mtl_tx_setup>;
++	snps,mtl-rx-config = <&mtl_rx_setup>;
 +	status = "disabled";
 +
 +	mdio {
@@ -1122,11 +1136,65 @@ index 000000000000..02aa6e6c3101
 +		#size-cells = <0>;
 +
 +		ethphy0: ethernet-phy@0 {
-+			compatible = "ethernet-phy-id0283.bc30", "ethernet-phy-ieee802.3-c22";
++			compatible = "ethernet-phy-ieee802.3-c22";
 +			reg = <0>;
 +			eee-broken-1000t;
-+			eee-broken-100t;
 +			reset-gpios = <&gpio4 12 GPIO_ACTIVE_LOW>;
++		};
++	};
++
++	mtl_tx_setup: tx-queues-config {
++		snps,tx-queues-to-use = <5>;
++		snps,tx-sched-sp;
++		queue0 {
++			snps,dcb-algorithm;
++			snps,priority = <0x1>;
++		};
++		queue1 {
++			snps,dcb-algorithm;
++			snps,priority = <0x2>;
++		};
++		queue2 {
++			snps,dcb-algorithm;
++			snps,priority = <0x4>;
++		};
++		queue3 {
++			snps,dcb-algorithm;
++			snps,priority = <0x8>;
++		};
++		queue4 {
++			snps,dcb-algorithm;
++			snps,priority = <0xf0>;
++		};
++	};
++
++	mtl_rx_setup: rx-queues-config {
++		snps,rx-queues-to-use = <5>;
++		snps,rx-sched-sp;
++		queue0 {
++			snps,dcb-algorithm;
++			snps,priority = <0x1>;
++			snps,map-to-dma-channel = <0>;
++		};
++		queue1 {
++			snps,dcb-algorithm;
++			snps,priority = <0x2>;
++			snps,map-to-dma-channel = <1>;
++		};
++		queue2 {
++			snps,dcb-algorithm;
++			snps,priority = <0x4>;
++			snps,map-to-dma-channel = <2>;
++		};
++		queue3 {
++			snps,dcb-algorithm;
++			snps,priority = <0x8>;
++			snps,map-to-dma-channel = <3>;
++		};
++		queue4 {
++			snps,dcb-algorithm;
++			snps,priority = <0xf0>;
++			snps,map-to-dma-channel = <4>;
 +		};
 +	};
 +};
@@ -1446,6 +1514,10 @@ index 000000000000..02aa6e6c3101
 +	status = "okay";
 +};
 +
++&vpu_v4l2 {
++	status = "okay";
++};
++
 +&wdog1 {
 +	pinctrl-names = "default";
 +	pinctrl-0 = <&pinctrl_wdog>;
@@ -1646,5 +1718,5 @@ index 000000000000..02aa6e6c3101
 +	};
 +};
 -- 
-2.35.1
+2.39.0
 

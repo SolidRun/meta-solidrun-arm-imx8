@@ -1,7 +1,7 @@
-From 2d7da45180e602ab920578714546fd78b5093bb6 Mon Sep 17 00:00:00 2001
+From db8c754690662a70ecf319bc3c208684bdd2655a Mon Sep 17 00:00:00 2001
 From: Jon Nettleton <jon@solid-run.com>
 Date: Tue, 8 Feb 2022 15:22:12 +0100
-Subject: [PATCH 07/11] regulator: pca9450: Add dt property pca,i2c-lt-en
+Subject: [PATCH 4/8] regulator: pca9450: Add dt property pca,i2c-lt-en
 
 The PCA9450 (at least the DS version) has a built in level
 translator that allows I2C lines to be shifted from 3.3V to 1.8V.
@@ -23,10 +23,10 @@ Signed-off-by: Jon Nettleton <jon@solid-run.com>
  2 files changed, 9 insertions(+)
 
 diff --git a/drivers/regulator/pca9450-regulator.c b/drivers/regulator/pca9450-regulator.c
-index d59305a6dd41..a6a594c27643 100644
+index 6bdcc97a075c..1b4aff9c607d 100644
 --- a/drivers/regulator/pca9450-regulator.c
 +++ b/drivers/regulator/pca9450-regulator.c
-@@ -716,6 +716,7 @@ static int pca9450_i2c_probe(struct i2c_client *i2c,
+@@ -713,6 +713,7 @@ static int pca9450_i2c_probe(struct i2c_client *i2c,
  	struct regulator_config config = { };
  	struct pca9450 *pca9450;
  	unsigned int device_id, i;
@@ -34,8 +34,8 @@ index d59305a6dd41..a6a594c27643 100644
  	int ret;
  
  	if (!i2c->irq) {
-@@ -836,6 +837,12 @@ static int pca9450_i2c_probe(struct i2c_client *i2c,
- 		return ret;
+@@ -833,6 +834,12 @@ static int pca9450_i2c_probe(struct i2c_client *i2c,
+ 		return PTR_ERR(pca9450->sd_vsel_gpio);
  	}
  
 +	ret = of_property_read_u8(i2c->dev.of_node, "pca,i2c-lt-en", &i2c_lt_en);
@@ -59,5 +59,5 @@ index 71902f41c919..1ddc303dfb5b 100644
 +
  #endif /* __LINUX_REG_PCA9450_H__ */
 -- 
-2.35.1
+2.39.0
 

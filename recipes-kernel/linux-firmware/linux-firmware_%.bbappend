@@ -1,11 +1,11 @@
 # Copyright 2017-2021 NXP
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 IMX_FIRMWARE_SRC ?= "git://github.com/NXP/imx-firmware.git;protocol=https"
-SRCBRANCH_imx-firmware = "lf-5.10.72_2.2.0"
+SRCBRANCH_imx-firmware = "lf-5.15.32_2.0.0"
 SRC_URI += " \
-    git://github.com/murata-wireless/qca-linux-calibration.git;protocol=https;name=murata-qca;destsuffix=murata-qca \
+    git://github.com/murata-wireless/qca-linux-calibration.git;protocol=https;branch=master;name=murata-qca;destsuffix=murata-qca \
     ${IMX_FIRMWARE_SRC};branch=${SRCBRANCH_imx-firmware};destsuffix=imx-firmware;name=imx-firmware \
 "
 
@@ -14,7 +14,7 @@ SRCREV_imx-firmware = "a312213179f671cecba5f32aa839cc752a3e817f"
 
 SRCREV_FORMAT = "default_murata-qca_imx-firmware"
 
-do_install_append () {
+do_install:append () {
     # Use Murata's QCA calibration files
     install -m 0644 ${WORKDIR}/murata-qca/1CQ/board.bin ${D}${nonarch_base_libdir}/firmware/ath10k/QCA6174/hw3.0/
 
@@ -33,7 +33,7 @@ do_install_append () {
 }
 
 # Use the latest version of sdma firmware in firmware-imx
-PACKAGES_remove = "${PN}-imx-sdma-license ${PN}-imx-sdma-imx6q ${PN}-imx-sdma-imx7d"
+PACKAGES:remove = "${PN}-imx-sdma-license ${PN}-imx-sdma-imx6q ${PN}-imx-sdma-imx7d"
 
 FILES_${PN}-bcm43455 += " \
        ${nonarch_base_libdir}/firmware/brcm/brcmfmac43455-sdio.clm_blob \
