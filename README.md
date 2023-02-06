@@ -63,6 +63,10 @@ To flash the image to a micro SD run -
 
 	bunzip2 -c tmp/deploy/images/imx8mpsolidrun/imx-image-full-imx8mpsolidrun.wic.bz2 | sudo dd of=/dev/sdX bs=1M
 
+Or for a multi-core machine this can done faster using
+
+    lbzcat tmp/deploy/images/imx8mpsolidrun/imx-image-full-imx8mpsolidrun.wic.bz2 | sudo dd of=/dev/sdX bs=4M conv=fsync
+
 (**Notice that /dev/sdX is the block device points to your micro SD**)
 
 
