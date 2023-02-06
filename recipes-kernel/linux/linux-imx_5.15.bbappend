@@ -16,7 +16,6 @@ SRC_URI += " \
 KERNEL_MODULE_AUTOLOAD += "imx-sdma"
 FILES_${PN} += " \
 	${sysconfdir}/modules-load.d/imx-sdma.conf \
-	file://0008-Edit-spi-wifi-BT-imx8mp-hummingboard-dts.patch \
 	file://sr_imx_v8_defconfig \
 "
-DELTA_KERNEL_DEFCONFIG:append:mx8-nxp-bsp = " sr_imx_v8_defconfig"
+DELTA_KERNEL_DEFCONFIG:append:mx8-nxp-bsp = " imx_v8_defconfig sr_imx_v8_defconfig"
