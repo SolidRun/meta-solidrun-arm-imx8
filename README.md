@@ -95,6 +95,13 @@ Follow the commands below to; first clone this branch and run the following comm
 
 and then follow the above instructions on how to build (**Notice that /home/<username>/work/imx8mp directory now is shared between the container and the outside deplelopment environment**)
 
+## Performance increase building source with LTO enabled
+
+To achieve better performance on the platform you can enable building the source with LTO (Link Time Optimization) enabled. To do this add the following lines to your local.conf
+
+    require conf/distro/include/lto.inc
+    DISTRO_FEATURES:append = " lto"
+
 ## Include NetworkManager and ModemManager for network control
 If you prefer to use NetworkManager and ModemManager rather than the default Yocto configuration of connman and ofono please add the following snippet to your local.conf
 	
