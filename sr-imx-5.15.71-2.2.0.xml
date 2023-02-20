@@ -31,7 +31,7 @@
 
   <project name="meta-nxp-demo-experience" path="sources/meta-nxp-demo-experience" remote="imx-support" revision="52eaf8bf42f8eda2917a1c8c046003c8c2c8f629" upstream="kirkstone"/>
   <project name="meta-openembedded" path="sources/meta-openembedded" remote="oe" revision="278ec081a64e6a7679d6def550101158126cd935" upstream="kirkstone"/>
-  <project name="meta-qt6" path="sources/meta-qt6" remote="QT6" revision="d92e4fb63abbef091c838f1ca92979bd4b8c1ef2" upstream="6.3"/>
+  <project name="meta-qt6" path="sources/meta-qt6" remote="QT6" revision="48b5dcc16b7adf059b6e42e5e9895b98584df028" upstream="6.3.2"/>
   <project name="meta-timesys" path="sources/meta-timesys" remote="Timesys" revision="d1ad27bfacc937048e7f9084b17f4d7c917d2004" upstream="master"/>
   <project name="meta-virtualization" path="sources/meta-virtualization" remote="yocto" revision="a7413c5d7568ce91b809ed11f84305b1afb468bb" upstream="kirkstone"/>
   <project name="poky" path="sources/poky" remote="yocto" revision="9940cd4d8d7b424ec209a446519dd97c3840dcd4" upstream="kirkstone"/>
