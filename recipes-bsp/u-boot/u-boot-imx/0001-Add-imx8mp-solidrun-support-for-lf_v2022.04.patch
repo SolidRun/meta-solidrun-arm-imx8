@@ -1,4 +1,4 @@
-From b95abd2ee8204169bbb63bb7528d7e6feaaa237d Mon Sep 17 00:00:00 2001
+From d691e0a9423e59e7473b8cf7acea106f670ffad6 Mon Sep 17 00:00:00 2001
 From: TalPilo <tal.pilo@solid-run.com>
 Date: Wed, 30 Sep 2020 11:38:11 +0300
 Subject: [PATCH] Add imx8mp solidrun support for lf_v2022.04
@@ -12,6 +12,8 @@ Signed-off-by: Rabeeh Khoury <rabeeh@solid-run.com>
 Signed-off-by: Yazan Shhady <yazan.shhady@solid-run.com>
 Signed-off-by: Josua Mayer <josua@solid-run.com>
 Signed-off-by: Jon Nettleton <jon@solid-run.com>
+
+%% original patch: 0001-Add-imx8mp-solidrun-support-for-lf_v2022.04.patch
 ---
  arch/arm/dts/Makefile                         |    1 +
  arch/arm/dts/imx8mp-solidrun-u-boot.dtsi      |  227 ++
@@ -20,7 +22,7 @@ Signed-off-by: Jon Nettleton <jon@solid-run.com>
  board/solidrun/imx8mp_solidrun/Kconfig        |   17 +
  board/solidrun/imx8mp_solidrun/MAINTAINERS    |    6 +
  board/solidrun/imx8mp_solidrun/Makefile       |   12 +
- .../imx8mp_solidrun/imx8mp_solidrun.c         |  342 +++
+ .../imx8mp_solidrun/imx8mp_solidrun.c         |  360 ++++
  .../imx8mp_solidrun/imximage-8mp-sd.cfg       |    9 +
  .../lpddr4_timing_1gb_samsung.c               | 1853 ++++++++++++++++
  .../lpddr4_timing_3gb_micron.c                | 1855 +++++++++++++++++
@@ -28,7 +30,7 @@ Signed-off-by: Jon Nettleton <jon@solid-run.com>
  board/solidrun/imx8mp_solidrun/spl.c          |  204 ++
  configs/imx8mp_solidrun_defconfig             |  189 ++
  include/configs/imx8mp_solidrun.h             |  207 ++
- 15 files changed, 5582 insertions(+)
+ 15 files changed, 5600 insertions(+)
  create mode 100644 arch/arm/dts/imx8mp-solidrun-u-boot.dtsi
  create mode 100644 arch/arm/dts/imx8mp-solidrun.dts
  create mode 100644 board/solidrun/imx8mp_solidrun/Kconfig
@@ -44,10 +46,10 @@ Signed-off-by: Jon Nettleton <jon@solid-run.com>
  create mode 100644 include/configs/imx8mp_solidrun.h
 
 diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
-index 95f2a49df4..52839e00ae 100644
+index 709fdaecd7..f02a60ea3f 100644
 --- a/arch/arm/dts/Makefile
 +++ b/arch/arm/dts/Makefile
-@@ -994,6 +994,7 @@ dtb-$(CONFIG_ARCH_IMX8M) += \
+@@ -999,6 +999,7 @@ dtb-$(CONFIG_ARCH_IMX8M) += \
  	imx8mq-mnt-reform2.dtb \
  	imx8mq-phanbell.dtb \
  	imx8mp-ddr4-evk.dtb \
@@ -892,10 +894,10 @@ index 0000000000..0a95a4c6a8
 +	};
 +};
 diff --git a/arch/arm/mach-imx/imx8m/Kconfig b/arch/arm/mach-imx/imx8m/Kconfig
-index 456073873d..b8443dcb0d 100644
+index a225a9784f..cd389c02e7 100644
 --- a/arch/arm/mach-imx/imx8m/Kconfig
 +++ b/arch/arm/mach-imx/imx8m/Kconfig
-@@ -206,6 +206,17 @@ config TARGET_IMX8MP_DDR4_EVK
+@@ -251,6 +251,17 @@ config TARGET_IMX8MP_DDR4_EVK
  	select ARCH_MISC_INIT
  	select SPL_CRYPTO if SPL
  
@@ -913,7 +915,7 @@ index 456073873d..b8443dcb0d 100644
  config TARGET_PICO_IMX8MQ
  	bool "Support Technexion Pico iMX8MQ"
  	select BINMAN
-@@ -316,6 +327,7 @@ source "board/kontron/sl-mx8mm/Kconfig"
+@@ -362,6 +373,7 @@ source "board/kontron/sl-mx8mm/Kconfig"
  source "board/phytec/phycore_imx8mm/Kconfig"
  source "board/phytec/phycore_imx8mp/Kconfig"
  source "board/ronetix/imx8mq-cm/Kconfig"
@@ -976,16 +978,17 @@ index 0000000000..6ef4c05b40
 +endif
 diff --git a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 new file mode 100644
-index 0000000000..1a2a72a1ee
+index 0000000000..be11b11eb0
 --- /dev/null
 +++ b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
-@@ -0,0 +1,342 @@
+@@ -0,0 +1,360 @@
 +// SPDX-License-Identifier: GPL-2.0+
 +/*
 + * Copyright 2019 NXP
 + */
 +
 +#include <common.h>
++#include <efi_loader.h>
 +#include <env.h>
 +#include <errno.h>
 +#include <init.h>
@@ -1036,6 +1039,23 @@ index 0000000000..1a2a72a1ee
 +	init_nand_clk();
 +}
 +#endif
++
++#if CONFIG_IS_ENABLED(EFI_HAVE_CAPSULE_SUPPORT)
++struct efi_fw_image fw_images[] = {
++	{
++		.image_type_id = IMX_BOOT_IMAGE_GUID,
++		.fw_name = u"IMX8MP-SR-RAW",
++		.image_index = 1,
++	},
++};
++
++struct efi_capsule_update_info update_info = {
++	.dfu_string = "mmc 2=flash-bin raw 0 0x2000 mmcpart 1",
++	.images = fw_images,
++};
++
++u8 num_image_type_guids = ARRAY_SIZE(fw_images);
++#endif /* EFI_HAVE_CAPSULE_SUPPORT */
 +
 +int board_early_init_f(void)
 +{
@@ -5733,5 +5753,5 @@ index 0000000000..cf3cac9a16
 +
 +#endif
 -- 
-2.39.0
+2.39.1
 

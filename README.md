@@ -13,7 +13,7 @@ use with OpenEmbedded and Yocto Freescale's BSP layer.
 
 2. Get NXP Ycoto sources(require repo app):
 
-		$ repo init -u https://github.com/SolidRun/meta-solidrun-arm-imx8 -b kirkstone-imx8m -m sr-imx-5.15.32-2.0.0.xml
+		$ repo init -u https://github.com/SolidRun/meta-solidrun-arm-imx8 -b kirkstone-imx8m -m sr-imx-5.15.71-2.2.0.xml
 		$ repo sync
 
 3. Add the meta-solidrun-arm-imx8 layer (curent git repository) into the sources directory, the directory layout should be like this:
@@ -53,19 +53,19 @@ use with OpenEmbedded and Yocto Freescale's BSP layer.
 
 The image will be ready at tmp/deploy/images/imx8mpsolidrun and should look as follow:
 
-    tmp/deploy/images/imx8mpsolidrun/core-image-minimal-imx8mpsolidrun.wic.bz2
+    tmp/deploy/images/imx8mpsolidrun/core-image-minimal-imx8mpsolidrun.wic.zst
 
 or
 
-    tmp/deploy/images/imx8mpsolidrun/imx-image-full-imx8mpsolidrun.wic.bz2
+    tmp/deploy/images/imx8mpsolidrun/imx-image-full-imx8mpsolidrun.wic.zst
 
 To flash the image to a micro SD run -
 
-	bunzip2 -c tmp/deploy/images/imx8mpsolidrun/imx-image-full-imx8mpsolidrun.wic.bz2 | sudo dd of=/dev/sdX bs=1M
+	zstd -d -c tmp/deploy/images/imx8mpsolidrun/imx-image-full-imx8mpsolidrun.wic.zst | sudo dd of=/dev/sdX bs=1M
 
 Or for a multi-core machine this can done faster using
 
-    lbzcat tmp/deploy/images/imx8mpsolidrun/imx-image-full-imx8mpsolidrun.wic.bz2 | sudo dd of=/dev/sdX bs=4M conv=fsync
+    pzstd -d -c tmp/deploy/images/imx8mpsolidrun/imx-image-full-imx8mpsolidrun.wic.zst | sudo dd of=/dev/sdX bs=4M conv=fsync
 
 (**Notice that /dev/sdX is the block device points to your micro SD**)
 
