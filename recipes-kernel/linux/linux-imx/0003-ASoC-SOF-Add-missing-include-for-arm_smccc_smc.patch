@@ -1,7 +1,7 @@
-From 5dd359eee04b0af7bef1b3aae0f8f7609e1eb452 Mon Sep 17 00:00:00 2001
+From e084e62f2a19165cd74a5ee75d13f6473945cafb Mon Sep 17 00:00:00 2001
 From: Jon Nettleton <jon@solid-run.com>
 Date: Sun, 6 Feb 2022 10:42:24 +0100
-Subject: [PATCH 3/8] ASoC: SOF: Add missing include for arm_smccc_smc
+Subject: [PATCH 03/14] ASoC: SOF: Add missing include for arm_smccc_smc
 
 Signed-off-by: Jon Nettleton <jon@solid-run.com>
 ---
@@ -21,5 +21,5 @@ index 0a82495a128e..2c67e1fcbbb0 100644
  #include <linux/firmware.h>
  #include <linux/of_platform.h>
 -- 
-2.39.0
+2.39.1
 

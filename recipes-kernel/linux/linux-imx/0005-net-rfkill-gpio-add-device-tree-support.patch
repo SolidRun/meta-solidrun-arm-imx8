@@ -1,7 +1,7 @@
-From f1fbb618185749bb64350d49c5c5a6c6466c0d2f Mon Sep 17 00:00:00 2001
+From 57119f56add0622a6e1a92ceaee9ff23dbf28b65 Mon Sep 17 00:00:00 2001
 From: Chen-Yu Tsai <wens@csie.org>
 Date: Tue, 15 Apr 2014 14:41:39 +0800
-Subject: [PATCH 5/8] net: rfkill: gpio: add device tree support
+Subject: [PATCH 05/14] net: rfkill: gpio: add device tree support
 
 This is a modernized, and fixed up patch from an
 early revision.  This is really not the proper place for this
@@ -114,5 +114,5 @@ index f5afc9bcdee6..67c299e7b916 100644
  };
  
 -- 
-2.39.0
+2.39.1
 
