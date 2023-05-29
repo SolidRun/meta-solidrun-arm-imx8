@@ -1,0 +1,59 @@
+From 3c2e620e5f1648c81d668068217431cc25f344ab Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Mon, 2 May 2022 17:18:31 +0300
+Subject: [PATCH 08/21] cmd: tlv_eeprom: remove empty function implementations
+ from header
+
+tlv_eeprom exposed functions are independent from platforms, hence no
+stubs are required.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ include/tlv_eeprom.h | 24 ++----------------------
+ 1 file changed, 2 insertions(+), 22 deletions(-)
+
+diff --git a/include/tlv_eeprom.h b/include/tlv_eeprom.h
+index 30626a1067..55fd72d6d2 100644
+--- a/include/tlv_eeprom.h
++++ b/include/tlv_eeprom.h
+@@ -65,7 +65,8 @@ struct __attribute__ ((__packed__)) tlvinfo_tlv {
+ #define TLV_CODE_VENDOR_EXT     0xFD
+ #define TLV_CODE_CRC_32         0xFE
+ 
+-#if CONFIG_IS_ENABLED(CMD_TLV_EEPROM)
++/* how many EEPROMs can be used */
++#define TLV_MAX_DEVICES			2
+ 
+ /**
+  * read_tlv_eeprom - Read the EEPROM binary data from the hardware
+@@ -156,27 +157,6 @@ void tlvinfo_update_crc(u8 *eeprom);
+  */
+ bool tlvinfo_check_crc(u8 *eeprom);
+ 
+-#else /* !CONFIG_IS_ENABLED(CMD_TLV_EEPROM) */
+-
+-static inline int read_tlv_eeprom(void *eeprom, int offset, int len, int dev)
+-{
+-	return -ENOSYS;
+-}
+-
+-static inline int write_tlv_eeprom(void *eeprom, int len)
+-{
+-	return -ENOSYS;
+-}
+-
+-static inline int
+-read_tlvinfo_tlv_eeprom(void *eeprom, struct tlvinfo_header **hdr,
+-			struct tlvinfo_tlv **first_entry, int dev)
+-{
+-	return -ENOSYS;
+-}
+-
+-#endif /* CONFIG_IS_ENABLED(CMD_TLV_EEPROM) */
+-
+ /**
+  *  is_valid_tlvinfo_header
+  *
+-- 
+2.40.1
+

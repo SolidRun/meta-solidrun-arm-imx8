@@ -1,0 +1,75 @@
+From 5b503effac8d88621fe0a62b3ca840d49f45d0ae Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Mon, 2 May 2022 17:18:33 +0300
+Subject: [PATCH 10/21] cmd: tlv_eeprom: hide access to static tlv_devices
+ array behind accessor
+
+The tlv_eeprom command logic checks the static tlv_devices array to
+validate the eeprom number. This array will be move to a separate tlv
+library.
+Hide this access behind a new function exists_tlv_eeprom.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ cmd/tlv_eeprom.c     | 12 ++++++++++--
+ include/tlv_eeprom.h |  7 +++++++
+ 2 files changed, 17 insertions(+), 2 deletions(-)
+
+diff --git a/cmd/tlv_eeprom.c b/cmd/tlv_eeprom.c
+index 57468edb1c..f51a9666bf 100644
+--- a/cmd/tlv_eeprom.c
++++ b/cmd/tlv_eeprom.c
+@@ -44,6 +44,14 @@ static struct udevice *tlv_devices[MAX_TLV_DEVICES];
+ #define to_header(p) ((struct tlvinfo_header *)p)
+ #define to_entry(p) ((struct tlvinfo_tlv *)p)
+ 
++/**
++ * Check whether eeprom device exists.
++ */
++bool exists_tlv_eeprom(int dev)
++{
++	return dev < TLV_MAX_DEVICES && tlv_devices[dev] != 0;
++}
++
+ static inline bool is_digit(char c)
+ {
+ 	return (c >= '0' && c <= '9');
+@@ -481,7 +489,7 @@ int do_tlv_eeprom(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
+ 		unsigned int devnum;
+ 
+ 		devnum = simple_strtoul(argv[2], NULL, 0);
+-		if (devnum > MAX_TLV_DEVICES || !tlv_devices[devnum]) {
++		if (!exists_tlv_eeprom(devnum)) {
+ 			printf("Invalid device number\n");
+ 			return 0;
+ 		}
+@@ -866,7 +874,7 @@ static void show_tlv_devices(int current_dev)
+ 	unsigned int dev;
+ 
+ 	for (dev = 0; dev < MAX_TLV_DEVICES; dev++)
+-		if (tlv_devices[dev])
++		if (exists_tlv_eeprom(dev))
+ 			printf("TLV: %u%s\n", dev,
+ 			       (dev == current_dev) ? " (*)" : "");
+ }
+diff --git a/include/tlv_eeprom.h b/include/tlv_eeprom.h
+index dc7952da6b..c81c58837d 100644
+--- a/include/tlv_eeprom.h
++++ b/include/tlv_eeprom.h
+@@ -69,6 +69,13 @@ struct __attribute__ ((__packed__)) tlvinfo_tlv {
+ /* how many EEPROMs can be used */
+ #define TLV_MAX_DEVICES			2
+ 
++/**
++ * Check whether eeprom device exists.
++ *
++ * @dev: EEPROM device to check.
++ */
++bool exists_tlv_eeprom(int dev);
++
+ /**
+  * read_tlv_eeprom - Read the EEPROM binary data from the hardware
+  * @eeprom: Pointer to buffer to hold the binary data
+-- 
+2.40.1
+

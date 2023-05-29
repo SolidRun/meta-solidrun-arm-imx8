@@ -1,0 +1,44 @@
+From 5f01433453e21835ad571ecceb041dffb5d041a6 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Mon, 2 May 2022 17:18:37 +0300
+Subject: [PATCH 14/21] arm: mvebu: clearfog: enable tlv library for spl in
+ favour of eeprom cmd
+
+The board file used CONFIG_SPL_CMD_TLV_EEPROM as a library to facilitate
+reading tlv data with the memory size from eeprom.
+Since the tlv library has been split off, only CONFIG_SPL_EEPROM_TLV_LIB
+is required now.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ configs/clearfog_defconfig | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/configs/clearfog_defconfig b/configs/clearfog_defconfig
+index 335adc969a..4214b8ae79 100644
+--- a/configs/clearfog_defconfig
++++ b/configs/clearfog_defconfig
+@@ -13,6 +13,7 @@ CONFIG_DM_GPIO=y
+ CONFIG_DEFAULT_DEVICE_TREE="armada-388-clearfog"
+ CONFIG_SPL_TEXT_BASE=0x40000030
+ CONFIG_SPL_SERIAL=y
++CONFIG_SPL_DRIVERS_MISC=y
+ CONFIG_SPL=y
+ CONFIG_DEBUG_UART_BASE=0xd0012000
+ CONFIG_DEBUG_UART_CLOCK=250000000
+@@ -27,7 +28,6 @@ CONFIG_SYS_CONSOLE_INFO_QUIET=y
+ CONFIG_DISPLAY_BOARDINFO_LATE=y
+ CONFIG_SPL_I2C=y
+ CONFIG_CMD_TLV_EEPROM=y
+-CONFIG_SPL_CMD_TLV_EEPROM=y
+ # CONFIG_CMD_FLASH is not set
+ CONFIG_CMD_GPIO=y
+ CONFIG_CMD_I2C=y
+@@ -70,3 +70,4 @@ CONFIG_SYS_NS16550=y
+ CONFIG_KIRKWOOD_SPI=y
+ CONFIG_USB=y
+ CONFIG_USB_XHCI_HCD=y
++CONFIG_SPL_EEPROM_TLV_LIB=y
+-- 
+2.40.1
+

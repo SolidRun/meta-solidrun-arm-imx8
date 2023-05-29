@@ -1,0 +1,25 @@
+From 68bab64b8d282c9dc22988e44a0b8e323f499bba Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Mon, 4 Apr 2022 14:26:04 +0300
+Subject: [PATCH 17/21] imx8mp: don't pre-define fdtfile environment variable
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ include/configs/imx8mp_solidrun.h | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/include/configs/imx8mp_solidrun.h b/include/configs/imx8mp_solidrun.h
+index cf3cac9a16..8fb5560d53 100644
+--- a/include/configs/imx8mp_solidrun.h
++++ b/include/configs/imx8mp_solidrun.h
+@@ -107,7 +107,6 @@
+ 	"boot_fdt=try\0" \
+ 	"fdt_high=0xffffffffffffffff\0"		\
+ 	"boot_fit=no\0" \
+-	"fdtfile=" CONFIG_DEFAULT_FDT_FILE "\0" \
+ 	"bootm_size=0x10000000\0" \
+ 	"mmcdev="__stringify(CONFIG_SYS_MMC_ENV_DEV)"\0" \
+ 	"mmcpart=1\0" \
+-- 
+2.40.1
+

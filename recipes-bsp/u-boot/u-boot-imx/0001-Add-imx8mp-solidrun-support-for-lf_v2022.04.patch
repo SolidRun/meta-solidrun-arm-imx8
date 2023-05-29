@@ -1,7 +1,7 @@
-From d691e0a9423e59e7473b8cf7acea106f670ffad6 Mon Sep 17 00:00:00 2001
+From d9e1c94c3aa342cc359630181a96dd70fb8a07dd Mon Sep 17 00:00:00 2001
 From: TalPilo <tal.pilo@solid-run.com>
 Date: Wed, 30 Sep 2020 11:38:11 +0300
-Subject: [PATCH] Add imx8mp solidrun support for lf_v2022.04
+Subject: [PATCH 01/21] Add imx8mp solidrun support for lf_v2022.04
 
 This adds the SolidRun board support and unified device-tree
 that supports booting our iMX8MP based HummingBoard Pulse and
@@ -17,20 +17,20 @@ Signed-off-by: Jon Nettleton <jon@solid-run.com>
 ---
  arch/arm/dts/Makefile                         |    1 +
  arch/arm/dts/imx8mp-solidrun-u-boot.dtsi      |  227 ++
- arch/arm/dts/imx8mp-solidrun.dts              |  597 ++++++
+ arch/arm/dts/imx8mp-solidrun.dts              |  609 ++++++
  arch/arm/mach-imx/imx8m/Kconfig               |   12 +
  board/solidrun/imx8mp_solidrun/Kconfig        |   17 +
  board/solidrun/imx8mp_solidrun/MAINTAINERS    |    6 +
  board/solidrun/imx8mp_solidrun/Makefile       |   12 +
  .../imx8mp_solidrun/imx8mp_solidrun.c         |  360 ++++
  .../imx8mp_solidrun/imximage-8mp-sd.cfg       |    9 +
- .../lpddr4_timing_1gb_samsung.c               | 1853 ++++++++++++++++
- .../lpddr4_timing_3gb_micron.c                | 1855 +++++++++++++++++
+ .../lpddr4_timing_1gb_samsung.c               | 1852 ++++++++++++++++
+ .../lpddr4_timing_3gb_micron.c                | 1854 +++++++++++++++++
  board/solidrun/imx8mp_solidrun/mmc.c          |   51 +
  board/solidrun/imx8mp_solidrun/spl.c          |  204 ++
- configs/imx8mp_solidrun_defconfig             |  189 ++
+ configs/imx8mp_solidrun_defconfig             |  192 ++
  include/configs/imx8mp_solidrun.h             |  207 ++
- 15 files changed, 5600 insertions(+)
+ 15 files changed, 5613 insertions(+)
  create mode 100644 arch/arm/dts/imx8mp-solidrun-u-boot.dtsi
  create mode 100644 arch/arm/dts/imx8mp-solidrun.dts
  create mode 100644 board/solidrun/imx8mp_solidrun/Kconfig
@@ -292,10 +292,10 @@ index 0000000000..f2e6031997
 +};
 diff --git a/arch/arm/dts/imx8mp-solidrun.dts b/arch/arm/dts/imx8mp-solidrun.dts
 new file mode 100644
-index 0000000000..0a95a4c6a8
+index 0000000000..b92c856930
 --- /dev/null
 +++ b/arch/arm/dts/imx8mp-solidrun.dts
-@@ -0,0 +1,597 @@
+@@ -0,0 +1,609 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 +/*
 + * Copyright 2020 SolidRun ltd.
@@ -527,6 +527,12 @@ index 0000000000..0a95a4c6a8
 +			};
 +		};
 +	};
++
++	eeprom: eeprom@50{
++		compatible = "st,24c01", "atmel,24c01";
++		reg = <0x50>;
++		pagesize = <16>;
++	};
 +};
 +
 +&i2c2 {
@@ -567,6 +573,12 @@ index 0000000000..0a95a4c6a8
 +		reg = <0x20>;
 +		gpio-controller;
 +		#gpio-cells = <2>;
++	};
++
++	eeprom_carrier: eeprom@57 {
++		compatible = "st,24c02", "atmel,24c02";
++		reg = <0x57>;
++		pagesize = <8>;
 +	};
 +};
 +
@@ -894,7 +906,7 @@ index 0000000000..0a95a4c6a8
 +	};
 +};
 diff --git a/arch/arm/mach-imx/imx8m/Kconfig b/arch/arm/mach-imx/imx8m/Kconfig
-index a225a9784f..cd389c02e7 100644
+index a225a9784f..1674dd4706 100644
 --- a/arch/arm/mach-imx/imx8m/Kconfig
 +++ b/arch/arm/mach-imx/imx8m/Kconfig
 @@ -251,6 +251,17 @@ config TARGET_IMX8MP_DDR4_EVK
@@ -903,7 +915,7 @@ index a225a9784f..cd389c02e7 100644
  
 +config TARGET_IMX8MP_SOLIDRUN
 +	bool "SolidRun MX8M Plus SOM based products"
-+	
++
 +	select IMX8MP
 +	select SUPPORT_SPL
 +	select IMX8M_LPDDR4
@@ -1359,10 +1371,10 @@ index 0000000000..6dedf1724a
 +LOADER		u-boot-spl-ddr.bin	0x920000
 diff --git a/board/solidrun/imx8mp_solidrun/lpddr4_timing_1gb_samsung.c b/board/solidrun/imx8mp_solidrun/lpddr4_timing_1gb_samsung.c
 new file mode 100644
-index 0000000000..24bf5dcbda
+index 0000000000..ba2b5686dc
 --- /dev/null
 +++ b/board/solidrun/imx8mp_solidrun/lpddr4_timing_1gb_samsung.c
-@@ -0,0 +1,1853 @@
+@@ -0,0 +1,1852 @@
 +/*
 + * Copyright 2019 NXP
 + *
@@ -3215,13 +3227,12 @@ index 0000000000..24bf5dcbda
 +	.ddrphy_pie_num = ARRAY_SIZE(ddr_phy_pie),
 +	.fsp_table = { 4000, 400, 100, },
 +};
-+
 diff --git a/board/solidrun/imx8mp_solidrun/lpddr4_timing_3gb_micron.c b/board/solidrun/imx8mp_solidrun/lpddr4_timing_3gb_micron.c
 new file mode 100644
-index 0000000000..11f53af7af
+index 0000000000..2dc6efc01c
 --- /dev/null
 +++ b/board/solidrun/imx8mp_solidrun/lpddr4_timing_3gb_micron.c
-@@ -0,0 +1,1855 @@
+@@ -0,0 +1,1854 @@
 +/*
 + * Copyright 2019 NXP
 + *
@@ -5076,7 +5087,6 @@ index 0000000000..11f53af7af
 +	.ddrphy_pie_num = ARRAY_SIZE(ddr_phy_pie),
 +	.fsp_table = { 3000, 400, 100, },
 +};
-+
 diff --git a/board/solidrun/imx8mp_solidrun/mmc.c b/board/solidrun/imx8mp_solidrun/mmc.c
 new file mode 100644
 index 0000000000..ab1652d697
@@ -5346,10 +5356,10 @@ index 0000000000..2c49850f31
 +}
 diff --git a/configs/imx8mp_solidrun_defconfig b/configs/imx8mp_solidrun_defconfig
 new file mode 100644
-index 0000000000..075103a79e
+index 0000000000..4ef45e3094
 --- /dev/null
 +++ b/configs/imx8mp_solidrun_defconfig
-@@ -0,0 +1,189 @@
+@@ -0,0 +1,192 @@
 +CONFIG_ARM=y
 +CONFIG_ARCH_IMX8M=y
 +CONFIG_SYS_TEXT_BASE=0x40200000
@@ -5430,7 +5440,7 @@ index 0000000000..075103a79e
 +CONFIG_ENV_OVERWRITE=y
 +CONFIG_ENV_IS_NOWHERE=y
 +CONFIG_ENV_IS_IN_MMC=y
-+CONFIG_ENV_IS_IN_SPI_FLASH=y
++# CONFIG_ENV_IS_IN_SPI_FLASH is not set
 +CONFIG_SYS_RELOC_GD_ENV_ADDR=y
 +CONFIG_SYS_MMC_ENV_DEV=1
 +CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG=y
@@ -5539,6 +5549,9 @@ index 0000000000..075103a79e
 +CONFIG_EFI_ESRT=y
 +CONFIG_EFI_HAVE_CAPSULE_UPDATE=y
 +CONFIG_FIT_SIGNATURE=y
++CONFIG_MISC=y
++CONFIG_I2C_EEPROM=y
++CONFIG_CMD_TLV_EEPROM=y
 diff --git a/include/configs/imx8mp_solidrun.h b/include/configs/imx8mp_solidrun.h
 new file mode 100644
 index 0000000000..cf3cac9a16
@@ -5753,5 +5766,5 @@ index 0000000000..cf3cac9a16
 +
 +#endif
 -- 
-2.39.1
+2.40.1
 
