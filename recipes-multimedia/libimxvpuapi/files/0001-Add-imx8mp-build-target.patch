@@ -1,0 +1,35 @@
+From dc23866a93d54b9c2e300e1eaa92acc43c44a7da Mon Sep 17 00:00:00 2001
+From: Jon Nettleton <jon@solid-run.com>
+Date: Thu, 2 Mar 2023 14:41:29 +0100
+Subject: [PATCH] Add imx8mp build target
+
+Although not officially supported the imx8mp does work with the
+imx8mm's decoding implementation, however encoding is not working.
+The imx8mp uses a different encoding library so the hantro_h1
+library may not be available for installations targeted only at
+the imx8mp. Add a compile target for the imx8mp that enables decoding
+but not encoding so the library will build and configure under these
+circumstances.
+
+Signed-off-by: Jon Nettleton <jon@solid-run.com>
+---
+ wscript | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/wscript b/wscript
+index 83a3d7d..e2d433b 100644
+--- a/wscript
++++ b/wscript
+@@ -163,7 +163,8 @@ class PlatformIMX8M:
+ imx_platforms = {
+ 	'imx6': PlatformIMX6(),
+ 	'imx8m': PlatformIMX8M(soc_type = 'MX8M', has_encoder = False),
+-	'imx8mm': PlatformIMX8M(soc_type = 'MX8MM', has_encoder = True)
++	'imx8mm': PlatformIMX8M(soc_type = 'MX8MM', has_encoder = True),
++	'imx8mp': PlatformIMX8M(soc_type = 'MX8MM', has_encoder = False)
+ }
+ 
+ 
+-- 
+2.39.1
+
