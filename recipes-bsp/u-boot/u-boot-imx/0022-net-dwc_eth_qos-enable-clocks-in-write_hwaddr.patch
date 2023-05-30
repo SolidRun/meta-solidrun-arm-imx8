@@ -1,0 +1,59 @@
+From 8e4397f9e54980b81ed833da35fa8dd1d520d1e9 Mon Sep 17 00:00:00 2001
+From: Jon Nettleton <jon@solid-run.com>
+Date: Tue, 30 May 2023 13:31:44 +0200
+Subject: [PATCH 1/2] net: dwc_eth_qos: enable clocks in write_hwaddr
+
+If the interface has not been started then eqos_write_hwaddr will
+be skipped for the iMX8MP. Since we want Linux to have access to
+the same MAC address regardless if the interface is brought up in
+u-boot we will start the clocks, program the MAC, and then stop them
+again.
+
+Signed-off-by: Jon Nettleton <jon@solid-run.com>
+---
+ drivers/net/dwc_eth_qos.c | 15 +++++++++++++--
+ 1 file changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/net/dwc_eth_qos.c b/drivers/net/dwc_eth_qos.c
+index bd6c89871b..27eb456f23 100644
+--- a/drivers/net/dwc_eth_qos.c
++++ b/drivers/net/dwc_eth_qos.c
+@@ -1059,6 +1059,7 @@ static int eqos_write_hwaddr(struct udevice *dev)
+ 	struct eth_pdata *plat = dev_get_plat(dev);
+ 	struct eqos_priv *eqos = dev_get_priv(dev);
+ 	uint32_t val;
++	int ret, stop_clocks = 0;
+ 
+ 	/*
+ 	 * This function may be called before start() or after stop(). At that
+@@ -1082,8 +1083,15 @@ static int eqos_write_hwaddr(struct udevice *dev)
+ 	 * future-proofing with the expectation the driver will eventually be
+ 	 * ported to some system where the expectation above is true.
+ 	 */
+-	if (!eqos->config->reg_access_always_ok && !eqos->reg_access_ok)
+-		return 0;
++	if (!eqos->config->reg_access_always_ok && !eqos->reg_access_ok) {
++		ret = eqos->config->ops->eqos_start_clks(dev);
++		if (ret < 0) {
++			pr_err("eqos_start_clks() failed eqos_write_hwaddr failed : %d", ret);
++			return 0;
++		} else {
++			stop_clocks = 1;
++		}
++	}
+ 
+ 	/* Update the MAC address */
+ 	val = (plat->enetaddr[5] << 8) |
+@@ -1095,6 +1103,9 @@ static int eqos_write_hwaddr(struct udevice *dev)
+ 		(plat->enetaddr[0]);
+ 	writel(val, &eqos->mac_regs->address0_low);
+ 
++	if (stop_clocks > 1)
++                ret = eqos->config->ops->eqos_stop_clks(dev);
++
+ 	return 0;
+ }
+ 
+-- 
+2.40.1
+

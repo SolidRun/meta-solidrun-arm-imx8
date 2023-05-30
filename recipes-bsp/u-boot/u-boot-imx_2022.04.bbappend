@@ -22,6 +22,8 @@ SRC_URI += " \
 	file://0019-imx8mp-read-mac-from-tlv-eeprom.patch \
 	file://0020-imx8mp-implement-tlv-eeprom-vendor-extension-for-kit.patch \
 	file://0021-solidrun-imx8mp-unify-TLV-parsing-and-storage.patch \
+	file://0022-net-dwc_eth_qos-enable-clocks-in-write_hwaddr.patch \
+	file://0023-imx8mp-solidrun-For-yocto-only-pass-the-fdtfile.patch \
 "
 
 LTO:class-target = ""
