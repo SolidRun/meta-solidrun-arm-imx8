@@ -2,6 +2,7 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 PATCHTOOL = "git"
 KBUILD_DEFCONFIG_mx8 = ""
 SRC_URI += " \
+	file://sr_imx_v8_defconfig \
 	file://0001-gpio-vf610-Fix-missing-include-for-pinctrl_.patch \
 	file://0002-drm-bridge-it6161-Build-fix-for-a10ae796.patch \
 	file://0003-ASoC-SOF-Add-missing-include-for-arm_smccc_smc.patch \
