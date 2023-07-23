@@ -10,6 +10,7 @@ SRC_URI += " \
 	file://0005-net-rfkill-gpio-add-device-tree-support.patch \
 	file://0006-regulator-userspace-consumer-add-DT-support.patch \
 	file://0007-ARM64-dts-imx8mp-Add-SolidRun-iMX8MP-SOM-based-platf.patch \
+	file://0008-Disable-M.2-rfkill-for-pcie-support.patch \
 "
 
 KERNEL_MODULE_AUTOLOAD += "imx-sdma"

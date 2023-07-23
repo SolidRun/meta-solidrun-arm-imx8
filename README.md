@@ -50,6 +50,7 @@ use with OpenEmbedded and Yocto Freescale's BSP layer.
 
     $ bitbake core-image-minimal
     $ bitbake imx-image-full
+	$ bitbake imx-hailo-demo-image
 
 The image will be ready at tmp/deploy/images/imx8mpsolidrun and should look as follow:
 

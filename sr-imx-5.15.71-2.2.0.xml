@@ -13,6 +13,7 @@
   <remote fetch="https://git.yoctoproject.org/git" name="yocto"/>
   <remote fetch="https://github.com/nxp-imx-support" name="imx-support"/>
   <remote fetch="https://github.com/SolidRun/" name="solidrun"/>
+  <remote fetch="https://github.com/hailo-ai/" name="hailo-ai"/>
 
   <project name="fsl-community-bsp-base" path="sources/base" remote="community" revision="60f79f7af60537146298560079ae603260f0bd14" upstream="kirkstone">
     <linkfile dest="README" src="README"/>
@@ -25,7 +26,6 @@
   <project name="meta-freescale-distro" path="sources/meta-freescale-distro" remote="community" revision="d5bbb487b2816dfc74984a78b67f7361ce404253" upstream="kirkstone"/>
 
   <project name="meta-imx" path="sources/meta-imx" remote="nxp-imx" revision="refs/tags/rel_imx_5.15.71_2.2.0" upstream="kirkstone-5.15.71-2.2.0">
-    <linkfile dest="imx-setup-release.sh" src="tools/imx-setup-release.sh"/>
     <linkfile dest="README-IMXBSP" src="README"/>
   </project>
 
@@ -35,5 +35,8 @@
   <project name="meta-timesys" path="sources/meta-timesys" remote="Timesys" revision="d1ad27bfacc937048e7f9084b17f4d7c917d2004" upstream="master"/>
   <project name="meta-virtualization" path="sources/meta-virtualization" remote="yocto" revision="9d056f957b42e31f1c2c5bad0af1ab6c84b53ee6" upstream="kirkstone"/>
   <project name="poky" path="sources/poky" remote="yocto" revision="f53ab3a2ff206a130cdc843839dd0ea5ec4ad02f" upstream="kirkstone"/>
-  <project name="meta-solidrun-arm-imx8" path="sources/meta-solidrun-arm-imx8" remote="solidrun" revision="kirkstone-imx8m"/>
+  <project name="meta-hailo" path="sources/meta-hailo" remote="hailo-ai" revision="7c1fbd2e312b04dae53accf5ff8fe77d1e52e488" upstream="kirkstone"/>
+  <project name="meta-solidrun-arm-imx8" path="sources/meta-solidrun-arm-imx8" remote="solidrun" revision="kirkstone-imx8m">
+    <linkfile dest="imx-setup-release.sh" src="setup.sh"/>
+  </project>
 </manifest>

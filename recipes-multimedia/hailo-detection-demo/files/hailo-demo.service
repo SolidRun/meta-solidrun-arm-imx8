@@ -1,0 +1,15 @@
+[Unit]
+Description=Hailo Demo Detection Application
+After=network.target weston.service
+Requires=weston.service
+
+[Service]
+Environment="HAILO_VIDEO_CAPTURE_DEV=/dev/video2"
+Environment="XDG_RUNTIME_DIR=/run/user/0"
+ExecStart=/bin/bash /home/root/apps/general_detection/general_detection.sh
+WorkingDirectory=/home/root/apps/general_detection/
+Restart=on-failure
+Type=simple
+
+[Install]
+WantedBy=graphical.target
