@@ -26,6 +26,7 @@ use with OpenEmbedded and Yocto Freescale's BSP layer.
 					│   	├── meta-freescale-3rdparty
 					│   	├── meta-freescale-distro
 					│   	├── meta-fsl-bsp-release
+					│   	├── meta-hailo
 					│   	├── meta-openembedded
 					│   	├── meta-qt5
 					│   	├── meta-rust
@@ -41,11 +42,7 @@ use with OpenEmbedded and Yocto Freescale's BSP layer.
 
 		$ DISTRO=fsl-imx-xwayland MACHINE=imx8mpsolidrun source imx-setup-release.sh -b build-xwayland-imx8mpsolidrun
 
-5. Append the following line into conf/bblayers.conf
-
-		BBLAYERS += "${BSPDIR}/sources/meta-solidrun-arm-imx8"
-
-6. Build Yocto image for imx8mp solidrun, by running the first, which is a minimal image (lacks firmwares) and then second which is full image including demos:
+5. Build Yocto image for imx8mp solidrun, by running the first, which is a minimal image (lacks firmwares) and then second which is full image including demos:
 (**The following command can take several hours**)
 
     $ bitbake core-image-minimal
@@ -105,13 +102,12 @@ To achieve better performance on the platform you can enable building the source
 
 ## Include NetworkManager and ModemManager for network control
 If you prefer to use NetworkManager and ModemManager rather than the default Yocto configuration of connman and ofono please add the following snippet to your local.conf
-	
-	IMAGE_INSTALL_remove += " ofono connman connman-gnome connman-conf"
-	IMAGE_INSTALL_remove += " packagegroup-core-tools-testapps"
-	PACKAGE_EXCLUDE += "ofono connman connman-gnome connman-conf"
-	PACKAGE_EXCLUDE += "connman-client connman-tools"
-	PACKAGE_EXCLUDE += "packagegroup-core-tools-testapps"
-	DISTRO_FEATURES_remove = " 3g"
-	IMAGE_INSTALL_append = " networkmanager networkmanager-nmcli modemmanager"
-	IMAGE_INSTALL_append = " networkmanager-bash-completion"
-	PACKAGECONFIG_append_pn-networkmanager = " modemmanager ppp"
+    IMAGE_INSTALL_remove += " ofono connman connman-gnome connman-conf"
+    IMAGE_INSTALL_remove += " packagegroup-core-tools-testapps"
+    PACKAGE_EXCLUDE += "ofono connman connman-gnome connman-conf"
+    PACKAGE_EXCLUDE += "connman-client connman-tools"
+    PACKAGE_EXCLUDE += "packagegroup-core-tools-testapps"
+    DISTRO_FEATURES_remove = " 3g"
+    IMAGE_INSTALL_append = " networkmanager networkmanager-nmcli modemmanager"
+    IMAGE_INSTALL_append = " networkmanager-bash-completion"
+    PACKAGECONFIG_append_pn-networkmanager = " modemmanager ppp"
