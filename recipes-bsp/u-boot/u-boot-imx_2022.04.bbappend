@@ -25,6 +25,7 @@ SRC_URI += " \
 		file://0022-net-dwc_eth_qos-enable-clocks-in-write_hwaddr.patch \
 		file://0023-imx8mp-solidrun-For-yocto-only-pass-the-fdtfile.patch \
 		file://0024-Automatic-DDR-detection-for-i.MX8MP.patch \
+		file://0025-Add-HummingBoard-Extended-tlv-based-support.patch \
 "
 
 LTO:class-target = ""
