@@ -1,0 +1,56 @@
+From 9e60760236edea26f1b37b579ef489c8bd35ef29 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Thu, 17 Aug 2023 15:54:38 +0200
+Subject: [PATCH] board: solidrun: imx8mp: fix parsing of tlv data kit sku
+
+The rewrite of common code for all fields of tlv data was using wrong
+offset for copying kit sku as string from tlv entry to common structure.
+Additionally the board file did not check if kit sku exists, showing
+always an error message about wrong length even when no kit sku had been
+programmed to tlv.
+
+Fix the memcpy offset in common code, and check ignore 0-length kit sku.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ board/solidrun/common/tlv_data.c                 | 8 +++++---
+ board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c | 4 +++-
+ 2 files changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/board/solidrun/common/tlv_data.c b/board/solidrun/common/tlv_data.c
+index 1b181bd889..debf103be3 100644
+--- a/board/solidrun/common/tlv_data.c
++++ b/board/solidrun/common/tlv_data.c
+@@ -76,9 +76,11 @@ static void parse_tlv_vendor_ext(struct tlvinfo_tlv *tlv_entry,
+ 		if (tlv_entry->length > 257)
+ 			break;
+ 		dest = td->tlv_kit_number[index];
+-	        len = min_t(unsigned int, tlv_entry->length,
+-			    sizeof(td->tlv_kit_number[index]) - 1);
+-		memcpy(dest, tlv_entry->value, len);
++		len = tlv_entry->length - 5;
++		len = min_t(unsigned int, tlv_entry->length - 5,
++					sizeof(td->tlv_kit_number[index]) - 1);
++		memcpy(dest, &tlv_entry->value[5], len);
++		dest[len] = '\0';
+ 		break;	
+ 	default:
+ 		break;
+diff --git a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
+index 35cb3dc122..02242e1090 100644
+--- a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
++++ b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
+@@ -555,7 +555,9 @@ static void board_id_from_tlv_info(void) {
+ 		pr_info("%s: read kit sku %s\n", __func__, hb_tlv_data.tlv_kit_number[i]);
+ 
+ 		// SRMP8QDW00D01GE008X01CE
+-		if(strlen(hb_tlv_data.tlv_kit_number[i]) != 23) {
++		if(!hb_tlv_data.tlv_kit_number[i][0])
++			continue;
++		else if (strlen(hb_tlv_data.tlv_kit_number[i]) != 23) {
+ 			pr_err("%s: kit sku \"%s\" has wrong length (expecting %0X)\n", __func__, hb_tlv_data.tlv_kit_number[i], 23);
+ 			continue;
+ 		}
+-- 
+2.35.3
+

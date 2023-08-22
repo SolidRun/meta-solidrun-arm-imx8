@@ -26,6 +26,15 @@ SRC_URI += " \
 		file://0023-imx8mp-solidrun-For-yocto-only-pass-the-fdtfile.patch \
 		file://0024-Automatic-DDR-detection-for-i.MX8MP.patch \
 		file://0025-Add-HummingBoard-Extended-tlv-based-support.patch \
+		file://0026-board-solidrun-imx8mp-fix-parsing-of-tlv-data-kit-sk.patch \
+		file://0027-board-solidrun-imx8mp-fix-fdtfile-variable-setting.patch \
+		file://0028-board-solidrun-imx8mp-update-spl_print_ddr_tables-wi.patch \
+		file://0029-imx8mp-solidrun-add-ddr-training-for-8gb-micron-modu.patch \
+		file://0030-board-solidrun-imx8mp-introduce-ddr-training-patches.patch \
+		file://0031-board-solidrun-imx8mp-remove-dtb-fixup-for-hummingbo.patch \
+		file://0032-net-phy-genphy_config-disable-BMCR_PDOWN-if-set.patch \
+		file://0033-board-solidrun-imx8mp-fix-mac-address-calculation.patch \
+		file://0034-board-solidrun-imx8mp-enable-second-on-soc-ethernet.patch \
 "
 
 LTO:class-target = ""

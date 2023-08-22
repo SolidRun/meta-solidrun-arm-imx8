@@ -1,0 +1,65 @@
+From b7cd25debb250a6a03e006c216fecac5c56b13a9 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Sun, 20 Aug 2023 14:01:20 +0200
+Subject: [PATCH 11/12] arm64: dts: imx8mp-sr-som: add second ethernet phy
+
+SoM can have optional ethernet phy (assembly option) on U13, using the
+(secondary) FEC ethernet controller.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ .../boot/dts/freescale/imx8mp-sr-som.dtsi     | 24 +++++++++++++++++--
+ 1 file changed, 22 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-sr-som.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-sr-som.dtsi
+index a83e66ef2a82..f18ba562089c 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-sr-som.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mp-sr-som.dtsi
+@@ -104,7 +104,7 @@ ethphy0: ethernet-phy@0 {
+ 			compatible = "ethernet-phy-ieee802.3-c22";
+ 			reg = <0>;
+ 			eee-broken-1000t;
+-			reset-gpios = <&gpio4 12 GPIO_ACTIVE_LOW>;
++			reset-gpios = <&gpio4 19 GPIO_ACTIVE_LOW>;
+ 		};
+ 	};
+ 
+@@ -164,6 +164,26 @@ queue4 {
+ 	};
+ };
+ 
++/*eth1*/
++&fec {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_fec>;
++	phy-mode = "rgmii-id";
++	phy-handle = <&ethphy1>;
++	fsl,magic-packet;
++	status = "disabled";
++
++	mdio {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		ethphy1: ethernet-phy@1 {
++			reg = <1>;
++			reset-gpios = <&gpio4 2 GPIO_ACTIVE_LOW>;
++		};
++	};
++};
++
+ &flexspi {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_flexspi0>;
+@@ -518,7 +538,7 @@ MX8MP_IOMUXC_ENET_TD2__ENET_QOS_RGMII_TD2       0x1f
+                         MX8MP_IOMUXC_ENET_TD3__ENET_QOS_RGMII_TD3       0x1f
+                         MX8MP_IOMUXC_ENET_TX_CTL__ENET_QOS_RGMII_TX_CTL 0x1f
+                         MX8MP_IOMUXC_ENET_TXC__CCM_ENET_QOS_CLOCK_GENERATE_TX_CLK       0x1f
+-			MX8MP_IOMUXC_SAI1_TXD0__GPIO4_IO12 		0x34
++                        MX8MP_IOMUXC_SAI1_TXD7__GPIO4_IO19              0x34
+ 		>;
+ 	};
+ 
+-- 
+2.35.3
+

@@ -1,0 +1,68 @@
+From 8c3e6127c498ba22527415cb19c6c3fc570fe9e6 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Sun, 20 Aug 2023 12:51:51 +0200
+Subject: [PATCH 12/12] arm64: dts: add support for imx8mp hummingboard
+ extended
+
+HummingBoard Extended is a variant of HummingBoard Pulse using both
+on-som ethernet phys and on-soc ethernet controllers providing 2x
+ethernet. This leaves pci-e available for other purposes on m.2 or
+mpcie.
+
+As a minor difference disable rfkill support for the wifi disable signal
+to leave it floating and improve general compatibility with m.2 pcie
+modules.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ arch/arm64/boot/dts/freescale/Makefile        |  1 +
+ .../imx8mp-hummingboard-extended.dts          | 25 +++++++++++++++++++
+ 2 files changed, 26 insertions(+)
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-hummingboard-extended.dts
+
+diff --git a/arch/arm64/boot/dts/freescale/Makefile b/arch/arm64/boot/dts/freescale/Makefile
+index 350a0c525853..421faf67edc9 100644
+--- a/arch/arm64/boot/dts/freescale/Makefile
++++ b/arch/arm64/boot/dts/freescale/Makefile
+@@ -120,6 +120,7 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mq-evk.dtb imx8mq-evk-rpmsg.dtb imx8mp-ab2.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-ddr4-evk.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-ndm.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-cubox-m.dtb
++dtb-$(CONFIG_ARCH_MXC) += imx8mp-hummingboard-extended.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-hummingboard-mate.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-hummingboard-pulse.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-hummingboard-ripple.dtb
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-extended.dts b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-extended.dts
+new file mode 100644
+index 000000000000..e9cd58d1830c
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-extended.dts
+@@ -0,0 +1,25 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2023 Josua Mayer <josua@solid-run.com>
++ */
++
++/dts-v1/;
++
++#include <dt-bindings/usb/pd.h>
++#include "imx8mp-sr-som.dtsi"
++#include "imx8mp-hummingboard-pulse.dtsi"
++
++/ {
++	model = "SolidRun i.MX8MP HummingBoard Extended";
++	compatible = "fsl,imx8mp-sr-som", "fsl,imx8mp";
++
++	/*
++	 * leave m.2 W_DISABLE signal floating to improve
++	 * compatibility with certain pcie cards;
++	 */
++	/delete-node/ rfkill_m2_wdis;
++};
++
++&fec {
++	status = "okay";
++};
+-- 
+2.35.3
+

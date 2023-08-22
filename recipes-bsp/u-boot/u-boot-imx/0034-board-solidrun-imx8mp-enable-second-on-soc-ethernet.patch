@@ -1,0 +1,162 @@
+From b759a8688d5c681a3046df48eaf6b12a0ef44afe Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Sun, 20 Aug 2023 14:57:54 +0200
+Subject: [PATCH 34/34] board: solidrun: imx8mp: enable second on-soc ethernet
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ arch/arm/dts/imx8mp-solidrun-u-boot.dtsi      |  6 -----
+ arch/arm/dts/imx8mp-solidrun.dts              | 22 +++++++++----------
+ .../imx8mp_solidrun/imx8mp_solidrun.c         | 16 --------------
+ include/configs/imx8mp_solidrun.h             |  5 +----
+ 4 files changed, 12 insertions(+), 37 deletions(-)
+
+diff --git a/arch/arm/dts/imx8mp-solidrun-u-boot.dtsi b/arch/arm/dts/imx8mp-solidrun-u-boot.dtsi
+index f2e6031997..07101667db 100644
+--- a/arch/arm/dts/imx8mp-solidrun-u-boot.dtsi
++++ b/arch/arm/dts/imx8mp-solidrun-u-boot.dtsi
+@@ -186,12 +186,6 @@
+ 	/delete-property/ assigned-clock-rates;
+ };
+ 
+-&ethphy0 {
+-	reset-gpios = <&gpio4 22 GPIO_ACTIVE_LOW>;
+-	reset-assert-us = <15000>;
+-	reset-deassert-us = <100000>;
+-};
+-
+ &lcdif1 {
+ 	/delete-property/ assigned-clocks;
+ 	/delete-property/ assigned-clock-parents;
+diff --git a/arch/arm/dts/imx8mp-solidrun.dts b/arch/arm/dts/imx8mp-solidrun.dts
+index b92c856930..fdcf112c74 100644
+--- a/arch/arm/dts/imx8mp-solidrun.dts
++++ b/arch/arm/dts/imx8mp-solidrun.dts
+@@ -22,6 +22,11 @@
+ 	model = "NXP i.MX8MPlus LPDDR4 SolidRun board";
+ 	compatible = "fsl,imx8mp-solidrun", "fsl,imx8mp";
+ 
++	aliases {
++		ethernet0 = &eqos;
++		ethernet1 = &fec;
++	};
++
+ 	chosen {
+ 		bootargs = "console=ttymxc1,115200 earlycon=ec_imx6q,0x30890000,115200";
+ 		stdout-path = &uart2;
+@@ -77,16 +82,15 @@
+ 	phy-mode = "rgmii-id";
+ 	phy-handle = <&ethphy1>;
+ 	fsl,magic-packet;
+-	status = "disabled";
++	status = "okay";
+ 
+ 	mdio {
+ 		#address-cells = <1>;
+ 		#size-cells = <0>;
+ 
+ 		ethphy1: ethernet-phy@1 {
+-			compatible = "ethernet-phy-ieee802.3-c22";
+ 			reg = <1>;
+-			eee-broken-1000t;
++			reset-gpios = <&gpio4 2 GPIO_ACTIVE_LOW>;
+ 		};
+ 	};
+ };
+@@ -97,19 +101,15 @@
+ 	phy-mode = "rgmii-id";
+ 	phy-handle = <&ethphy0>;
+ 	status = "okay";
+-        compatible = "fsl,imx-eqos";
+-        /delete-property/ assigned-clocks;
+-        /delete-property/ assigned-clock-parents;
+-        /delete-property/ assigned-clock-rates;
+ 
+ 	mdio {
++		compatible = "snps,dwmac-mdio";
+ 		#address-cells = <1>;
+ 		#size-cells = <0>;
+ 
+ 		ethphy0: ethernet-phy@0 {
+-			compatible = "ethernet-phy-ieee802.3-c22";
+ 			reg = <0>;
+-			eee-broken-1000t;
++			reset-gpios = <&gpio4 19 GPIO_ACTIVE_LOW>;
+ 		};
+ 	};
+ };
+@@ -387,7 +387,7 @@
+ 			MX8MP_IOMUXC_ENET_TD3__ENET_QOS_RGMII_TD3	0x1f
+ 			MX8MP_IOMUXC_ENET_TX_CTL__ENET_QOS_RGMII_TX_CTL	0x1f
+ 			MX8MP_IOMUXC_ENET_TXC__CCM_ENET_QOS_CLOCK_GENERATE_TX_CLK	0x1f
+-			MX8MP_IOMUXC_SAI1_TXD7__GPIO4_IO19		0x19
++			MX8MP_IOMUXC_SAI1_TXD7__GPIO4_IO19		0x34
+ 		>;
+ 	};
+ 
+@@ -407,7 +407,7 @@
+ 			MX8MP_IOMUXC_SAI1_TXD3__ENET1_RGMII_TD3		0x1f
+ 			MX8MP_IOMUXC_SAI1_TXD4__ENET1_RGMII_TX_CTL	0x1f
+ 			MX8MP_IOMUXC_SAI1_TXD5__ENET1_RGMII_TXC		0x1f
+-			MX8MP_IOMUXC_SAI1_RXD0__GPIO4_IO02		0x19
++			MX8MP_IOMUXC_SAI1_RXD0__GPIO4_IO02		0x34
+ 		>;
+ 	};
+ 
+diff --git a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
+index 7dbd9d5509..2b5eef0d4c 100644
+--- a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
++++ b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
+@@ -410,15 +410,6 @@ static int setup_eqos(void)
+ 	return set_clk_eqos(ENET_125MHZ);
+ }
+ 
+-#if CONFIG_IS_ENABLED(NET)
+-int board_phy_config(struct phy_device *phydev)
+-{
+-	if (phydev->drv->config)
+-		phydev->drv->config(phydev);
+-	return 0;
+-}
+-#endif
+-
+ #define DISPMIX				13
+ #define MIPI				15
+ 
+@@ -686,13 +677,6 @@ static void mac_add_n(unsigned char *base, u16 n) {
+ int board_get_mac(int dev_id, unsigned char *mac) {
+ 	int i;
+ 
+-	// HACK: id 1 is the first
+-	if(dev_id == 0) {
+-		pr_err("%s: requested mac address for unknown interface 0!\n", __func__);
+-		return -ENOENT;
+-	}
+-	dev_id -= 1;
+-
+ 	/*
+ 	 * Note: Environment ethaddr (eth1addr, eth2addr, ...) has first priority,
+ 	 * therefore it should be read and returned here.
+diff --git a/include/configs/imx8mp_solidrun.h b/include/configs/imx8mp_solidrun.h
+index f756be17c5..019a32b1a1 100644
+--- a/include/configs/imx8mp_solidrun.h
++++ b/include/configs/imx8mp_solidrun.h
+@@ -48,14 +48,11 @@
+ /* ENET1 */
+ 
+ #if defined(CONFIG_CMD_NET)
+-#define CONFIG_ETHPRIME                 "eth1" /* Set eqos to primary since we use its MDIO */
++#define CONFIG_ETHPRIME                 "eth0" /* Set eqos to primary since it's phy is always assembled */
+ 
+ #define CONFIG_FEC_XCV_TYPE             RGMII
+-#define CONFIG_FEC_MXC_PHYADDR          1
+ #define FEC_QUIRK_ENET_MAC
+ 
+-#define DWC_NET_PHYADDR			0
+-
+ #define PHY_ANEG_TIMEOUT 20000
+ 
+ #endif
+-- 
+2.35.3
+

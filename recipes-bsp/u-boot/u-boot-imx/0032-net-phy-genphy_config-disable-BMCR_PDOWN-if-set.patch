@@ -1,0 +1,32 @@
+From 431bee8f51e945436a832241a6adcb6c3cc54d17 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Mon, 21 Aug 2023 11:16:36 +0200
+Subject: [PATCH 32/34] net: phy: genphy_config: disable BMCR_PDOWN if set
+
+Disable phy power-down mode in case it was set initially, e.g. due to
+bootstrap or previous configuration.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ drivers/net/phy/phy.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/drivers/net/phy/phy.c b/drivers/net/phy/phy.c
+index 22bdab6de8..c60201a6a3 100644
+--- a/drivers/net/phy/phy.c
++++ b/drivers/net/phy/phy.c
+@@ -427,6 +427,11 @@ int genphy_config(struct phy_device *phydev)
+ 			features |= SUPPORTED_1000baseX_Half;
+ 	}
+ 
++	/* disable power-down */
++	val = phy_read(phydev, MDIO_DEVAD_NONE, MII_BMCR);
++	if (val & BMCR_PDOWN)
++		phy_write(phydev, MDIO_DEVAD_NONE, MII_BMCR, val ^ BMCR_PDOWN);
++
+ 	phydev->supported &= features;
+ 	phydev->advertising &= features;
+ 
+-- 
+2.35.3
+

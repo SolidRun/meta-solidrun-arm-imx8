@@ -11,6 +11,10 @@ SRC_URI += " \
 	file://0006-regulator-userspace-consumer-add-DT-support.patch \
 	file://0007-ARM64-dts-imx8mp-Add-SolidRun-iMX8MP-SOM-based-platf.patch \
 	file://0008-Move-M.2-PCIe-reset-from-M.2-rfkill-to-PCIe-node.patch \
+	file://0009-arm64-dts-imx8mp-hummingboard-pulse-add-separate-dtb.patch \
+	file://0010-arm64-dts-imx8mp-hummingboard-pulse-swap-m.2-reset-a.patch \
+	file://0011-arm64-dts-imx8mp-sr-som-add-second-ethernet-phy.patch \
+	file://0012-arm64-dts-add-support-for-imx8mp-hummingboard-extend.patch \
 "
 
 KERNEL_MODULE_AUTOLOAD += "imx-sdma"
