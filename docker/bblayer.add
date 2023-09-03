@@ -1,1 +1,0 @@
-BBLAYERS += "${BSPDIR}/sources/meta-solidrun-arm-imx8"

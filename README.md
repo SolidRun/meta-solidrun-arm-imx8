@@ -81,11 +81,11 @@ When performing this the following is valid -
 Follow the commands below to; first clone this branch and run the following command only once -
 
     cd docker
-    docker build --tag yocto-build-image:latest --no-cache --build-arg USERNAME=<your user name> --build-arg PUID=<your user ID, for example 1000> --build-arg PGID=<your group ID, for example 1000> .
+    docker build --tag yocto-build-image:latest .
 
 ## Spin a container and mount your working directory into it
 
-    docker run --rm -it -v /home/<username>/work/imx8mp/:/home/<username>/work/imx8mp/ yocto-build-image:latest /bin/bash
+    docker run --rm -it -v "$PWD":/home/build/work/imx8mp/ yocto-build-image:latest /bin/bash
     git config --global user.name "Your Name"
     git config --global user.email "you@example.com"
     wget https://storage.googleapis.com/git-repo-downloads/repo
