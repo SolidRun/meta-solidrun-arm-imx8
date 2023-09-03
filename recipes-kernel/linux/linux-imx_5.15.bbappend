@@ -15,6 +15,7 @@ SRC_URI += " \
 	file://0010-arm64-dts-imx8mp-hummingboard-pulse-swap-m.2-reset-a.patch \
 	file://0011-arm64-dts-imx8mp-sr-som-add-second-ethernet-phy.patch \
 	file://0012-arm64-dts-add-support-for-imx8mp-hummingboard-extend.patch \
+	file://0013-arm64-dts-split-pcie-reset-signals-for-hb-pulse-and-.patch \
 "
 
 KERNEL_MODULE_AUTOLOAD += "imx-sdma"
