@@ -5,6 +5,7 @@ Requires=weston.service
 
 [Service]
 Environment="HAILO_VIDEO_CAPTURE_DEV=/dev/video2"
+Environment="HAILO_VIDEO_CAPTURE_DEV_1=/dev/video3"
 Environment="XDG_RUNTIME_DIR=/run/user/0"
 ExecStart=/bin/bash /home/root/apps/demo/@DEMOSCRIPT@
 WorkingDirectory=/home/root/apps/demo

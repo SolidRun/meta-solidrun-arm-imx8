@@ -8,6 +8,7 @@ This recipe is for demo only."
 # Available demos:
 # - general_detection.sh
 # - lpr_loop.sh
+# - multistream_detection.sh
 # Note: tested only with imx-hailo-demo-image.
 
 HAILO_DEMO_APP ?= "general_detection.sh"
@@ -22,6 +23,7 @@ inherit systemd features_check
 # Demo image
 SRC_URI = "https://hailo-tappas.s3.eu-west-2.amazonaws.com/v3.25/general/hefs/yolov5m_wo_spp_60p.hef;md5sum=3837ea90c4e0a9fff97b6e2e3d1630ab \
             file://general_detection.sh \
+            file://multistream_detection.sh \
             file://lpr_loop.sh \
             file://hailo-demo.service"
 
@@ -38,6 +40,7 @@ do_install() {
     mkdir -p ${ROOTFS_APPS_DIR}/resources
     cp ${WORKDIR}/yolov5m_wo_spp_60p.hef ${ROOTFS_APPS_DIR}/resources
     install -m 755 ${WORKDIR}/general_detection.sh ${ROOTFS_APPS_DIR}/
+    install -m 755 ${WORKDIR}/multistream_detection.sh ${ROOTFS_APPS_DIR}/
     install -m 755 ${WORKDIR}/lpr_loop.sh ${ROOTFS_APPS_DIR}/
 
     if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then

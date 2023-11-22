@@ -21,6 +21,7 @@ CORE_IMAGE_EXTRA_INSTALL += " \
     packagegroup-imx-isp \
     packagegroup-fsl-gstreamer1.0 \
     packagegroup-fsl-gstreamer1.0-full \
+    ffmpeg \
     firmwared \
     ${@bb.utils.contains('DISTRO_FEATURES', 'x11 wayland', 'weston-xwayland xterm', '', d)} \
 "
