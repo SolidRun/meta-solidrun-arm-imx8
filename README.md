@@ -13,7 +13,7 @@ use with OpenEmbedded and Yocto Freescale's BSP layer.
 
 2. Get NXP Ycoto sources(require repo app):
 
-		$ repo init -u https://source.codeaurora.org/external/imx/imx-manifest -b imx-linux-hardknott -m imx-5.10.72-2.2.0.xml
+		$ repo init -u git://github.com/nxp-imx/imx-manifest.git -b imx-linux-hardknott -m imx-5.10.72-2.2.0.xml
 		$ repo sync
 
 3. Add the meta-solidrun-arm-imx8 layer (curent git repository) into the sources directory, the directory layout should be like this:
@@ -38,7 +38,7 @@ use with OpenEmbedded and Yocto Freescale's BSP layer.
 				</pre>
 4. Configure imx8mpsolidrun board, Distro for xwayland support and create the build environment:
 **After running the following commands, you need to accept the EULA (scrool down and run "y")**
-
+		# $: [MACHINE=<machine>] [DISTRO=fsl-imx-<backend>] source ./imx-setup-release.sh -b <build folder>
 		$ DISTRO=fsl-imx-xwayland MACHINE=imx8mpsolidrun source imx-setup-release.sh -b build-xwayland-imx8mpsolidrun
 
 5. Appned the following line into conf/bblayers.conf
