@@ -111,3 +111,11 @@ If you prefer to use NetworkManager and ModemManager rather than the default Yoc
     IMAGE_INSTALL_append = " networkmanager networkmanager-nmcli modemmanager"
     IMAGE_INSTALL_append = " networkmanager-bash-completion"
     PACKAGECONFIG_append_pn-networkmanager = " modemmanager ppp"
+
+## Enabling Mender
+You can enable mender OTA with these steps:
+1. Add mender-core to bblayers.conf:
+
+    BBLAYERS += "${BSPDIR}/sources/meta-mender/meta-mender-core"
+	
+2. Configure mender. You can find sample configuration in conf/sample/local.conf.mender.sample

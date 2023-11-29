@@ -14,6 +14,7 @@
   <remote fetch="https://github.com/nxp-imx-support" name="imx-support"/>
   <remote fetch="https://github.com/SolidRun/" name="solidrun"/>
   <remote fetch="https://github.com/hailo-ai/" name="hailo-ai"/>
+  <remote fetch="https://github.com/mendersoftware/" name="mender"/>
 
   <project name="fsl-community-bsp-base" path="sources/base" remote="community" revision="60f79f7af60537146298560079ae603260f0bd14" upstream="kirkstone">
     <linkfile dest="README" src="README"/>
@@ -36,6 +37,7 @@
   <project name="meta-virtualization" path="sources/meta-virtualization" remote="yocto" revision="9d056f957b42e31f1c2c5bad0af1ab6c84b53ee6" upstream="kirkstone"/>
   <project name="poky" path="sources/poky" remote="yocto" revision="f53ab3a2ff206a130cdc843839dd0ea5ec4ad02f" upstream="kirkstone"/>
   <project name="meta-hailo" path="sources/meta-hailo" remote="hailo-ai" revision="7c1fbd2e312b04dae53accf5ff8fe77d1e52e488" upstream="kirkstone"/>
+  <project name="meta-mender" path="sources/meta-mender" remote="mender" revision="eb5b14577295ec3a15d3b21602ac4607a0cb3ad8" upstream="kirkstone"/>
   <project name="meta-solidrun-arm-imx8" path="sources/meta-solidrun-arm-imx8" remote="solidrun" revision="kirkstone-imx8m">
     <linkfile dest="imx-setup-release.sh" src="setup.sh"/>
   </project>
