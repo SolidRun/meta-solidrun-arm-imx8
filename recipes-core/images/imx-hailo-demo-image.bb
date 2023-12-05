@@ -23,6 +23,7 @@ CORE_IMAGE_EXTRA_INSTALL += " \
     packagegroup-fsl-gstreamer1.0-full \
     ffmpeg \
     firmwared \
+    packagegroup-fsl-opencv-imx \
     ${@bb.utils.contains('DISTRO_FEATURES', 'x11 wayland', 'weston-xwayland xterm', '', d)} \
 "
 
