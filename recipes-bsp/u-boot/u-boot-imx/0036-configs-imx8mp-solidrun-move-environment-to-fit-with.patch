@@ -1,0 +1,32 @@
+From 246a9d376e2967132a4703ec56fd22746fb6b5b1 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Thu, 11 Jan 2024 17:38:10 +0100
+Subject: [PATCH] configs: imx8mp-solidrun: move environment to fit within emmc
+ boot-part
+
+move environment to last erase block (512k), just before 4MiB size limit
+of eMMC boot partitions.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ configs/imx8mp_solidrun_defconfig | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/configs/imx8mp_solidrun_defconfig b/configs/imx8mp_solidrun_defconfig
+index 4ef45e309..05e217510 100644
+--- a/configs/imx8mp_solidrun_defconfig
++++ b/configs/imx8mp_solidrun_defconfig
+@@ -9,8 +9,8 @@ CONFIG_SPL_LIBGENERIC_SUPPORT=y
+ CONFIG_NR_DRAM_BANKS=3
+ CONFIG_SYS_MEMTEST_START=0x60000000
+ CONFIG_SYS_MEMTEST_END=0xC0000000
+-CONFIG_ENV_SIZE=0x4000
+-CONFIG_ENV_OFFSET=0x400000
++CONFIG_ENV_SIZE=0x80000
++CONFIG_ENV_OFFSET=0x380000
+ CONFIG_ENV_SECT_SIZE=0x10000
+ CONFIG_SYS_I2C_MXC_I2C1=y
+ CONFIG_SYS_I2C_MXC_I2C2=y
+-- 
+2.35.3
+
