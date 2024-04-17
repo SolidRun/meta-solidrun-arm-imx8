@@ -1,0 +1,113 @@
+From 96056ab987d681fda3a351a0167133ad43acdd27 Mon Sep 17 00:00:00 2001
+From: Yazan Shhady <yazan.shhady@solid-run.com>
+Date: Mon, 19 Apr 2021 00:38:52 +0300
+Subject: [PATCH] Edit ethernet phy address
+
+---
+ arch/arm/dts/imx8mn-solidrun.dts  |  8 ++++----
+ include/configs/imx8mn_solidrun.h | 11 +++++++++--
+ 2 files changed, 13 insertions(+), 6 deletions(-)
+
+diff --git a/arch/arm/dts/imx8mn-solidrun.dts b/arch/arm/dts/imx8mn-solidrun.dts
+index f712835fab..02d2fa39b3 100644
+--- a/arch/arm/dts/imx8mn-solidrun.dts
++++ b/arch/arm/dts/imx8mn-solidrun.dts
+@@ -349,7 +349,8 @@
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_fec1>;
+ 	phy-mode = "rgmii-id";
+-	phy-handle = <&ethphy0>;
++	phy-handle = <&ethphy4>;
++	phy-reset-gpios = <&gpio3 19 GPIO_ACTIVE_LOW>;
+ 	fsl,magic-packet;
+ 	status = "okay";
+ 
+@@ -357,12 +358,11 @@
+ 		#address-cells = <1>;
+ 		#size-cells = <0>;
+ 
+-		ethphy0: ethernet-phy@0 {
++		ethphy4: ethernet-phy@4 {
+ 			compatible = "ethernet-phy-ieee802.3-c22";
+-			reg = <0>;
++			reg = <4>;
+ 			at803x,led-act-blind-workaround;
+ 			at803x,eee-disabled;
+-			at803x,vddio-1p8v;
+ 		};
+ 	};
+ };
+diff --git a/include/configs/imx8mn_solidrun.h b/include/configs/imx8mn_solidrun.h
+index f04bd1cf14..fe05a7847a 100644
+--- a/include/configs/imx8mn_solidrun.h
++++ b/include/configs/imx8mn_solidrun.h
+@@ -69,7 +69,7 @@
+ #define PHY_ANEG_TIMEOUT 20000
+ 
+ #define CONFIG_FEC_XCV_TYPE             RGMII
+-#define CONFIG_FEC_MXC_PHYADDR          0
++#define CONFIG_FEC_MXC_PHYADDR          4
+ #define FEC_QUIRK_ENET_MAC
+ 
+ #define IMX_FEC_BASE			0x30BE0000
+@@ -100,6 +100,7 @@
+ 	"sd_dev=1\0" \
+ 
+ /* Initial environment variables */
++
+ #define CONFIG_EXTRA_ENV_SETTINGS		\
+ 	CONFIG_MFG_ENV_SETTINGS \
+ 	JAILHOUSE_ENV \
+@@ -108,6 +109,8 @@
+ 	"splashimage=0x50000000\0" \
+ 	"console=ttymxc1,115200\0" \
+ 	"fdt_addr=0x43000000\0"			\
++	"kernel_addr_r=0x40480000\0" \
++	"ramdisk_addr_r=0x43800000\0"   \
+ 	"fdt_high=0xffffffffffffffff\0"		\
+ 	"boot_fit=no\0" \
+ 	"fdt_file=" CONFIG_DEFAULT_FDT_FILE "\0" \
+@@ -155,6 +158,7 @@
+ 			"fi; " \
+ 		"fi;\0"
+ 
++/*
+ #define CONFIG_BOOTCOMMAND \
+ 	   "mmc dev ${mmcdev}; if mmc rescan; then " \
+ 		   "if run loadbootscript; then " \
+@@ -166,6 +170,7 @@
+ 			   "fi; " \
+ 		   "fi; " \
+ 	   "fi;"
++*/
+ 
+ /* Link Definitions */
+ #define CONFIG_LOADADDR			0x40480000
+@@ -245,7 +250,7 @@
+ /* USB configs */
+ #ifndef CONFIG_SPL_BUILD
+ #define CONFIG_CMD_USB
+-#define CONFIG_USB_STORAGE
++//#define CONFIG_USB_STORAGE
+ #define CONFIG_USBD_HS
+ 
+ #define CONFIG_CMD_USB_MASS_STORAGE
+@@ -259,6 +264,7 @@
+ #define CONFIG_MXC_USB_PORTSC  (PORT_PTS_UTMI | PORT_PTS_PTW)
+ #define CONFIG_USB_MAX_CONTROLLER_COUNT         2
+ 
++/*
+ #ifdef CONFIG_DM_VIDEO
+ #define CONFIG_VIDEO_MXS
+ #define CONFIG_VIDEO_LOGO
+@@ -271,6 +277,7 @@
+ #define CONFIG_VIDEO_BMP_RLE8
+ #define CONFIG_VIDEO_BMP_LOGO
+ #endif
++*/
+ 
+ #define BOOT_TARGET_DEVICES(func) \
+         func(MMC, mmc, 1) \
+-- 
+2.25.1
+

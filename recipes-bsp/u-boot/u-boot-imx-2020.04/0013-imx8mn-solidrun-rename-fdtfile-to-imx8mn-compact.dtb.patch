@@ -1,0 +1,67 @@
+From 3eae881d367b76c3d3672b149a21dd58c74271a6 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Tue, 12 Apr 2022 12:25:21 +0300
+Subject: [PATCH] imx8mn: solidrun: rename fdtfile to imx8mn-compact.dtb
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ arch/arm/dts/Makefile                                    | 2 +-
+ arch/arm/dts/{imx8mn-solidrun.dts => imx8mn-compact.dts} | 2 +-
+ configs/imx8mn_solidrun_defconfig                        | 4 ++--
+ 3 files changed, 4 insertions(+), 4 deletions(-)
+ rename arch/arm/dts/{imx8mn-solidrun.dts => imx8mn-compact.dts} (99%)
+
+diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
+index 7e18d93c..e0d03c3f 100644
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -790,7 +790,7 @@ dtb-$(CONFIG_ARCH_IMX8M) += \
+ 	imx8mm-verdin.dtb \
+ 	imx8mn-ddr3l-evk.dtb \
+ 	imx8mn-ddr4-evk.dtb \
+-	imx8mn-solidrun.dtb \
++	imx8mn-compact.dtb \
+ 	imx8mn-evk.dtb \
+ 	imx8mq-ddr3l-val.dtb \
+ 	imx8mq-ddr4-val.dtb \
+diff --git a/arch/arm/dts/imx8mn-solidrun.dts b/arch/arm/dts/imx8mn-compact.dts
+similarity index 99%
+rename from arch/arm/dts/imx8mn-solidrun.dts
+rename to arch/arm/dts/imx8mn-compact.dts
+index 02d2fa39..54e56cd7 100644
+--- a/arch/arm/dts/imx8mn-solidrun.dts
++++ b/arch/arm/dts/imx8mn-compact.dts
+@@ -9,7 +9,7 @@
+ #include "imx8mn.dtsi"
+ 
+ / {
+-	model = "NXP i.MX8MNano DDR4 Solidrun board";
++	model = "SolidRun i.MX8MN Compact";
+ 	compatible = "fsl,imx8mn-solidrun", "fsl,imx8mn";
+ 
+ 	chosen {
+diff --git a/configs/imx8mn_solidrun_defconfig b/configs/imx8mn_solidrun_defconfig
+index a0382a8b..1a5ac7f3 100644
+--- a/configs/imx8mn_solidrun_defconfig
++++ b/configs/imx8mn_solidrun_defconfig
+@@ -28,7 +28,7 @@ CONFIG_SPL_LOAD_FIT=y
+ CONFIG_SPL_FIT_GENERATOR="arch/arm/mach-imx/mkimage_fit_atf.sh"
+ CONFIG_OF_SYSTEM_SETUP=y
+ CONFIG_SYS_EXTRA_OPTIONS="IMX_CONFIG=arch/arm/mach-imx/imx8m/imximage-8mn-ddr4.cfg"
+-CONFIG_DEFAULT_FDT_FILE="imx8mn-solidrun.dtb"
++CONFIG_DEFAULT_FDT_FILE="imx8mn-compact.dtb"
+ CONFIG_BOARD_LATE_INIT=y
+ CONFIG_BOARD_EARLY_INIT_F=y
+ CONFIG_SPL_BOARD_INIT=y
+@@ -57,7 +57,7 @@ CONFIG_CMD_EXT4_WRITE=y
+ CONFIG_CMD_FAT=y
+ CONFIG_CMD_SF=y
+ CONFIG_OF_CONTROL=y
+-CONFIG_DEFAULT_DEVICE_TREE="imx8mn-solidrun"
++CONFIG_DEFAULT_DEVICE_TREE="imx8mn-compact"
+ CONFIG_ENV_IS_IN_MMC=y
+ CONFIG_ENV_IS_IN_SPI_FLASH=y
+ CONFIG_ENV_IS_NOWHERE=y
+-- 
+2.25.1
+

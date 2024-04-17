@@ -1,0 +1,54 @@
+From 6ffdb6af349447eabdaefd69b8eb0faffbeefbc7 Mon Sep 17 00:00:00 2001
+From: Yazan Shhady <yazan.shhady@solid-run.com>
+Date: Mon, 5 Jul 2021 18:56:07 +0300
+Subject: [PATCH] Imx8mn: Add support to read MAC Address from the Fuses
+
+---
+ .../imx8mn_solidrun/imx8mn_solidrun.c         | 31 +++++++++++++++++++
+ 1 file changed, 31 insertions(+)
+
+diff --git a/board/solidrun/imx8mn_solidrun/imx8mn_solidrun.c b/board/solidrun/imx8mn_solidrun/imx8mn_solidrun.c
+index 718fe0a4b8..8a2a8b53b9 100644
+--- a/board/solidrun/imx8mn_solidrun/imx8mn_solidrun.c
++++ b/board/solidrun/imx8mn_solidrun/imx8mn_solidrun.c
+@@ -146,6 +146,37 @@ int board_late_init(void)
+ #ifdef CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
+ 	env_set("board_name", "SOLIDRUN");
+ 	env_set("board_rev", "iMX8MN");
++
++        /* Read MAC Address from Fuses */
++        unsigned char enetaddr[6];
++        imx_get_mac_from_fuse(0, enetaddr);
++
++        if (is_valid_ethaddr(enetaddr)) {
++		env_set("ethaddr", "");
++		eth_env_set_enetaddr("ethaddr", enetaddr);
++		printf("Read Valid MAC from Fuses MAC -> $ethaddr=%02x:%02x:%02x:%02x:%02x:%02x\n",
++                                enetaddr[0], enetaddr[1], enetaddr[2], enetaddr[3], enetaddr[4], enetaddr[5]);
++
++        } else {
++                /* Check if have valid MAC Address in the u-boot environments */
++                int ret;
++                ret = eth_env_get_enetaddr("ethaddr", enetaddr);
++                if  (ret){
++                        printf("Device alreday have a valid MAC -> $ethaddr=%02x:%02x:%02x:%02x:%02x:%02x\n",
++                                                enetaddr[0], enetaddr[1], enetaddr[2], enetaddr[3], enetaddr[4], enetaddr[5]);
++
++#ifdef CONFIG_NET_RANDOM_ETHADDR
++                } else {
++                        /* Generate Random MAC Address */
++                        net_random_ethaddr(enetaddr);
++                        eth_env_set_enetaddr("ethaddr", enetaddr);
++                        printf("Generate Random MAC -> $ethaddr=%02x:%02x:%02x:%02x:%02x:%02x\n",
++                                        enetaddr[0], enetaddr[1], enetaddr[2], enetaddr[3], enetaddr[4], enetaddr[5]);
++                        env_save();
++#endif
++                }
++        }
++
+ #endif
+ 	return 0;
+ }
+-- 
+2.25.1
+

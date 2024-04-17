@@ -1,0 +1,181 @@
+From 7efee8dd3fac8fb307667fcbee83914946715331 Mon Sep 17 00:00:00 2001
+From: Alvaro-Karsz <alvaro.karsz@solid-run.com>
+Date: Wed, 30 Jun 2021 09:50:24 +0300
+Subject: [PATCH] IMX8MN: Graceful reboot app improvement
+
+New option - boot only if capacitor charge is 90%.
+---
+ .../imx8mn_solidrun/imx8mn_solidrun.c         | 107 +++++++++++-------
+ configs/imx8mn_solidrun_defconfig             |   2 +-
+ 2 files changed, 67 insertions(+), 42 deletions(-)
+
+diff --git a/board/solidrun/imx8mn_solidrun/imx8mn_solidrun.c b/board/solidrun/imx8mn_solidrun/imx8mn_solidrun.c
+index f3ff075ca6..7ae863fd86 100644
+--- a/board/solidrun/imx8mn_solidrun/imx8mn_solidrun.c
++++ b/board/solidrun/imx8mn_solidrun/imx8mn_solidrun.c
+@@ -353,24 +353,55 @@ bool is_power_key_pressed(void) {
+ #define IO_EXPANDER_RST            IMX_GPIO_NR(3, 16)
+ 
+ 
+-
+-
+ /*
+- *function that can be called from U-boot
+- This function will check if power is connected to board.
+- If power is not connected, it will keep checking forever.
++ * Function that can be called from U-boot
++ * This function will check if power is connected.
++ * If power is not connected, it will keep checking forever.
++ *
++ * function receives 1 argument <mode>: this function has 2 modes:
++ * mode = 1: boot if power is connected.
++ * mode = 2: boot if power is connected and capacitor charge is over 90%.
++ *
+  * */
+-int check_power_connection(void) 
+-{
++int check_power_connection(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]) {
++
+         struct udevice *bus, *i2c_dev = NULL;
+         int ret,
+ 	    bus_number = 2, /*I/O expander i2c bus*/
+ 	    io_expander_address = 0x20, /*I/O expander address on bus*/
+ 	    input_reg_address = 0x0, /*Input values regiser address in I/O expander*/
+ 	    power_connection_bit_mask = 2, /*the second bit indicates if power is connected*/
+-	    echo_message_to_user_flag = 1;
+-	/*echo_message_to_user_flag is a flag to indicate if a echo to user is needed in cases when power is not connected - flag is used to make sure the message is echoed just once*/
++	    ninty_percent_charge_bit_mask = 4; /*the third bit indicates if capacitor charge is over 90%*/
+         uint8_t i2c_value;
++	char mode;/*function mode, get from argv*/
++
++
++
++	/*validate number of arguments*/
++
++	if(argc == 1) {/*no arguments, set default mode - 1*/
++		mode = '1';
++	} else if (argc == 2) { /*get mode from argv*/
++		mode = *argv[1];
++	} else { /*invalid number of arguments*/
++		return cmd_usage(cmdtp);
++	}
++
++	/*check mode*/
++	switch(mode) {
++		case '1':
++			printf("Power check - boot once power is connected\n");
++		break;
++		
++		case '2':
++			printf("Power check - boot once power is connected and capacitor charge is 90%\n");
++		break;
++
++		default: /*ilegal mode, ignore function and boot*/
++			printf("Power check - illegal mode, BOOTING\n");
++			return 0;
++		break;
++	}
+ 	
+ 
+ 	/*release I/O expander from reset*/	
+@@ -380,11 +411,13 @@ int check_power_connection(void)
+ 	
+ 	/*get BUS*/	
+         ret = uclass_get_device_by_seq(UCLASS_I2C, bus_number, &bus);
++
+         if (ret) {
+-                printf("Can't find bus %d, Exit Power connection check\n", bus_number);
++                printf("Can't find bus %d, Exit power check\n", bus_number);
+                 return 0;
+         }
+ 
++	
+ 	/*probe bus, check if I/O expander is detected on bus*/
+ 	ret = dm_i2c_probe(bus, io_expander_address, 0, &i2c_dev);
+ 
+@@ -393,49 +426,41 @@ int check_power_connection(void)
+ 		return 0;
+ 	}	
+ 
+-	/*keep reading i2c until power connection is detected*/
+-	while (1)
+-	{
++
++	/* Keep reading i2c until boot conditions are met. */
++
++	while (1) {
++
+ 		ret = dm_i2c_read(i2c_dev, input_reg_address , &i2c_value, 1);
+ 
+ 		if (ret) {
+ 			/*error reading i2c, exit function*/
+-	                printf("Can't read I2C, Exit Power connection check\n");
++	                printf("Can't read I2C, exit power check\n");
+ 			return 0;
+ 		}
+ 		
+-		/*apply mask, only the power connection bit is relevant*/
+-		i2c_value &= power_connection_bit_mask; 	
+-
+-
+-
+-		if(i2c_value) {
+-			/*power connection bit is ON, power connected, exit loop*/
+-
+-
+-			/*
+-			 *TODO: WAIT UNTIL CAP IS AT LEAST 92.5% FROM REGULATION POINT BEFORE BOOTING
+-			 * THIS CAN BE DONE BY READING THE I/O EXPANDER'S THIRD BIT.
+-			 * */
+-
+-			break;
+-		}
+-
+-		/*power is off, alert user. echo message only in first check (avoid multiple messages)*/
+-		if(echo_message_to_user_flag) {
+-			printf("PLEASE CONNECT POWER\n");
+-			/*turn off the flag, echo was made*/
+-			echo_message_to_user_flag = 0;
++		/*check boot conditions*/
++		if(i2c_value & power_connection_bit_mask && /*power is connected*/
++				(
++				 	mode != '2' || /*no need to check for capacitor charge*/
++					( mode == '2' && i2c_value & ninty_percent_charge_bit_mask) /*capacitor is not 90% charged - keep reading i2c value*/
++				)
++		) {
++			break; /*boot conditions are met, exit loop*/
+ 		}
+ 	}	
+ 
+-	/*power is connected*/
+-
+ 
+-	/*echo message to user*/
+-	printf("POWER IS CONNECTED\n");
++	printf("BOOTING\n");
+ 	return 0;
+ }
+ 
+-U_BOOT_CMD(check_power_connection,1 ,0, (void *)check_power_connection, "", "");
++U_BOOT_CMD(
++		check_power_connection,2 ,0, (void *)check_power_connection,
++		"Check if power is connected\n"
++		"	check_power_connection <mode>\n"
++		"	mode = 1: boot if power is connected\n"
++		"	mode = 2: boot if power is connected and capacitor charge is over 90%\n",
++		" <mode>\n"
++);
+ #endif
+diff --git a/configs/imx8mn_solidrun_defconfig b/configs/imx8mn_solidrun_defconfig
+index fb90cf9922..89223c99ef 100644
+--- a/configs/imx8mn_solidrun_defconfig
++++ b/configs/imx8mn_solidrun_defconfig
+@@ -144,4 +144,4 @@ CONFIG_DISTRO_DEFAULTS=y
+ CONFIG_ENV_VARS_UBOOT_CONFIG=y
+ CONFIG_USE_BOOTCOMMAND=y
+ # CONFIG_BOOTCOMMAND="run distro_bootcmd"
+-CONFIG_BOOTCOMMAND="check_power_connection; echo 'Enable Can_ClockOut1 (24MHz)';mw 0x30360128 0x1d0 ;mmc dev 1; ls mmc 1:1 boot; load mmc 1:1 ${loadaddr}  boot/Image; load mmc 1:1 ${fdt_addr} boot/imx8mn-compact.dtb; load mmc 1:1 ${initrd_addr} boot/rootfs.cpio; booti ${loadaddr} ${initrd_addr} ${fdt_addr}"
++CONFIG_BOOTCOMMAND="check_power_connection 2; echo 'Enable Can_ClockOut1 (24MHz)';mw 0x30360128 0x1d0 ;mmc dev 1; ls mmc 1:1 boot; load mmc 1:1 ${loadaddr}  boot/Image; load mmc 1:1 ${fdt_addr} boot/imx8mn-compact.dtb; load mmc 1:1 ${initrd_addr} boot/rootfs.cpio; booti ${loadaddr} ${initrd_addr} ${fdt_addr}"
+-- 
+2.25.1
+

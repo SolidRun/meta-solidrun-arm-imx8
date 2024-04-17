@@ -1,0 +1,146 @@
+From 72fb0b2a5b7c6ae511214971191a4b03f6d3f60a Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Mon, 22 Apr 2024 15:21:16 +0200
+Subject: [PATCH] imx8mn: solidrun: implement ethernet phy selection
+
+SolidSense N8 Compact version 1.2 and later replace the original ar8035
+phy with adin1300.
+Implement auto-detection by mdio address and patch Linux device-tree
+accordingly.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ arch/arm/dts/imx8mn-compact.dts               | 13 ++--
+ .../imx8mn_solidrun/imx8mn_solidrun.c         | 71 +++++++++++++++++++
+ include/configs/imx8mn_solidrun.h             |  2 +-
+ 3 files changed, 81 insertions(+), 5 deletions(-)
+
+diff --git a/arch/arm/dts/imx8mn-compact.dts b/arch/arm/dts/imx8mn-compact.dts
+index 54e56cd7..dd5e624c 100644
+--- a/arch/arm/dts/imx8mn-compact.dts
++++ b/arch/arm/dts/imx8mn-compact.dts
+@@ -349,7 +349,7 @@
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_fec1>;
+ 	phy-mode = "rgmii-id";
+-	phy-handle = <&ethphy4>;
++	phy-handle = <&phy>;
+ 	phy-reset-gpios = <&gpio3 19 GPIO_ACTIVE_LOW>;
+ 	fsl,magic-packet;
+ 	status = "okay";
+@@ -358,9 +358,14 @@
+ 		#address-cells = <1>;
+ 		#size-cells = <0>;
+ 
+-		ethphy4: ethernet-phy@4 {
+-			compatible = "ethernet-phy-ieee802.3-c22";
+-			reg = <4>;
++		phy: ethernet-phy@ffffffff {
++			/*
++			 * The PHY can appear either:
++			 * - AR8035: at address 4
++			 * - ADIN1300: at address 0
++			 * Actual address being detected at runtime.
++			 */
++			reg = <0xffffffff>;
+ 			at803x,led-act-blind-workaround;
+ 			at803x,eee-disabled;
+ 		};
+diff --git a/board/solidrun/imx8mn_solidrun/imx8mn_solidrun.c b/board/solidrun/imx8mn_solidrun/imx8mn_solidrun.c
+index 8a2a8b53..d83d78f5 100644
+--- a/board/solidrun/imx8mn_solidrun/imx8mn_solidrun.c
++++ b/board/solidrun/imx8mn_solidrun/imx8mn_solidrun.c
+@@ -121,6 +121,77 @@ int board_phy_config(struct phy_device *phydev)
+ }
+ #endif
+ 
++static int find_ethernet_phy(void)
++{
++	struct mii_dev *bus = NULL;
++	struct phy_device *phydev = NULL;
++	int phy_addr = -ENOENT;
++
++#ifdef CONFIG_FEC_MXC
++	bus = fec_get_miibus(ENET1_BASE_ADDR, -1);
++	if (!bus)
++		return -ENOENT;
++
++	// scan address 0, 4
++	phydev = phy_find_by_mask(bus, 0b00010001, PHY_INTERFACE_MODE_RGMII_ID);
++	if (!phydev) {
++		return -ENOENT;
++	}
++	pr_debug("%s: detected ethernet phy at address %d\n", __func__, phydev->addr);
++	phy_addr = phydev->addr;
++#endif
++
++	return phy_addr;
++}
++
++#if defined(CONFIG_OF_LIBFDT) && defined(CONFIG_OF_BOARD_SETUP)
++/*
++ * Configure the correct ethernet PHYs nodes in device-tree:
++ * - AR8035 at addresses 4: SolidSense N8 Compact v1.0+
++ * - ADIN1300 at address 0: SolidSense N8 Compact v1.2+
++ */
++int ft_board_setup(void *fdt, struct bd_info *bd)
++{
++	int node_fec, node_phy0, node_phy4;
++	int ret, phy;
++	bool enable_phy0 = false, enable_phy4 = false;
++	u32 phy_handle;
++
++	// detect phy
++	phy = find_ethernet_phy();
++	switch (phy) {
++	case 0:
++		enable_phy0 = true;
++		break;
++	case 4:
++		enable_phy4 = true;
++		break;
++	default:
++		pr_err("%s: couldn't detect ethernet phy, not patching dtb!\n", __func__);
++		return 0;
++	}
++
++	// update all phy nodes status
++	node_phy0 = fdt_path_offset(fdt, "/soc@0/bus@30800000/ethernet@30be0000/mdio/ethernet-phy@0");
++	ret = fdt_setprop_string(fdt, node_phy0, "status", enable_phy0 ? "okay" : "disabled");
++	if (ret < 0 && enable_phy0)
++		pr_err("%s: failed to enable ethernet phy at address 0 in dtb!\n", __func__);
++	node_phy4 = fdt_path_offset(fdt, "/soc@0/bus@30800000/ethernet@30be0000/mdio/ethernet-phy@4");
++	ret = fdt_setprop_string(fdt, node_phy4, "status", enable_phy4 ? "okay" : "disabled");
++	if (ret < 0 && enable_phy4)
++		pr_err("%s: failed to enable ethernet phy at address 4 in dtb!\n", __func__);
++
++	// update phy-handle
++	phy_handle = fdt_get_phandle(fdt, enable_phy0 ? node_phy0 : node_phy4);
++	node_fec = fdt_path_offset(fdt, "/soc@0/bus@30800000/ethernet@30be0000");
++	ret = fdt_setprop_u32(fdt, node_fec, "phy-handle", phy_handle);
++	if (ret < 0)
++		pr_err("%s: failed to update phy-handle in dtb!\n", __func__);
++
++	return 0;
++}
++#endif
++
+ #define FSL_SIP_GPC			0xC2000000
+ #define FSL_SIP_CONFIG_GPC_PM_DOMAIN	0x3
+ #define DISPMIX				9
+diff --git a/include/configs/imx8mn_solidrun.h b/include/configs/imx8mn_solidrun.h
+index 27687fc5..27a4e3de 100644
+--- a/include/configs/imx8mn_solidrun.h
++++ b/include/configs/imx8mn_solidrun.h
+@@ -69,7 +69,7 @@
+ #define PHY_ANEG_TIMEOUT 20000
+ 
+ #define CONFIG_FEC_XCV_TYPE             RGMII
+-#define CONFIG_FEC_MXC_PHYADDR          4
++#define CONFIG_FEC_MXC_PHYADDR          -1
+ #define FEC_QUIRK_ENET_MAC
+ 
+ #define IMX_FEC_BASE			0x30BE0000
+-- 
+2.35.3
+

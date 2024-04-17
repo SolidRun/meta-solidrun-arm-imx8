@@ -17,6 +17,10 @@ SRC_URI += " \
 	file://0012-arm64-dts-add-support-for-imx8mp-hummingboard-extend.patch \
 	file://0013-arm64-dts-split-pcie-reset-signals-for-hb-pulse-and-.patch \
 	file://0014-adv7511-driver-update.patch \
+	file://0100-dt-bindings-net-adin-document-phy-clock-output-prope.patch \
+	file://0101-dt-bindings-net-adin-add-pin-polarity-properties-for.patch \
+	file://0102-net-phy-adin-add-support-for-setting-led-link-status.patch \
+	file://0103-arm64-dts-add-description-for-solidrun-solidsense-n8.patch \
 "
 
 KERNEL_MODULE_AUTOLOAD += "imx-sdma"

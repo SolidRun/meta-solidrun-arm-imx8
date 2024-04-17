@@ -1,0 +1,55 @@
+From 5ef558021f90e6497eb42305dcef1e3d52b67019 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Fri, 19 Apr 2024 17:35:17 +0200
+Subject: [PATCH 101/103] dt-bindings: net: adin: add pin polarity properties
+ for LED_0, LINK_ST
+
+ADIN1300 supports software control over pin polarity for both LED_0 and
+LINK_ST pins.
+
+Add new properties to set pin polarity:
+
+- adi,led-polarity:
+  LED_0 is used as hardware configuration signal during reset.
+  Depending on external voltage on the line default value is either
+  active-high  (0) or active-low (1).
+- adi,link-st-polarity:
+  LINK_ST is always active-high (0) after reset.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ .../devicetree/bindings/net/adi,adin.yaml      | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/net/adi,adin.yaml b/Documentation/devicetree/bindings/net/adi,adin.yaml
+index 77750df0c2c4..cb21a12f3770 100644
+--- a/Documentation/devicetree/bindings/net/adi,adin.yaml
++++ b/Documentation/devicetree/bindings/net/adi,adin.yaml
+@@ -51,6 +51,24 @@ properties:
+     description: Enable 25MHz reference clock output on CLK25_REF pin.
+     type: boolean
+ 
++  adi,led-polarity:
++    $ref: /schemas/types.yaml#/definitions/uint32
++    description:
++      LED_0 pin polarity. If unspecified keep phy reset-default derived
++      from hardware configuration pins.
++    enum:
++      - 0 # active high
++      - 1 # active low
++
++  adi,link-st-polarity:
++    $ref: /schemas/types.yaml#/definitions/uint32
++    description:
++      LINK_ST pin polarity.
++    enum:
++      - 0 # active high
++      - 1 # active low
++    default: 0
++
+ unevaluatedProperties: false
+ 
+ examples:
+-- 
+2.35.3
+
