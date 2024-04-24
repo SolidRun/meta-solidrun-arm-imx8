@@ -36,6 +36,7 @@ SRC_URI += " \
 		file://0033-board-solidrun-imx8mp-fix-mac-address-calculation.patch \
 		file://0034-board-solidrun-imx8mp-enable-second-on-soc-ethernet.patch \
 		file://0036-configs-imx8mp-solidrun-move-environment-to-fit-with.patch \
+		file://0037-net-fec_mxc-add-weak-implementation-of-board_get_mac.patch \
 "
 
 LTO:class-target = ""
