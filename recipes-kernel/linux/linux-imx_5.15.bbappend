@@ -17,10 +17,16 @@ SRC_URI += " \
 	file://0012-arm64-dts-add-support-for-imx8mp-hummingboard-extend.patch \
 	file://0013-arm64-dts-split-pcie-reset-signals-for-hb-pulse-and-.patch \
 	file://0014-adv7511-driver-update.patch \
+	file://0016-Revert-net-rfkill-gpio-add-device-tree-support.patch \
+	file://0017-net-rfkill-gpio-add-DT-support.patch \
+	file://0018-net-rfkill-gpio-prevent-value-glitch-during-probe.patch \
+	file://0019-net-rfkill-gpio-set-GPIO-direction.patch \
+	file://0020-arm64-dts-imx8mp-hummingboard-pulse-use-upstream-rfk.patch \
 	file://0100-dt-bindings-net-adin-document-phy-clock-output-prope.patch \
 	file://0101-dt-bindings-net-adin-add-pin-polarity-properties-for.patch \
 	file://0102-net-phy-adin-add-support-for-setting-led-link-status.patch \
 	file://0103-arm64-dts-add-description-for-solidrun-solidsense-n8.patch \
+	file://0104-arm64-dts-imx8mn-solidsense-n8-add-power-controls-fo.patch \
 "
 
 KERNEL_MODULE_AUTOLOAD += "imx-sdma"

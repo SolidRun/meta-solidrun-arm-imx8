@@ -1,0 +1,89 @@
+From 8a452381dc5ba7062b5935a4423772d3a0a7b684 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Sun, 28 Apr 2024 14:49:15 +0200
+Subject: [PATCH] arm64: dts: imx8mn-solidsense-n8: add power controls for lte
+ modem
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ .../imx8mn-solidsense-n8-compact.dts          | 35 ++++++++++++++++---
+ 1 file changed, 31 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mn-solidsense-n8-compact.dts b/arch/arm64/boot/dts/freescale/imx8mn-solidsense-n8-compact.dts
+index f8ee48a9bffa..6c842667f4c8 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mn-solidsense-n8-compact.dts
++++ b/arch/arm64/boot/dts/freescale/imx8mn-solidsense-n8-compact.dts
+@@ -69,6 +69,18 @@ led3 {
+ 		};
+ 	};
+ 
++	reg_modem_vbat: regulator-modem-vbat {
++		compatible = "regulator-fixed";
++		regulator-name = "modem-vbat";
++		pinctrl-names = "default";
++		pinctrl-0 = <&regulator_modem_vbat_pins>;
++		regulator-min-microvolt = <3800000>;
++		regulator-max-microvolt = <3800000>;
++		gpio = <&gpio3 25 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		regulator-always-on;
++	};
++
+ 	/* power to lte modems behind hub ports 2/3 */
+ 	reg_modem_vbus: regulator-modem-vbus {
+ 		compatible = "regulator-fixed";
+@@ -121,6 +133,15 @@ reg_usdhc2_vmmc: regulator-usdhc2-vmmc {
+ 		off-on-delay-us = <250>;
+ 	};
+ 
++	rfkill {
++		compatible = "rfkill-gpio";
++		label = "rfkill-wwan";
++		radio-type = "wwan";
++		pinctrl-names = "default";
++		pinctrl-0 = <&modem_pins>;
++		reset-gpios = <&gpio1 7 GPIO_ACTIVE_HIGH>;
++	};
++
+ 	usdhc1_pwrseq: usdhc1-pwrseq {
+ 		compatible = "mmc-pwrseq-simple";
+ 		reset-gpios = <&gpio2 10 GPIO_ACTIVE_LOW>;
+@@ -420,7 +441,7 @@ &i2c4 {
+ 
+ &iomuxc {
+ 	pinctr-names = "default";
+-	pinctrl-0 = <&modem_pins>, <&tamper_pins>, <&usb_hub_pins>;
++	pinctrl-0 = <&tamper_pins>, <&usb_hub_pins>;
+ 
+ 	ieee802151_radio_pins: ieee802151-radio-pins {
+ 		fsl,pins = <
+@@ -530,10 +551,10 @@ MX8MN_IOMUXC_GPIO1_IO13_GPIO1_IO13	0x100
+ 
+ 	modem_pins: modem-pins {
+ 		fsl,pins = <
+-			/* RESET_N */
++			/* RESET_N: modem-internal pull-down */
+ 			MX8MN_IOMUXC_GPIO1_IO07_GPIO1_IO7	0x0
+-			/* PWRKEY */
+-			MX8MN_IOMUXC_GPIO1_IO08_GPIO1_IO8	0x0
++			/* PWRKEY: pull-down ensures always-on */
++			MX8MN_IOMUXC_GPIO1_IO08_GPIO1_IO8	0x100
+ 		>;
+ 	};
+ 
+@@ -543,6 +564,12 @@ MX8MN_IOMUXC_GPIO1_IO03_GPIO1_IO3	0x140
+ 		>;
+ 	};
+ 
++	regulator_modem_vbat_pins: regulator-modem-vbat-pins {
++		fsl,pins = <
++			MX8MN_IOMUXC_SAI5_MCLK_GPIO3_IO25	0x0
++		>;
++	};
++
+ 	regulator_modem_vbus_pins: regulator-modem-vbus-pins {
+ 		fsl,pins = <
+ 			MX8MN_IOMUXC_SPDIF_RX_GPIO5_IO4		0x0
+-- 
+2.35.3
+

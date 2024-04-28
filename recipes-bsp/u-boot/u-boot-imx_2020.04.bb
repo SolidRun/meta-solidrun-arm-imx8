@@ -92,3 +92,5 @@ file://0013-imx8mn-solidrun-rename-fdtfile-to-imx8mn-compact.dtb.patch \
 file://0014-imx8mn-solidrun-implement-ethernet-phy-selection.patch \
 file://0015-imx8mn-solidrun-regenerate-defconfig.patch \
 "
+
+include ${@bb.utils.contains('BBFILE_COLLECTIONS', 'mender', 'u-boot-imx-mender.inc', '', d)}
