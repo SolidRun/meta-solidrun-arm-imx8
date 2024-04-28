@@ -1,7 +1,7 @@
-OpenEmbedded/Yocto BSP layer for SolidRun's iMX8MPlus based platforms
+OpenEmbedded/Yocto BSP layer for SolidRun's iMX8M Plus & Nano based platforms
 ================================================================
 
-This layer provides support for SolidRun's iMX8mp based platforms for
+This layer provides support for SolidRun's iMX8M Plus & Nano based platforms for
 use with OpenEmbedded and Yocto Freescale's BSP layer.
 
 
@@ -37,12 +37,38 @@ use with OpenEmbedded and Yocto Freescale's BSP layer.
 					├── downloads
 					└── ...
 				</pre>
-4. Configure imx8mpsolidrun board, Distro for xwayland support and create the build environment:
-**After running the following commands, you need to accept the EULA (scrool down and run "y")**
 
-		$ DISTRO=fsl-imx-xwayland MACHINE=imx8mpsolidrun source imx-setup-release.sh -b build-xwayland-imx8mpsolidrun
+4. Configure target machine and distro:
 
-5. Build Yocto image for imx8mp solidrun, by running the first, which is a minimal image (lacks firmwares) and then second which is full image including demos:
+   | MACHINE        | Description                    |
+   | -------------- | ------------------------------ |
+   | imx8mpsolidrun | All i.MX8M Plus based products |
+   | solidsensen8   | SolidSense N8                  |
+
+   Select appropriate machine from the table above, and set in environment:
+
+       # E.g. imx8mpsolidrun:
+       MACHINE=imx8mpsolidrun
+
+   | DISTRO           | Description                                             |
+   | ---------------- | ------------------------------------------------------- |
+   | fsl-imx-fb       | NXP Distro with Framebuffer Graphics                    |
+   | fsl-imx-wayland  | NXP Distro with Wayland Graphics                        |
+   | fsl-imx-x11      | NXP Distro with X11 Graphics                            |
+   | fsl-imx-xwayland | NXP Distro with Wayland Graphics with X11 Compatibility |
+
+   While NXP supports multiple graphical systems, "fsl-imx-xwayland" is recommended for greatest compatibility.
+   New designs should consider "fsl-imx-wayland" without X11 compatibility:
+
+       # E.g. fsl-imx-xwayland
+       DISTRO=fsl-imx-xwayland
+
+   Configure machine, distro and create build environment:
+   **After running the following commands, you need to accept the EULA (scrool down and run "y")**
+
+       DISTRO=$DISTRO MACHINE=$MACHINE source imx-setup-release.sh -b build-$DISTRO-$MACHINE
+
+5. Build Yocto image by running the first, which is a minimal image (lacks firmwares) and then second which is full image including demos:
 (**The following command can take several hours**)
 
     $ bitbake core-image-minimal
