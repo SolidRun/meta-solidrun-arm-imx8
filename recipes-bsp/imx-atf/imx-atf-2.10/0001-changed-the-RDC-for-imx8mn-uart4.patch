@@ -11,7 +11,7 @@ diff --git a/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c b/plat/imx/imx8m/imx8mn/i
 index c87748a18..e9be22aae 100644
 --- a/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c
 +++ b/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c
-@@ -105,7 +105,7 @@ static const struct imx_rdc_cfg rdc[] = {
+@@ -112,7 +112,7 @@ static const struct imx_rdc_cfg rdc[] = {
  	RDC_MDAn(RDC_MDA_M7, DID1),
  
  	/* peripherals domain permission */
