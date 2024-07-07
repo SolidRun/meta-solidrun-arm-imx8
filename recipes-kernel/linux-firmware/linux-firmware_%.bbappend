@@ -3,14 +3,14 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 IMX_FIRMWARE_SRC ?= "git://github.com/NXP/imx-firmware.git;protocol=https"
-SRCBRANCH_imx-firmware = "lf-5.15.71_2.2.0"
+SRCBRANCH_imx-firmware = "lf-6.6.23_2.0.0"
 SRC_URI += " \
     git://github.com/murata-wireless/qca-linux-calibration.git;protocol=https;branch=master;name=murata-qca;destsuffix=murata-qca \
     ${IMX_FIRMWARE_SRC};branch=${SRCBRANCH_imx-firmware};destsuffix=imx-firmware;name=imx-firmware \
 "
 
 SRCREV_murata-qca = "a0026b646ce6adfb72f135ffa8a310f3614b2272"
-SRCREV_imx-firmware = "982bb10dfabfb9e7b9dc106c59a4fbb2c45bfb44"
+SRCREV_imx-firmware = "7e038c6afba3118bcee91608764ac3c633bce0c4"
 
 SRCREV_FORMAT = "default_murata-qca_imx-firmware"
 
