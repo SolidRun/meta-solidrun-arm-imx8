@@ -1,4 +1,4 @@
-From c82ecb79b85150556373086389f79eaab8f00863 Mon Sep 17 00:00:00 2001
+From 3c8781d942a40efba3642b94494bbc3cf5d37f82 Mon Sep 17 00:00:00 2001
 From: Jon Nettleton <jon@solid-run.com>
 Date: Fri, 26 Mar 2021 11:37:34 +0100
 Subject: [PATCH 07/14] ARM64: dts: imx8mp: Add SolidRun iMX8MP SOM based
@@ -20,20 +20,20 @@ Signed-off-by: Jon Nettleton <jon@solid-run.com>
  create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-sr-som.dtsi
 
 diff --git a/arch/arm64/boot/dts/freescale/Makefile b/arch/arm64/boot/dts/freescale/Makefile
-index 9a7319c6b4e3..6d6b05666d58 100644
+index afc9f83f11df..32d2fccfdaa8 100644
 --- a/arch/arm64/boot/dts/freescale/Makefile
 +++ b/arch/arm64/boot/dts/freescale/Makefile
-@@ -119,6 +119,7 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-phyboard-pollux-rdk.dtb
- dtb-$(CONFIG_ARCH_MXC) += imx8mq-evk.dtb imx8mq-evk-rpmsg.dtb imx8mp-ab2.dtb
+@@ -133,6 +133,7 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-ab2.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-navq.dtb imx8mp-navq-ov5640-ov5645.dts imx8mp-navq-ov5647-ov5640.dts
  dtb-$(CONFIG_ARCH_MXC) += imx8mp-ddr4-evk.dtb
  dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-ndm.dtb
 +dtb-$(CONFIG_ARCH_MXC) += imx8mp-hummingboard-pulse.dtb imx8mp-cubox-m.dtb
- dtb-$(CONFIG_ARCH_MXC) += imx8mq-evk.dtb imx8mq-evk-rpmsg.dtb imx8mq-evk-pcie1-m2.dtb imx8mq-evk-usd-wifi.dtb \
- 			  imx8mq-evk-usdhc2-m2.dtb
- dtb-$(CONFIG_ARCH_MXC) += imx8mq-evk-ak4497.dtb imx8mq-evk-audio-tdm.dtb imx8mq-evk-pdm.dtb
+ 
+ imx8mp-evk-revb4-dtbs := imx8mp-evk.dtb imx8mp-evk-revb4.dtbo
+ imx8mp-evk-revb4-rm67191-dtbs := imx8mp-evk-rm67191.dtb imx8mp-evk-revb4.dtbo
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp-cubox-m.dts b/arch/arm64/boot/dts/freescale/imx8mp-cubox-m.dts
 new file mode 100644
-index 000000000000..e43a5194f2fd
+index 000000000000..f7adc5c8a345
 --- /dev/null
 +++ b/arch/arm64/boot/dts/freescale/imx8mp-cubox-m.dts
 @@ -0,0 +1,300 @@
@@ -339,7 +339,7 @@ index 000000000000..e43a5194f2fd
 +};
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dts b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dts
 new file mode 100644
-index 000000000000..03903a50235e
+index 000000000000..a3d67b8a9df3
 --- /dev/null
 +++ b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dts
 @@ -0,0 +1,684 @@
@@ -350,7 +350,7 @@ index 000000000000..03903a50235e
 +
 +/dts-v1/;
 +
-+#include <dt-bindings/usb/pd.h>
++#include "dt-bindings/usb/pd.h"
 +#include "imx8mp-sr-som.dtsi"
 +
 +/ {
@@ -928,7 +928,7 @@ index 000000000000..03903a50235e
 +
 +        pinctrl_pcie: pciegrp {
 +                fsl,pins = <
-+                        MX8MP_IOMUXC_SAI3_RXFS__GPIO4_IO28		0x41/*pcie reset*/
++			MX8MP_IOMUXC_SAI3_RXFS__GPIO4_IO28		0x41/*pcie reset*/
 +                >;
 +        };
 +
@@ -1029,7 +1029,7 @@ index 000000000000..03903a50235e
 +};
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp-sr-som.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-sr-som.dtsi
 new file mode 100644
-index 000000000000..a83e66ef2a82
+index 000000000000..1069bdcf5d8c
 --- /dev/null
 +++ b/arch/arm64/boot/dts/freescale/imx8mp-sr-som.dtsi
 @@ -0,0 +1,684 @@
@@ -1226,7 +1226,7 @@ index 000000000000..a83e66ef2a82
 +		pinctrl-0 = <&pinctrl_pmic>;
 +		interrupt-parent = <&gpio1>;
 +		interrupts = <3 GPIO_ACTIVE_LOW>;
-+		pca,i2c-lt-en = /bits/ 8 <0x2>;
++		nxp,i2c-lt-enable = /bits/ 8 <0x2>;
 +
 +		regulators {
 +			buck1: BUCK1 {
@@ -1719,4 +1719,3 @@ index 000000000000..a83e66ef2a82
 +};
 -- 
 2.39.1
-

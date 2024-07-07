@@ -1,0 +1,30 @@
+From f4c88667216bd83588a631a3984029aaf966f6ff Mon Sep 17 00:00:00 2001
+From: Omar El-Domeiri <github@doesnotexist.com>
+Date: Sun, 7 Jul 2024 16:49:54 +0000
+Subject: [PATCH] update constants for audio clocks to match upstream
+ See include/dt-bindings/clock/imx8mp-clock.h
+ https://github.com/nxp-imx/linux-imx/commit/849af490b6a674ba0636fbf95ac048b87ad2eb95
+
+---
+ .../boot/dts/freescale/imx8mp-hummingboard-pulse.dtsi     | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dtsi
+index d86c3f08ee5b..24d3a7e10728 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dtsi
+@@ -410,9 +410,11 @@ &sai3 {
+         assigned-clocks = <&clk IMX8MP_CLK_SAI3>;
+         assigned-clock-parents = <&clk IMX8MP_AUDIO_PLL1_OUT>;
+         assigned-clock-rates = <12288000>;
+-        clocks = <&audio_blk_ctrl IMX8MP_CLK_AUDIO_BLK_CTRL_SAI3_IPG>, <&clk IMX8MP_CLK_DUMMY>,
+-                 <&audio_blk_ctrl IMX8MP_CLK_AUDIO_BLK_CTRL_SAI3_MCLK1>, <&clk IMX8MP_CLK_DUMMY>,
+-                 <&clk IMX8MP_CLK_DUMMY>;
++		clocks = <&audio_blk_ctrl IMX8MP_CLK_AUDIOMIX_SAI3_IPG>,
++			 <&clk IMX8MP_CLK_DUMMY>,
++			 <&audio_blk_ctrl IMX8MP_CLK_AUDIOMIX_SAI3_MCLK1>,
++			 <&clk IMX8MP_CLK_DUMMY>,
++			 <&clk IMX8MP_CLK_DUMMY>;
+         clock-names = "bus", "mclk0", "mclk1", "mclk2", "mclk3";
+         fsl,sai-mclk-direction-output;
+ 	status = "okay";

@@ -1,8 +1,8 @@
-From 5ef558021f90e6497eb42305dcef1e3d52b67019 Mon Sep 17 00:00:00 2001
+From 033e88e1e914127339399bd6ce36fb0be1ccad41 Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Fri, 19 Apr 2024 17:35:17 +0200
-Subject: [PATCH 101/103] dt-bindings: net: adin: add pin polarity properties
- for LED_0, LINK_ST
+Subject: [PATCH] dt-bindings: net: adin: add pin polarity properties for
+ LED_0, LINK_ST
 
 ADIN1300 supports software control over pin polarity for both LED_0 and
 LINK_ST pins.
@@ -22,10 +22,10 @@ Signed-off-by: Josua Mayer <josua@solid-run.com>
  1 file changed, 18 insertions(+)
 
 diff --git a/Documentation/devicetree/bindings/net/adi,adin.yaml b/Documentation/devicetree/bindings/net/adi,adin.yaml
-index 77750df0c2c4..cb21a12f3770 100644
+index 929cf8c0b0fd..ff9262dc69f9 100644
 --- a/Documentation/devicetree/bindings/net/adi,adin.yaml
 +++ b/Documentation/devicetree/bindings/net/adi,adin.yaml
-@@ -51,6 +51,24 @@ properties:
+@@ -52,6 +52,24 @@ properties:
      description: Enable 25MHz reference clock output on CLK25_REF pin.
      type: boolean
  
@@ -52,4 +52,3 @@ index 77750df0c2c4..cb21a12f3770 100644
  examples:
 -- 
 2.35.3
-

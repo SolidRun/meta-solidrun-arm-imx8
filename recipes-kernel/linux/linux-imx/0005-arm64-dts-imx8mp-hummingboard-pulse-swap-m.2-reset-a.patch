@@ -1,20 +1,20 @@
-From efbadb93184e2b74c63089f022d9780633fdecc3 Mon Sep 17 00:00:00 2001
+From f5109d699511314f0830ea8b279348e26ae119a4 Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Sun, 20 Aug 2023 13:42:12 +0200
-Subject: [PATCH 10/10] arm64: dts: imx8mp-hummingboard-pulse: swap m.2 reset
- and w_disable IOs
+Subject: [PATCH] arm64: dts: imx8mp-hummingboard-pulse: swap m.2 reset and
+ w_disable IOs
 
 According to schematics the M.2 reset signal is controlled by
 GPIO1_IO06, while W_DISABLE uses GPIO1_IO13.
 Swap usage accordingly in rfkill and pinctrl.
 
-Signed-off0by: Josua Mayer <josua@solid-run.com>
+Signed-off-by: Josua Mayer <josua@solid-run.com>
 ---
- .../boot/dts/freescale/imx8mp-hummingboard-pulse.dtsi     | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+ .../dts/freescale/imx8mp-hummingboard-pulse.dtsi | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dtsi
-index 42bb1f26e093..818f7e440b23 100644
+index b088454dcf10..ba1771f9cde7 100644
 --- a/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dtsi
 +++ b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dtsi
 @@ -106,7 +106,7 @@ rfkill_m2_wdis {
@@ -44,15 +44,22 @@ index 42bb1f26e093..818f7e440b23 100644
  		>;
  	};
  
-@@ -577,7 +577,7 @@ MX8MP_IOMUXC_GPIO1_IO08__GPIO1_IO08		0x16
+@@ -575,11 +575,11 @@ MX8MP_IOMUXC_GPIO1_IO08__GPIO1_IO08		0x16
+ 		>;
+ 	};
  
-         pinctrl_pcie: pciegrp {
-                 fsl,pins = <
--						MX8MP_IOMUXC_GPIO1_IO13__GPIO1_IO13		0x19
-+						MX8MP_IOMUXC_GPIO1_IO06__GPIO1_IO06		0x19
-                 >;
-         };
+-        pinctrl_pcie: pciegrp {
+-                fsl,pins = <
+-			MX8MP_IOMUXC_GPIO1_IO13__GPIO1_IO13		0x19
+-                >;
+-        };
++    pinctrl_pcie: pciegrp {
++        fsl,pins = <
++			MX8MP_IOMUXC_GPIO1_IO06__GPIO1_IO06		0x19
++        >;
++    };
  
+ 	pinctrl_pdm: pdmgrp {
+ 		fsl,pins = <
 -- 
 2.35.3
-
