@@ -1,0 +1,149 @@
+From 495fa52b30bd79d17a7bea1d429465abea53ca43 Mon Sep 17 00:00:00 2001
+From: Omar El-Domeiri <github@doesnotexist.com>
+Date: Tue, 9 Jul 2024 16:42:16 +0000
+Subject: [PATCH] migrate to new schema for u-boot,dm-* tags to bootph-*
+
+As stated in the documentation within spl.rst:
+"NOTE: U-Boot migrated to a new schema for the u-boot,dm-* tags in 2023.
+Please update to use the new bootph-* tags as described in the
+doc/device-tree-bindings/bootph.yaml binding file."
+---
+ arch/arm/dts/imx8mp-solidrun-u-boot.dtsi | 46 ++++++++++++------------
+ 1 file changed, 23 insertions(+), 23 deletions(-)
+
+diff --git a/arch/arm/dts/imx8mp-solidrun-u-boot.dtsi b/arch/arm/dts/imx8mp-solidrun-u-boot.dtsi
+index 1f8b12abb69..631f34fa764 100644
+--- a/arch/arm/dts/imx8mp-solidrun-u-boot.dtsi
++++ b/arch/arm/dts/imx8mp-solidrun-u-boot.dtsi
+@@ -10,7 +10,7 @@
+ 	wdt-reboot {
+ 		compatible = "wdt-reboot";
+ 		wdt = <&wdog1>;
+-		u-boot,dm-spl;
++		bootph-pre-ram;
+ 	};
+ 
+ 	mcu_rdc {
+@@ -59,72 +59,72 @@
+ };
+ 
+ &reg_usdhc2_vmmc {
+-	u-boot,dm-spl;
++	bootph-pre-ram;
+ 	u-boot,off-on-delay-us = <20000>;
+ };
+ 
+ &pinctrl_uart2 {
+-	u-boot,dm-spl;
++	bootph-pre-ram;
+ };
+ 
+ &pinctrl_usdhc2_gpio {
+-	u-boot,dm-spl;
++	bootph-pre-ram;
+ };
+ 
+ &pinctrl_usdhc2 {
+-	u-boot,dm-spl;
++	bootph-pre-ram;
+ };
+ 
+ &pinctrl_usdhc3 {
+-	u-boot,dm-spl;
++	bootph-pre-ram;
+ };
+ 
+ &gpio1 {
+-	u-boot,dm-spl;
++	bootph-pre-ram;
+ };
+ 
+ &gpio2 {
+-	u-boot,dm-spl;
++	bootph-pre-ram;
+ };
+ 
+ &gpio3 {
+-	u-boot,dm-spl;
++	bootph-pre-ram;
+ };
+ 
+ &gpio4 {
+-	u-boot,dm-spl;
++	bootph-pre-ram;
+ };
+ 
+ &gpio5 {
+-	u-boot,dm-spl;
++	bootph-pre-ram;
+ };
+ 
+ &uart2 {
+-	u-boot,dm-spl;
++	bootph-pre-ram;
+ };
+ 
+ &i2c1 {
+-	u-boot,dm-spl;
++	bootph-all;
+ };
+ 
+ &i2c2 {
+-	u-boot,dm-spl;
++	bootph-pre-ram;
+ };
+ 
+ &i2c3 {
+-	u-boot,dm-spl;
++	bootph-pre-ram;
+ };
+ 
+ &pinctrl_i2c1 {
+-	u-boot,dm-spl;
++	bootph-all;
+ };
+ 
+ &pinctrl_i2c1_gpio {
+-	u-boot,dm-spl;
++	bootph-all;
+ };
+ 
+ &usdhc2 {
+-	u-boot,dm-spl;
++	bootph-pre-ram;
+ 	sd-uhs-sdr104;
+ 	sd-uhs-ddr50;
+ 	assigned-clocks = <&clk IMX8MP_CLK_USDHC2>;
+@@ -133,7 +133,7 @@
+ };
+ 
+ &usdhc3 {
+-	u-boot,dm-spl;
++	bootph-pre-ram;
+ 	mmc-hs400-1_8v;
+ 	mmc-hs400-enhanced-strobe;
+ 	assigned-clocks = <&clk IMX8MP_CLK_USDHC3>;
+@@ -142,19 +142,19 @@
+ };
+ 
+ &wdog1 {
+-	u-boot,dm-spl;
++	bootph-pre-ram;
+ };
+ 
+ &{/soc@0/bus@30800000/i2c@30a20000/pca9450@25} {
+-	u-boot,dm-spl;
++	bootph-all;
+ };
+ 
+ &{/soc@0/bus@30800000/i2c@30a20000/pca9450@25/regulators} {
+-	u-boot,dm-spl;
++	bootph-all;
+ };
+ 
+ &pinctrl_pmic {
+-	u-boot,dm-spl;
++	bootph-all;
+ };
+ 
+ &eqos {

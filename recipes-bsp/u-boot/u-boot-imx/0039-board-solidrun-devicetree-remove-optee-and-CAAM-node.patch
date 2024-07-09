@@ -1,0 +1,50 @@
+From 9dd56f4250e18fa9f7e91d349699f2c865a719c2 Mon Sep 17 00:00:00 2001
+From: Omar El-Domeiri <github@doesnotexist.com>
+Date: Tue, 9 Jul 2024 16:38:53 +0000
+Subject: [PATCH] board solidrun devicetree remove optee and CAAM nodes
+
+optee and CAAM nodes are now found in parent file imx8mp-u-boot.dtsi
+---
+ arch/arm/dts/imx8mp-solidrun-u-boot.dtsi | 22 ----------------------
+ 1 file changed, 22 deletions(-)
+
+diff --git a/arch/arm/dts/imx8mp-solidrun-u-boot.dtsi b/arch/arm/dts/imx8mp-solidrun-u-boot.dtsi
+index 07101667dbe..1f8b12abb69 100644
+--- a/arch/arm/dts/imx8mp-solidrun-u-boot.dtsi
++++ b/arch/arm/dts/imx8mp-solidrun-u-boot.dtsi
+@@ -12,12 +12,6 @@
+ 		wdt = <&wdog1>;
+ 		u-boot,dm-spl;
+ 	};
+-	firmware {
+-		optee {
+-			compatible = "linaro,optee-tz";
+-			method = "smc";
+-		};
+-	};
+ 
+ 	mcu_rdc {
+ 		compatible = "imx8m,mcu_rdc";
+@@ -109,22 +103,6 @@
+ 	u-boot,dm-spl;
+ };
+ 
+-&crypto {
+-	u-boot,dm-spl;
+-};
+-
+-&sec_jr0 {
+-	u-boot,dm-spl;
+-};
+-
+-&sec_jr1 {
+-	u-boot,dm-spl;
+-};
+-
+-&sec_jr2 {
+-	u-boot,dm-spl;
+-};
+-
+ &i2c1 {
+ 	u-boot,dm-spl;
+ };

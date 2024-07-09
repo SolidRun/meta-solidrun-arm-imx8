@@ -1,0 +1,24 @@
+From a1b33e39efbe9ce8300f04fb05c119e7c5ed8c5e Mon Sep 17 00:00:00 2001
+From: Omar El-Domeiri <github@doesnotexist.com>
+Date: Tue, 9 Jul 2024 16:31:54 +0000
+Subject: [PATCH] board/solidrun/imx8mp_solidrun: remove freescale/Kconfig
+ include
+
+Options are now oly included once at arch level now
+This mirrors the change in upstream here:
+https://github.com/nxp-imx/uboot-imx/commit/93145335fbf5cbe7f6b1ca42263a156620a37f7f
+---
+ board/solidrun/imx8mp_solidrun/Kconfig | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/board/solidrun/imx8mp_solidrun/Kconfig b/board/solidrun/imx8mp_solidrun/Kconfig
+index d7a81984fbe..7b025cf7ff4 100644
+--- a/board/solidrun/imx8mp_solidrun/Kconfig
++++ b/board/solidrun/imx8mp_solidrun/Kconfig
+@@ -12,6 +12,4 @@ config SYS_CONFIG_NAME
+ config IMX_CONFIG
+ 	default "board/solidrun/imx8mp_solidrun/imximage-8mp-sd.cfg"
+ 
+-source "board/freescale/common/Kconfig"
+-
+ endif
