@@ -1,4 +1,4 @@
-From 61097dbc24324686fea05b9f3888b3cd57f0d6db Mon Sep 17 00:00:00 2001
+From 157bf709e3f9ff89412099967cc6f3e6e2c9bb15 Mon Sep 17 00:00:00 2001
 From: Mikhail Anikin <mikhail.anikin@solid-run.com>
 Date: Wed, 21 Jun 2023 19:33:01 +0300
 Subject: [PATCH] Automatic DDR detection for i.MX8MP
@@ -134,17 +134,16 @@ Signed-off-by: Mikhail Anikin <mikhail.anikin@solid-run.com>
  ...g.c => lpddr4_timing_1gb_samsung_micron.c} |   2 +-
  ...g.c => lpddr4_timing_4gb_samsung_micron.c} |   2 +-
  board/solidrun/imx8mp_solidrun/spl.c          | 337 +++++++++++++++---
- drivers/ddr/imx/imx8m/ddr_init.c              |  10 +-
  include/configs/imx8mp_solidrun.h             |   5 +-
- 9 files changed, 412 insertions(+), 76 deletions(-)
+ 8 files changed, 404 insertions(+), 74 deletions(-)
  rename board/solidrun/imx8mp_solidrun/{lpddr4_timing_1gb_samsung.c => lpddr4_timing_1gb_samsung_micron.c} (99%)
  rename board/solidrun/imx8mp_solidrun/{lpddr4_timing_4gb_samsung.c => lpddr4_timing_4gb_samsung_micron.c} (99%)
 
 diff --git a/arch/arm/include/asm/arch-imx8m/ddr.h b/arch/arm/include/asm/arch-imx8m/ddr.h
-index 5e4fbecf05..264d66b9ee 100644
+index c14855d177e..577c6b2a7c7 100644
 --- a/arch/arm/include/asm/arch-imx8m/ddr.h
 +++ b/arch/arm/include/asm/arch-imx8m/ddr.h
-@@ -726,6 +726,8 @@ void get_trained_CDD(unsigned int fsp);
+@@ -727,6 +727,8 @@ unsigned int lpddr4_mr_read(unsigned int mr_rank, unsigned int mr_addr);
  
  ulong ddrphy_addr_remap(uint32_t paddr_apb_from_ctlr);
  
@@ -154,10 +153,10 @@ index 5e4fbecf05..264d66b9ee 100644
  {
  	writel(val, addr);
 diff --git a/arch/arm/mach-imx/imx8m/soc.c b/arch/arm/mach-imx/imx8m/soc.c
-index 0d2f7a5897..33925c53b1 100644
+index c3282ccc213..34cde0bbf46 100644
 --- a/arch/arm/mach-imx/imx8m/soc.c
 +++ b/arch/arm/mach-imx/imx8m/soc.c
-@@ -239,6 +239,19 @@ __weak int board_phys_sdram_size(phys_size_t *size)
+@@ -252,6 +252,19 @@ __weak int board_phys_sdram_size(phys_size_t *size)
  	return 0;
  }
  
@@ -177,7 +176,7 @@ index 0d2f7a5897..33925c53b1 100644
  int dram_init(void)
  {
  	phys_size_t sdram_size;
-@@ -254,6 +267,12 @@ int dram_init(void)
+@@ -267,6 +280,12 @@ int dram_init(void)
  	else
  		gd->ram_size = sdram_size;
  
@@ -190,7 +189,7 @@ index 0d2f7a5897..33925c53b1 100644
  	return 0;
  }
  
-@@ -297,6 +316,12 @@ int dram_init_banksize(void)
+@@ -310,6 +329,12 @@ int dram_init_banksize(void)
  		gd->bd->bi_dram[bank].size = sdram_b1_size;
  	}
  
@@ -199,12 +198,12 @@ index 0d2f7a5897..33925c53b1 100644
 +	if(ret)
 +		return ret;
 +#endif
-+	
++
  	if (sdram_b2_size) {
  		if (++bank >= CONFIG_NR_DRAM_BANKS) {
  			puts("CONFIG_NR_DRAM_BANKS is not enough for SDRAM_2\n");
 diff --git a/board/solidrun/imx8mp_solidrun/Makefile b/board/solidrun/imx8mp_solidrun/Makefile
-index 257529f401..e2531571fe 100644
+index 257529f4018..e2531571fe1 100644
 --- a/board/solidrun/imx8mp_solidrun/Makefile
 +++ b/board/solidrun/imx8mp_solidrun/Makefile
 @@ -8,5 +8,5 @@ obj-y += imx8mp_solidrun.o mmc.o ../common/tlv_data.o
@@ -215,7 +214,7 @@ index 257529f401..e2531571fe 100644
 +obj-$(CONFIG_IMX8M_LPDDR4) += lpddr4_timing_4gb_samsung_micron.o lpddr4_timing_3gb_micron.o lpddr4_timing_2gb_samsung.o lpddr4_timing_1gb_samsung_micron.o
  endif
 diff --git a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
-index c195cc6036..f728ff770c 100644
+index c195cc60361..f728ff770c8 100644
 --- a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 +++ b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 @@ -17,6 +17,7 @@
@@ -353,7 +352,7 @@ diff --git a/board/solidrun/imx8mp_solidrun/lpddr4_timing_1gb_samsung.c b/board/
 similarity index 99%
 rename from board/solidrun/imx8mp_solidrun/lpddr4_timing_1gb_samsung.c
 rename to board/solidrun/imx8mp_solidrun/lpddr4_timing_1gb_samsung_micron.c
-index ba2b5686dc..c923c87d27 100644
+index ba2b5686dcb..c923c87d279 100644
 --- a/board/solidrun/imx8mp_solidrun/lpddr4_timing_1gb_samsung.c
 +++ b/board/solidrun/imx8mp_solidrun/lpddr4_timing_1gb_samsung_micron.c
 @@ -1837,7 +1837,7 @@ static struct dram_fsp_msg ddr_dram_fsp_msg[] = {
@@ -369,7 +368,7 @@ diff --git a/board/solidrun/imx8mp_solidrun/lpddr4_timing_4gb_samsung.c b/board/
 similarity index 99%
 rename from board/solidrun/imx8mp_solidrun/lpddr4_timing_4gb_samsung.c
 rename to board/solidrun/imx8mp_solidrun/lpddr4_timing_4gb_samsung_micron.c
-index ef3f86e75d..acef6da47c 100644
+index ef3f86e75d3..acef6da47c1 100644
 --- a/board/solidrun/imx8mp_solidrun/lpddr4_timing_4gb_samsung.c
 +++ b/board/solidrun/imx8mp_solidrun/lpddr4_timing_4gb_samsung_micron.c
 @@ -1838,7 +1838,7 @@ static struct dram_fsp_msg ddr_dram_fsp_msg[] = {
@@ -382,7 +381,7 @@ index ef3f86e75d..acef6da47c 100644
  	.ddrc_cfg_num = ARRAY_SIZE(ddr_ddrc_cfg),
  	.ddrphy_cfg = ddr_ddrphy_cfg,
 diff --git a/board/solidrun/imx8mp_solidrun/spl.c b/board/solidrun/imx8mp_solidrun/spl.c
-index 74b172cf34..59116cc5a8 100644
+index 74b172cf34f..6e1e4503cac 100644
 --- a/board/solidrun/imx8mp_solidrun/spl.c
 +++ b/board/solidrun/imx8mp_solidrun/spl.c
 @@ -4,6 +4,9 @@
@@ -547,7 +546,7 @@ index 74b172cf34..59116cc5a8 100644
 +{
 +	int ret;
 +	bool output = true;
-+	
++
 +	/* Try 4G Samsung.
 +	 * Will work with: 3G Micron as well.
 +	 */
@@ -763,30 +762,8 @@ index 74b172cf34..59116cc5a8 100644
  #if CONFIG_IS_ENABLED(DM_PMIC_PCA9450)
  int power_init_board(void)
  {
-diff --git a/drivers/ddr/imx/imx8m/ddr_init.c b/drivers/ddr/imx/imx8m/ddr_init.c
-index d64edc57be..7d4b1b0bae 100644
---- a/drivers/ddr/imx/imx8m/ddr_init.c
-+++ b/drivers/ddr/imx/imx8m/ddr_init.c
-@@ -134,9 +134,15 @@ unsigned int lpddr4_mr_read(unsigned int mr_rank, unsigned int mr_addr)
- 		tmp = reg32_read(DRC_PERF_MON_MRR0_DAT(0));
- 	} while ((tmp & 0x8) == 0);
- 	tmp = reg32_read(DRC_PERF_MON_MRR1_DAT(0));
--	tmp = tmp & 0xff;
-+	// tmp = tmp & 0xff;
- 	reg32_write(DRC_PERF_MON_MRR0_DAT(0), 0x4);
--
-+	while (tmp) { //try to find a significant byte in the word
-+		if (tmp & 0xff) {
-+			tmp &= 0xff;
-+			break;
-+		}
-+		tmp >>= 8;
-+	}
- 	return tmp;
- }
- 
 diff --git a/include/configs/imx8mp_solidrun.h b/include/configs/imx8mp_solidrun.h
-index 8fb5560d53..c638fd895f 100644
+index 8fb5560d533..c638fd895f6 100644
 --- a/include/configs/imx8mp_solidrun.h
 +++ b/include/configs/imx8mp_solidrun.h
 @@ -177,7 +177,10 @@
@@ -801,6 +778,3 @@ index 8fb5560d53..c638fd895f 100644
  
  #define CONFIG_MXC_UART_BASE		UART2_BASE_ADDR
  
--- 
-2.34.1
-

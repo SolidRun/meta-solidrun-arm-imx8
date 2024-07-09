@@ -1,8 +1,8 @@
-From c814c57dfe34f6a6f60e703d3f0edd8e2d9290a7 Mon Sep 17 00:00:00 2001
+From 1493a494abbbdc3381d7be8045a5532579cb6367 Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Wed, 16 Aug 2023 16:49:01 +0200
-Subject: [PATCH 28/30] board: solidrun: imx8mp: update spl_print_ddr_tables
- with correct labels
+Subject: [PATCH] board: solidrun: imx8mp: update spl_print_ddr_tables with
+ correct labels
 
 spl_print_ddr_tables used the index into an array of timing parameters
 to indicate the size while printing training result and mode registers.
@@ -18,7 +18,7 @@ Signed-off-by: Josua Mayer <josua@solid-run.com>
  1 file changed, 24 insertions(+), 19 deletions(-)
 
 diff --git a/board/solidrun/imx8mp_solidrun/spl.c b/board/solidrun/imx8mp_solidrun/spl.c
-index 59116cc5a8..879309525b 100644
+index 6e1e4503cac..ed9086dc696 100644
 --- a/board/solidrun/imx8mp_solidrun/spl.c
 +++ b/board/solidrun/imx8mp_solidrun/spl.c
 @@ -66,28 +66,33 @@ int spl_board_boot_device(enum boot_device boot_dev_spl)
@@ -86,6 +86,3 @@ index 59116cc5a8..879309525b 100644
  	}
  	printf("\n");
  	printf("****************************************\n");
--- 
-2.35.3
-

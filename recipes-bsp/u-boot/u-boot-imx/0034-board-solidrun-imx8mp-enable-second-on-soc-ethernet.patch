@@ -1,7 +1,7 @@
-From b759a8688d5c681a3046df48eaf6b12a0ef44afe Mon Sep 17 00:00:00 2001
+From ea6f9dbbcd5c33fab0ac0275661bcc0eb66f6842 Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Sun, 20 Aug 2023 14:57:54 +0200
-Subject: [PATCH 34/34] board: solidrun: imx8mp: enable second on-soc ethernet
+Subject: [PATCH] board: solidrun: imx8mp: enable second on-soc ethernet
 
 Signed-off-by: Josua Mayer <josua@solid-run.com>
 ---
@@ -12,7 +12,7 @@ Signed-off-by: Josua Mayer <josua@solid-run.com>
  4 files changed, 12 insertions(+), 37 deletions(-)
 
 diff --git a/arch/arm/dts/imx8mp-solidrun-u-boot.dtsi b/arch/arm/dts/imx8mp-solidrun-u-boot.dtsi
-index f2e6031997..07101667db 100644
+index f2e6031997e..07101667dbe 100644
 --- a/arch/arm/dts/imx8mp-solidrun-u-boot.dtsi
 +++ b/arch/arm/dts/imx8mp-solidrun-u-boot.dtsi
 @@ -186,12 +186,6 @@
@@ -29,7 +29,7 @@ index f2e6031997..07101667db 100644
  	/delete-property/ assigned-clocks;
  	/delete-property/ assigned-clock-parents;
 diff --git a/arch/arm/dts/imx8mp-solidrun.dts b/arch/arm/dts/imx8mp-solidrun.dts
-index b92c856930..fdcf112c74 100644
+index b92c8569302..fdcf112c745 100644
 --- a/arch/arm/dts/imx8mp-solidrun.dts
 +++ b/arch/arm/dts/imx8mp-solidrun.dts
 @@ -22,6 +22,11 @@
@@ -104,7 +104,7 @@ index b92c856930..fdcf112c74 100644
  	};
  
 diff --git a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
-index 7dbd9d5509..2b5eef0d4c 100644
+index 7dbd9d55094..2b5eef0d4c6 100644
 --- a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 +++ b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 @@ -410,15 +410,6 @@ static int setup_eqos(void)
@@ -138,7 +138,7 @@ index 7dbd9d5509..2b5eef0d4c 100644
  	 * Note: Environment ethaddr (eth1addr, eth2addr, ...) has first priority,
  	 * therefore it should be read and returned here.
 diff --git a/include/configs/imx8mp_solidrun.h b/include/configs/imx8mp_solidrun.h
-index f756be17c5..019a32b1a1 100644
+index f756be17c53..019a32b1a13 100644
 --- a/include/configs/imx8mp_solidrun.h
 +++ b/include/configs/imx8mp_solidrun.h
 @@ -48,14 +48,11 @@
@@ -157,6 +157,3 @@ index f756be17c5..019a32b1a1 100644
  #define PHY_ANEG_TIMEOUT 20000
  
  #endif
--- 
-2.35.3
-

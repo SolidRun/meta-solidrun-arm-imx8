@@ -1,20 +1,20 @@
-From 7c0ead192c8e9608a2c9fa8b42db53083466893c Mon Sep 17 00:00:00 2001
+From ca9fd59ef06e89e23e928240a552a0c7d30cf1ab Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Tue, 15 Aug 2023 17:26:13 +0200
-Subject: [PATCH 29/30] imx8mp-solidrun: add ddr training for 8gb micron module
+Subject: [PATCH] imx8mp-solidrun: add ddr training for 8gb micron module
 
 Signed-off-by: Josua Mayer <josua@solid-run.com>
 ---
  board/solidrun/imx8mp_solidrun/Makefile       |    6 +-
  .../imx8mp_solidrun/imx8mp_solidrun.c         |   12 +-
  .../lpddr4_timing_8gb_micron.c                | 1853 +++++++++++++++++
- board/solidrun/imx8mp_solidrun/spl.c          |   25 +-
+ board/solidrun/imx8mp_solidrun/spl.c          |   23 +-
  include/configs/imx8mp_solidrun.h             |    4 +-
- 5 files changed, 1892 insertions(+), 8 deletions(-)
+ 5 files changed, 1891 insertions(+), 7 deletions(-)
  create mode 100644 board/solidrun/imx8mp_solidrun/lpddr4_timing_8gb_micron.c
 
 diff --git a/board/solidrun/imx8mp_solidrun/Makefile b/board/solidrun/imx8mp_solidrun/Makefile
-index e2531571fe..ca86121cb5 100644
+index e2531571fe1..ca86121cb52 100644
 --- a/board/solidrun/imx8mp_solidrun/Makefile
 +++ b/board/solidrun/imx8mp_solidrun/Makefile
 @@ -8,5 +8,9 @@ obj-y += imx8mp_solidrun.o mmc.o ../common/tlv_data.o
@@ -29,7 +29,7 @@ index e2531571fe..ca86121cb5 100644
 +obj-$(CONFIG_IMX8M_LPDDR4) += lpddr4_timing_8gb_micron.o
  endif
 diff --git a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
-index eecca23e26..e4e3745b93 100644
+index cc20fa68735..fadce9000ad 100644
 --- a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 +++ b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 @@ -190,10 +190,11 @@ int board_phys_sdram2_size(phys_size_t *size)
@@ -70,7 +70,7 @@ index eecca23e26..e4e3745b93 100644
  	*size = output;
 diff --git a/board/solidrun/imx8mp_solidrun/lpddr4_timing_8gb_micron.c b/board/solidrun/imx8mp_solidrun/lpddr4_timing_8gb_micron.c
 new file mode 100644
-index 0000000000..f5469a93b2
+index 00000000000..f5469a93b23
 --- /dev/null
 +++ b/board/solidrun/imx8mp_solidrun/lpddr4_timing_8gb_micron.c
 @@ -0,0 +1,1853 @@
@@ -1928,7 +1928,7 @@ index 0000000000..f5469a93b2
 +	.fsp_table = { 4000, 400, 100, },
 +};
 diff --git a/board/solidrun/imx8mp_solidrun/spl.c b/board/solidrun/imx8mp_solidrun/spl.c
-index 879309525b..8a3e562c07 100644
+index ed9086dc696..8a3e562c07a 100644
 --- a/board/solidrun/imx8mp_solidrun/spl.c
 +++ b/board/solidrun/imx8mp_solidrun/spl.c
 @@ -34,6 +34,7 @@
@@ -1947,12 +1947,10 @@ index 879309525b..8a3e562c07 100644
  	{ .label = "Samsung/Micron 4G", .timings = &dram_timing_4gb_samsung_micron },
  	{ .label = "Micron 3G        ", .timings = &dram_timing_3gb_micron },
  	{ .label = "Samsung 2G       ", .timings = &dram_timing_2gb_samsung },
-@@ -180,7 +182,14 @@ static bool spl_generic_ddr_init(void)
- {
+@@ -181,6 +183,13 @@ static bool spl_generic_ddr_init(void)
  	int ret;
  	bool output = true;
--	
-+
+ 
 +	/* Try 8GB Micron. */
 +	ret = ddr_init(&dram_timing_8gb_micron);
 +	if (!ret) {
@@ -2009,7 +2007,7 @@ index 879309525b..8a3e562c07 100644
  			goto err;
  		}
 diff --git a/include/configs/imx8mp_solidrun.h b/include/configs/imx8mp_solidrun.h
-index c638fd895f..f756be17c5 100644
+index c638fd895f6..f756be17c53 100644
 --- a/include/configs/imx8mp_solidrun.h
 +++ b/include/configs/imx8mp_solidrun.h
 @@ -172,12 +172,12 @@
@@ -2027,6 +2025,3 @@ index c638fd895f..f756be17c5 100644
  
  /* Some general LPDDR4 macros */
  #define LPDDR4_SAMSUNG_MANID		0x1
--- 
-2.35.3
-

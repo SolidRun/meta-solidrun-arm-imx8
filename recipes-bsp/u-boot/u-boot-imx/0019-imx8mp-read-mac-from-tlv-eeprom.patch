@@ -1,7 +1,7 @@
-From 0909285a7df275e9e6de035cd43df378d424b6f9 Mon Sep 17 00:00:00 2001
+From 0cd2cadb6fb9d8e82592cef1cda413eb56a951bf Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Sun, 3 Apr 2022 14:52:43 +0300
-Subject: [PATCH 19/21] imx8mp: read mac from tlv eeprom
+Subject: [PATCH] imx8mp: read mac from tlv eeprom
 
 Signed-off-by: Josua Mayer <josua@solid-run.com>
 ---
@@ -9,7 +9,7 @@ Signed-off-by: Josua Mayer <josua@solid-run.com>
  1 file changed, 95 insertions(+), 2 deletions(-)
 
 diff --git a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
-index e2bd8fc752..7fa59acc9d 100644
+index e2bd8fc7523..7fa59acc9de 100644
 --- a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 +++ b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 @@ -549,12 +549,79 @@ int board_late_init(void)
@@ -127,6 +127,3 @@ index e2bd8fc752..7fa59acc9d 100644
  	// fuses
  	imx_get_mac_from_fuse(dev_id, mac);
  	if(is_valid_ethaddr(mac)) {
--- 
-2.40.1
-

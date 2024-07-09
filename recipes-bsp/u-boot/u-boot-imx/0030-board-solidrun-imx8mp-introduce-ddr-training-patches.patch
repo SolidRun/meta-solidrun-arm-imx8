@@ -1,8 +1,8 @@
-From 3edc77f478740faace8a841a919e887268ab8696 Mon Sep 17 00:00:00 2001
+From 6bb6e843e6f4b2f4a965d316463d81f63070c76f Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Thu, 17 Aug 2023 12:30:28 +0200
-Subject: [PATCH 30/30] board: solidrun: imx8mp: introduce ddr training patches
- to reduce spl size
+Subject: [PATCH] board: solidrun: imx8mp: introduce ddr training patches to
+ reduce spl size
 
 Now that there are 5 different DDR training parameters supporting 7
 variants of DDR modules, SPL has grown unreasonably due to
@@ -46,7 +46,7 @@ Signed-off-by: Josua Mayer <josua@solid-run.com>
  create mode 100644 board/solidrun/imx8mp_solidrun/lpddr4_timing_patch_8gb_micron.c
 
 diff --git a/board/solidrun/imx8mp_solidrun/Makefile b/board/solidrun/imx8mp_solidrun/Makefile
-index ca86121cb5..a55643cf63 100644
+index ca86121cb52..a55643cf630 100644
 --- a/board/solidrun/imx8mp_solidrun/Makefile
 +++ b/board/solidrun/imx8mp_solidrun/Makefile
 @@ -8,9 +8,10 @@ obj-y += imx8mp_solidrun.o mmc.o ../common/tlv_data.o
@@ -64,7 +64,7 @@ index ca86121cb5..a55643cf63 100644
  endif
 diff --git a/board/solidrun/imx8mp_solidrun/lpddr4_timing.c b/board/solidrun/imx8mp_solidrun/lpddr4_timing.c
 new file mode 100644
-index 0000000000..1447e60cbf
+index 00000000000..1447e60cbf0
 --- /dev/null
 +++ b/board/solidrun/imx8mp_solidrun/lpddr4_timing.c
 @@ -0,0 +1,52 @@
@@ -122,7 +122,7 @@ index 0000000000..1447e60cbf
 +}
 diff --git a/board/solidrun/imx8mp_solidrun/lpddr4_timing.h b/board/solidrun/imx8mp_solidrun/lpddr4_timing.h
 new file mode 100644
-index 0000000000..56275d1f8c
+index 00000000000..56275d1f8cc
 --- /dev/null
 +++ b/board/solidrun/imx8mp_solidrun/lpddr4_timing.h
 @@ -0,0 +1,43 @@
@@ -170,7 +170,7 @@ index 0000000000..56275d1f8c
 +
 +#endif /* __IMX8MPSR_LPDDR4_TIMING_H__ */
 diff --git a/board/solidrun/imx8mp_solidrun/lpddr4_timing_3gb_micron.c b/board/solidrun/imx8mp_solidrun/lpddr4_timing_3gb_micron.c
-index 2dc6efc01c..284ff54ec5 100644
+index 2dc6efc01c1..284ff54ec57 100644
 --- a/board/solidrun/imx8mp_solidrun/lpddr4_timing_3gb_micron.c
 +++ b/board/solidrun/imx8mp_solidrun/lpddr4_timing_3gb_micron.c
 @@ -1092,7 +1092,7 @@ static struct dram_cfg_param ddr_fsp0_cfg[] = {
@@ -193,7 +193,7 @@ index 2dc6efc01c..284ff54ec5 100644
  	{ 0x90001, 0x400 },
 diff --git a/board/solidrun/imx8mp_solidrun/lpddr4_timing_patch_2gb_samsung.c b/board/solidrun/imx8mp_solidrun/lpddr4_timing_patch_2gb_samsung.c
 new file mode 100644
-index 0000000000..e978701e2a
+index 00000000000..e978701e2a5
 --- /dev/null
 +++ b/board/solidrun/imx8mp_solidrun/lpddr4_timing_patch_2gb_samsung.c
 @@ -0,0 +1,51 @@
@@ -250,7 +250,7 @@ index 0000000000..e978701e2a
 +};
 diff --git a/board/solidrun/imx8mp_solidrun/lpddr4_timing_patch_8gb_micron.c b/board/solidrun/imx8mp_solidrun/lpddr4_timing_patch_8gb_micron.c
 new file mode 100644
-index 0000000000..fcc9e8f1b5
+index 00000000000..fcc9e8f1b52
 --- /dev/null
 +++ b/board/solidrun/imx8mp_solidrun/lpddr4_timing_patch_8gb_micron.c
 @@ -0,0 +1,31 @@
@@ -286,7 +286,7 @@ index 0000000000..fcc9e8f1b5
 +	.fsp_table = {},
 +};
 diff --git a/board/solidrun/imx8mp_solidrun/spl.c b/board/solidrun/imx8mp_solidrun/spl.c
-index 8a3e562c07..3f76caad17 100644
+index 8a3e562c07a..3f76caad17b 100644
 --- a/board/solidrun/imx8mp_solidrun/spl.c
 +++ b/board/solidrun/imx8mp_solidrun/spl.c
 @@ -31,15 +31,11 @@
@@ -391,6 +391,3 @@ index 8a3e562c07..3f76caad17 100644
  		} else {
  			goto err;
  		}
--- 
-2.35.3
-

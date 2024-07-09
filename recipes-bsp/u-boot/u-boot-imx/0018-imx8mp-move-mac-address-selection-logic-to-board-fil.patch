@@ -1,7 +1,7 @@
-From cf5204fb60db5e0edc281968be6549688ba4450d Mon Sep 17 00:00:00 2001
+From 8785a0e510cd75d4a29311c7869ff5ac947d67a9 Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Sun, 3 Apr 2022 13:29:30 +0300
-Subject: [PATCH 18/21] imx8mp: move mac-address selection logic to board-file
+Subject: [PATCH] imx8mp: move mac-address selection logic to board-file
 
 Make mac address selection explicit in the board-file to allow full
 control over selection priority if multiple locations may contain MACs.
@@ -10,15 +10,15 @@ Signed-off-by: Josua Mayer <josua@solid-run.com>
 ---
  arch/arm/include/asm/mach-imx/sys_proto.h     |  1 +
  .../imx8mp_solidrun/imx8mp_solidrun.c         | 24 +++++++++++++++++++
- drivers/net/dwc_eth_qos.c                     |  2 +-
- drivers/net/fec_mxc.c                         |  4 ++--
- 4 files changed, 28 insertions(+), 3 deletions(-)
+ drivers/net/dwc_eth_qos.c                     |  6 ++++-
+ drivers/net/fec_mxc.c                         |  8 +++++--
+ 4 files changed, 36 insertions(+), 3 deletions(-)
 
 diff --git a/arch/arm/include/asm/mach-imx/sys_proto.h b/arch/arm/include/asm/mach-imx/sys_proto.h
-index 04505d948c..6a39574d11 100644
+index dc589e03cec..8f801ed26bd 100644
 --- a/arch/arm/include/asm/mach-imx/sys_proto.h
 +++ b/arch/arm/include/asm/mach-imx/sys_proto.h
-@@ -270,6 +270,7 @@ unsigned long call_imx_sip_ret2(unsigned long id, unsigned long reg0,
+@@ -347,6 +347,7 @@ unsigned long call_imx_sip_ret2(unsigned long id, unsigned long reg0,
  				unsigned long reg3);
  
  void imx_get_mac_from_fuse(int dev_id, unsigned char *mac);
@@ -27,7 +27,7 @@ index 04505d948c..6a39574d11 100644
  #if defined(CONFIG_MX6) || defined(CONFIG_MX7) || defined(CONFIG_MX7ULP)
  void enable_ca7_smp(void);
 diff --git a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
-index 0f71a4beaa..e2bd8fc752 100644
+index 0f71a4beaad..e2bd8fc7523 100644
 --- a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 +++ b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 @@ -549,6 +549,30 @@ int board_late_init(void)
@@ -62,23 +62,27 @@ index 0f71a4beaa..e2bd8fc752 100644
  bool is_power_key_pressed(void) {
  	return (bool)(!!(readl(SNVS_HPSR) & (0x1 << 6)));
 diff --git a/drivers/net/dwc_eth_qos.c b/drivers/net/dwc_eth_qos.c
-index ad48a13170..bd6c89871b 100644
+index 8a65017f668..825d3529731 100644
 --- a/drivers/net/dwc_eth_qos.c
 +++ b/drivers/net/dwc_eth_qos.c
-@@ -1103,7 +1103,7 @@ static int eqos_read_rom_hwaddr(struct udevice *dev)
- 	struct eth_pdata *pdata = dev_get_plat(dev);
+@@ -714,7 +714,11 @@ static int eqos_read_rom_hwaddr(struct udevice *dev)
+ 	struct eqos_priv *eqos = dev_get_priv(dev);
+ 	int ret;
  
- #if defined(CONFIG_IMX8MP) || defined(CONFIG_IMX8DXL) || defined(CONFIG_IMX93)
--	imx_get_mac_from_fuse(dev_seq(dev), pdata->enetaddr);
-+	board_get_mac(dev_seq(dev), pdata->enetaddr);
- #endif
- 	return !is_valid_ethaddr(pdata->enetaddr);
- }
+-	ret = eqos->config->ops->eqos_get_enetaddr(dev);
++	// TODO: this may not be correct anymore since
++	// patch 0018-imx8mp-move-mac-address-selection-logic-to-board-fil.patch did not cleanly apply here
++	// NOTE: .eqos_get_enetaddr = eqos_null_ops in structs below
++	ret = board_get_mac(dev_seq(dev), pdata->enetaddr);
++	// ret = eqos->config->ops->eqos_get_enetaddr(dev);
+ 	if (ret < 0)
+ 		return ret;
+ 
 diff --git a/drivers/net/fec_mxc.c b/drivers/net/fec_mxc.c
-index b67569b7cd..99a785509e 100644
+index 8a866ca8b79..f2681a2e5c9 100644
 --- a/drivers/net/fec_mxc.c
 +++ b/drivers/net/fec_mxc.c
-@@ -403,7 +403,7 @@ static void fec_rbd_clean(int last, struct fec_bd *prbd)
+@@ -396,7 +396,7 @@ static void fec_rbd_clean(int last, struct fec_bd *prbd)
  
  static int fec_get_hwaddr(int dev_id, unsigned char *mac)
  {
@@ -87,15 +91,16 @@ index b67569b7cd..99a785509e 100644
  	return !is_valid_ethaddr(mac);
  }
  
-@@ -1190,7 +1190,7 @@ static int fec_probe(struct bd_info *bd, int dev_id, uint32_t base_addr,
- 	edev->index = fec->dev_id;
+@@ -1103,7 +1103,11 @@ static int fecmxc_read_rom_hwaddr(struct udevice *dev)
+ 	struct fec_priv *priv = dev_get_priv(dev);
+ 	struct eth_pdata *pdata = dev_get_plat(dev);
  
- 	if (fec_get_hwaddr(fec->dev_id, ethaddr) == 0) {
--		debug("got MAC%d address from fuse: %pM\n", fec->dev_id, ethaddr);
-+		debug("got MAC%d address from board-file: %pM\n", fec->dev_id, ethaddr);
- 		memcpy(edev->enetaddr, ethaddr, 6);
- 		if (fec->dev_id)
- 			sprintf(mac, "eth%daddr", fec->dev_id);
--- 
-2.40.1
-
+-	return fec_get_hwaddr(priv->dev_id, pdata->enetaddr);
++	int ret = fec_get_hwaddr(priv->dev_id, pdata->enetaddr);
++	if (ret == 0)
++		debug("got MAC%d address from board-file: %pM\n", priv->dev_id, pdata->enetaddr);
++
++	return ret;
+ }
+ 
+ static int fecmxc_set_promisc(struct udevice *dev, bool enable)

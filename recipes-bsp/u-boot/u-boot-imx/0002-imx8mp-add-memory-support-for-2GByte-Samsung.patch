@@ -1,7 +1,7 @@
-From d673cbb9560308b474eb9f49d589919ed833577c Mon Sep 17 00:00:00 2001
+From f13f0465b93f5c56bee6a4f4dd9c9650a25963a2 Mon Sep 17 00:00:00 2001
 From: Yazan Shhady <yazan.shhady@solid-run.com>
 Date: Tue, 17 Jan 2023 11:09:03 +0200
-Subject: [PATCH 02/21] imx8mp: add memory support for 2GByte Samsung
+Subject: [PATCH] imx8mp: add memory support for 2GByte Samsung
 
 SolidRun supports Samsung 1GByte|2GByte and Micron 3GByte.
 
@@ -17,7 +17,7 @@ testing in multiplications of 1GByte or 2GByte.
  create mode 100644 board/solidrun/imx8mp_solidrun/lpddr4_timing_2gb_samsung.c
 
 diff --git a/board/solidrun/imx8mp_solidrun/Makefile b/board/solidrun/imx8mp_solidrun/Makefile
-index 6ef4c05b40..8d03edd813 100644
+index 6ef4c05b403..8d03edd8131 100644
 --- a/board/solidrun/imx8mp_solidrun/Makefile
 +++ b/board/solidrun/imx8mp_solidrun/Makefile
 @@ -8,5 +8,5 @@ obj-y += imx8mp_solidrun.o mmc.o
@@ -28,7 +28,7 @@ index 6ef4c05b40..8d03edd813 100644
 +obj-$(CONFIG_IMX8M_LPDDR4) += lpddr4_timing_3gb_micron.o lpddr4_timing_2gb_samsung.o lpddr4_timing_1gb_samsung.o
  endif
 diff --git a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
-index be11b11eb0..38f4810b26 100644
+index be11b11eb0c..38f4810b262 100644
 --- a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 +++ b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 @@ -88,25 +88,51 @@ int board_early_init_f(void)
@@ -97,7 +97,7 @@ index be11b11eb0..38f4810b26 100644
  
 diff --git a/board/solidrun/imx8mp_solidrun/lpddr4_timing_2gb_samsung.c b/board/solidrun/imx8mp_solidrun/lpddr4_timing_2gb_samsung.c
 new file mode 100644
-index 0000000000..079f9c2e61
+index 00000000000..079f9c2e61d
 --- /dev/null
 +++ b/board/solidrun/imx8mp_solidrun/lpddr4_timing_2gb_samsung.c
 @@ -0,0 +1,1853 @@
@@ -1955,7 +1955,7 @@ index 0000000000..079f9c2e61
 +	.fsp_table = { 4000, 400, 100, },
 +};
 diff --git a/board/solidrun/imx8mp_solidrun/spl.c b/board/solidrun/imx8mp_solidrun/spl.c
-index 2c49850f31..74b172cf34 100644
+index 2c49850f312..74b172cf34f 100644
 --- a/board/solidrun/imx8mp_solidrun/spl.c
 +++ b/board/solidrun/imx8mp_solidrun/spl.c
 @@ -33,6 +33,7 @@ DECLARE_GLOBAL_DATA_PTR;
@@ -2069,6 +2069,3 @@ index 2c49850f31..74b172cf34 100644
  }
  
  #if CONFIG_IS_ENABLED(DM_PMIC_PCA9450)
--- 
-2.40.1
-

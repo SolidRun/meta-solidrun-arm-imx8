@@ -1,8 +1,8 @@
-From 3b07d2545a12d9c6bc64cd70758d65953901b995 Mon Sep 17 00:00:00 2001
+From 2056b21d021ffbd6e29f573eee1e73b95a9a7be8 Mon Sep 17 00:00:00 2001
 From: Yazan Shhady <yazan.shhady@solid-run.com>
 Date: Mon, 30 Jan 2023 11:39:32 +0200
-Subject: [PATCH 03/21] imx8mp_solidrun: add ddr calibration for Samsung 4GB
- moudule K4F6E3S4HM-SGCL
+Subject: [PATCH] imx8mp_solidrun: add ddr calibration for Samsung 4GB moudule
+ K4F6E3S4HM-SGCL
 
 ---
  board/solidrun/imx8mp_solidrun/Makefile       |    2 +-
@@ -11,7 +11,7 @@ Subject: [PATCH 03/21] imx8mp_solidrun: add ddr calibration for Samsung 4GB
  create mode 100644 board/solidrun/imx8mp_solidrun/lpddr4_timing_4gb_samsung.c
 
 diff --git a/board/solidrun/imx8mp_solidrun/Makefile b/board/solidrun/imx8mp_solidrun/Makefile
-index 8d03edd813..649c0d5c80 100644
+index 8d03edd8131..649c0d5c801 100644
 --- a/board/solidrun/imx8mp_solidrun/Makefile
 +++ b/board/solidrun/imx8mp_solidrun/Makefile
 @@ -8,5 +8,5 @@ obj-y += imx8mp_solidrun.o mmc.o
@@ -23,7 +23,7 @@ index 8d03edd813..649c0d5c80 100644
  endif
 diff --git a/board/solidrun/imx8mp_solidrun/lpddr4_timing_4gb_samsung.c b/board/solidrun/imx8mp_solidrun/lpddr4_timing_4gb_samsung.c
 new file mode 100644
-index 0000000000..ef3f86e75d
+index 00000000000..ef3f86e75d3
 --- /dev/null
 +++ b/board/solidrun/imx8mp_solidrun/lpddr4_timing_4gb_samsung.c
 @@ -0,0 +1,1853 @@
@@ -1880,6 +1880,3 @@ index 0000000000..ef3f86e75d
 +	.ddrphy_pie_num = ARRAY_SIZE(ddr_phy_pie),
 +	.fsp_table = { 4000, 400, 100, },
 +};
--- 
-2.40.1
-

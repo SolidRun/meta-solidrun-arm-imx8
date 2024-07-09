@@ -1,4 +1,4 @@
-From 4a1e715ce0fc1cdce4c7ddff4154236eab27a53d Mon Sep 17 00:00:00 2001
+From a744b37802d198af2a266ecedaff365a661bb56e Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Wed, 24 Apr 2024 18:38:06 +0200
 Subject: [PATCH] net: fec_mxc: add weak implementation of board_get_mac
@@ -12,10 +12,10 @@ Signed-off-by: Josua Mayer <josua@solid-run.com>
  1 file changed, 5 insertions(+)
 
 diff --git a/drivers/net/fec_mxc.c b/drivers/net/fec_mxc.c
-index 99a785509..f08fb505b 100644
+index f2681a2e5c9..73e4fc642a2 100644
 --- a/drivers/net/fec_mxc.c
 +++ b/drivers/net/fec_mxc.c
-@@ -401,6 +401,11 @@ static void fec_rbd_clean(int last, struct fec_bd *prbd)
+@@ -394,6 +394,11 @@ static void fec_rbd_clean(int last, struct fec_bd *prbd)
  	writew(0, &prbd->data_length);
  }
  
@@ -27,6 +27,3 @@ index 99a785509..f08fb505b 100644
  static int fec_get_hwaddr(int dev_id, unsigned char *mac)
  {
  	board_get_mac(dev_id, mac);
--- 
-2.35.3
-

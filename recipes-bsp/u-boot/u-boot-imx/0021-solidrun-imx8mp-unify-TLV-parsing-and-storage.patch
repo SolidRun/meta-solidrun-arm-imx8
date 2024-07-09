@@ -1,7 +1,7 @@
-From 51409027d43b197fdde0298078b79fa0e682ceb6 Mon Sep 17 00:00:00 2001
+From 22c5276004a888a21b2e51bb2ba3920ea55b2dc4 Mon Sep 17 00:00:00 2001
 From: Jon Nettleton <jon@solid-run.com>
 Date: Mon, 29 May 2023 05:48:56 +0200
-Subject: [PATCH 21/21] solidrun: imx8mp: unify TLV parsing and storage
+Subject: [PATCH] solidrun: imx8mp: unify TLV parsing and storage
 
 All SolidRun devices use the same TLV version and information.
 Rather than splitting this out and duplicating code for each
@@ -15,10 +15,10 @@ Signed-off-by: Jon Nettleton <jon@solid-run.com>
  board/solidrun/common/tlv_data.h              |  22 +-
  board/solidrun/imx8mp_solidrun/Makefile       |   2 +-
  .../imx8mp_solidrun/imx8mp_solidrun.c         | 244 ++++--------------
- 5 files changed, 136 insertions(+), 221 deletions(-)
+ 4 files changed, 135 insertions(+), 221 deletions(-)
 
 diff --git a/board/solidrun/common/tlv_data.c b/board/solidrun/common/tlv_data.c
-index 11d6e4a138..1b181bd889 100644
+index cf5824886c3..f3c9e13d658 100644
 --- a/board/solidrun/common/tlv_data.c
 +++ b/board/solidrun/common/tlv_data.c
 @@ -8,31 +8,54 @@
@@ -45,13 +45,13 @@ index 11d6e4a138..1b181bd889 100644
 +		    sizeof(td->tlv_product_name[index]) - 1);
 +	memcpy(dest, tlv_entry->value, len);
 +}
- 
++
 +static void store_part_number(struct tlvinfo_tlv *tlv_entry,
 +			      struct tlv_data *td, int index)
 +{
 +	int len;
 +	char *dest;
-+
+ 
 +	dest = td->tlv_part_number[index];
  	len = min_t(unsigned int, tlv_entry->length,
 -		    sizeof(td->tlv_product_name[0]) - 1);
@@ -87,13 +87,13 @@ index 11d6e4a138..1b181bd889 100644
  
  	if (tlv_entry->length < 5) /* 4 bytes PEN + at least 1 byte type */
  		return;
-@@ -43,15 +66,29 @@ static void parse_tlv_vendor_ext(struct tlvinfo_tlv *tlv_entry,
+@@ -43,20 +66,34 @@ static void parse_tlv_vendor_ext(struct tlvinfo_tlv *tlv_entry,
  	if (pen != 0xffffffff)
  		return;
  
 -	if (val[4] != SR_TLV_CODE_RAM_SIZE)
 -		return;
--	if (tlv_entry->length != 6)
+-	if (tlv_entry->length < 6)
 -		return;
 -	td->ram_size = val[5];
 +	switch (val[4]) {
@@ -109,21 +109,26 @@ index 11d6e4a138..1b181bd889 100644
 +	        len = min_t(unsigned int, tlv_entry->length,
 +			    sizeof(td->tlv_kit_number[index]) - 1);
 +		memcpy(dest, tlv_entry->value, len);
-+		break;	
++		break;
 +	default:
 +		break;
 +	};
-+		
+ 
+ 	/* extension with additional data field for number of ddr channels */
+ 	if (tlv_entry->length >= 7) {
+ 		td->ram_channels = val[6];
+ 	}
++
 +	return;
  }
  
  static void parse_tlv_data(u8 *eeprom, struct tlvinfo_header *hdr,
 -			   struct tlvinfo_tlv *entry, struct tlv_data *td)
-+			   struct tlvinfo_tlv *entry, struct tlv_data *td, int index)
++						  struct tlvinfo_tlv *entry, struct tlv_data *td, int index)
  {
  	unsigned int tlv_offset, tlv_len;
  
-@@ -62,10 +99,19 @@ static void parse_tlv_data(u8 *eeprom, struct tlvinfo_header *hdr,
+@@ -67,10 +104,19 @@ static void parse_tlv_data(u8 *eeprom, struct tlvinfo_header *hdr,
  
  		switch (entry->type) {
  		case TLV_CODE_PRODUCT_NAME:
@@ -145,7 +150,7 @@ index 11d6e4a138..1b181bd889 100644
  			break;
  		default:
  			break;
-@@ -82,12 +128,12 @@ void read_tlv_data(struct tlv_data *td)
+@@ -87,12 +133,12 @@ void read_tlv_data(struct tlv_data *td)
  	struct tlvinfo_tlv *tlv_entry;
  	int ret, i;
  
@@ -161,10 +166,10 @@ index 11d6e4a138..1b181bd889 100644
  }
  
 diff --git a/board/solidrun/common/tlv_data.h b/board/solidrun/common/tlv_data.h
-index a1432e4b8e..ba8a114edb 100644
+index be3f782ac4a..484245e3074 100644
 --- a/board/solidrun/common/tlv_data.h
 +++ b/board/solidrun/common/tlv_data.h
-@@ -8,10 +8,30 @@
+@@ -8,11 +8,31 @@
  
  struct tlv_data {
  	/* Store product name of both SOM and carrier */
@@ -175,6 +180,7 @@ index a1432e4b8e..ba8a114edb 100644
 +	unsigned char tlv_mac_base[TLV_MAX_DEVICES][6];
 +	u16 tlv_mac_count[TLV_MAX_DEVICES];
  	unsigned int ram_size;
+ 	uint8_t ram_channels;
  };
  
 +/*
@@ -197,7 +203,7 @@ index a1432e4b8e..ba8a114edb 100644
  bool sr_product_is(const struct tlv_data *td, const char *product);
  
 diff --git a/board/solidrun/imx8mp_solidrun/Makefile b/board/solidrun/imx8mp_solidrun/Makefile
-index 649c0d5c80..257529f401 100644
+index 649c0d5c801..257529f4018 100644
 --- a/board/solidrun/imx8mp_solidrun/Makefile
 +++ b/board/solidrun/imx8mp_solidrun/Makefile
 @@ -4,7 +4,7 @@
@@ -210,7 +216,7 @@ index 649c0d5c80..257529f401 100644
  ifdef CONFIG_SPL_BUILD
  obj-y += spl.o
 diff --git a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
-index bdfa8af08a..b0af978e37 100644
+index bdfa8af08ad..b0af978e37e 100644
 --- a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 +++ b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 @@ -35,9 +35,22 @@
@@ -584,6 +590,3 @@ index bdfa8af08a..b0af978e37 100644
  		mac_add_n(mac, i);
  
  		if(is_valid_ethaddr(mac)) {
--- 
-2.40.1
-

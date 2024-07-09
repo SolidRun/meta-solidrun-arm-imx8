@@ -1,4 +1,4 @@
-From 246a9d376e2967132a4703ec56fd22746fb6b5b1 Mon Sep 17 00:00:00 2001
+From fd896ab51423b8a11fa7afc413a1eaecfdf333ab Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Thu, 11 Jan 2024 17:38:10 +0100
 Subject: [PATCH] configs: imx8mp-solidrun: move environment to fit within emmc
@@ -13,7 +13,7 @@ Signed-off-by: Josua Mayer <josua@solid-run.com>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/configs/imx8mp_solidrun_defconfig b/configs/imx8mp_solidrun_defconfig
-index 4ef45e309..05e217510 100644
+index 4ef45e30946..05e21751030 100644
 --- a/configs/imx8mp_solidrun_defconfig
 +++ b/configs/imx8mp_solidrun_defconfig
 @@ -9,8 +9,8 @@ CONFIG_SPL_LIBGENERIC_SUPPORT=y
@@ -27,6 +27,3 @@ index 4ef45e309..05e217510 100644
  CONFIG_ENV_SECT_SIZE=0x10000
  CONFIG_SYS_I2C_MXC_I2C1=y
  CONFIG_SYS_I2C_MXC_I2C2=y
--- 
-2.35.3
-

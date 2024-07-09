@@ -1,7 +1,7 @@
-From 8e4397f9e54980b81ed833da35fa8dd1d520d1e9 Mon Sep 17 00:00:00 2001
+From 22d143f893400cdd86c7bbf27e66c15bd848bc3c Mon Sep 17 00:00:00 2001
 From: Jon Nettleton <jon@solid-run.com>
 Date: Tue, 30 May 2023 13:31:44 +0200
-Subject: [PATCH 1/2] net: dwc_eth_qos: enable clocks in write_hwaddr
+Subject: [PATCH] net: dwc_eth_qos: enable clocks in write_hwaddr
 
 If the interface has not been started then eqos_write_hwaddr will
 be skipped for the iMX8MP. Since we want Linux to have access to
@@ -15,10 +15,10 @@ Signed-off-by: Jon Nettleton <jon@solid-run.com>
  1 file changed, 13 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/net/dwc_eth_qos.c b/drivers/net/dwc_eth_qos.c
-index bd6c89871b..27eb456f23 100644
+index 825d3529731..cf43dfa86e7 100644
 --- a/drivers/net/dwc_eth_qos.c
 +++ b/drivers/net/dwc_eth_qos.c
-@@ -1059,6 +1059,7 @@ static int eqos_write_hwaddr(struct udevice *dev)
+@@ -669,6 +669,7 @@ static int eqos_write_hwaddr(struct udevice *dev)
  	struct eth_pdata *plat = dev_get_plat(dev);
  	struct eqos_priv *eqos = dev_get_priv(dev);
  	uint32_t val;
@@ -26,7 +26,7 @@ index bd6c89871b..27eb456f23 100644
  
  	/*
  	 * This function may be called before start() or after stop(). At that
-@@ -1082,8 +1083,15 @@ static int eqos_write_hwaddr(struct udevice *dev)
+@@ -692,8 +693,15 @@ static int eqos_write_hwaddr(struct udevice *dev)
  	 * future-proofing with the expectation the driver will eventually be
  	 * ported to some system where the expectation above is true.
  	 */
@@ -44,7 +44,7 @@ index bd6c89871b..27eb456f23 100644
  
  	/* Update the MAC address */
  	val = (plat->enetaddr[5] << 8) |
-@@ -1095,6 +1103,9 @@ static int eqos_write_hwaddr(struct udevice *dev)
+@@ -705,6 +713,9 @@ static int eqos_write_hwaddr(struct udevice *dev)
  		(plat->enetaddr[0]);
  	writel(val, &eqos->mac_regs->address0_low);
  
@@ -54,6 +54,3 @@ index bd6c89871b..27eb456f23 100644
  	return 0;
  }
  
--- 
-2.40.1
-
