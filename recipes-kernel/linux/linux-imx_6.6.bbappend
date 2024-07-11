@@ -17,6 +17,7 @@ SRC_URI += " \
 	file://0012-arm64-dts-add-description-for-solidrun-solidsense-n8.patch \
 	file://0013-arm64-dts-imx8mn-solidsense-n8-add-power-controls-fo.patch \
 	file://0014-update-constants-for-audio-clocks-to-match-upstream.patch \
+        file://0015-try-snps-parkmode-disable-hs-quirk.patch \
 "
 
 KERNEL_MODULE_AUTOLOAD += "imx-sdma"

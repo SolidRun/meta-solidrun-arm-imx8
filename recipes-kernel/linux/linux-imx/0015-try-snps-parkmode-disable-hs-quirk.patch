@@ -1,0 +1,21 @@
+From 63f92240bc1e738a81253573d314dfd012fd22be Mon Sep 17 00:00:00 2001
+From: Omar El-Domeiri <github@doesnotexist.com>
+Date: Thu, 11 Jul 2024 19:41:31 +0000
+Subject: [PATCH] try snps,parkmode-disable-hs-quirk
+
+---
+ arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dtsi | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dtsi
+index 1c007fde875a..3504cec852f5 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dtsi
+@@ -451,6 +451,7 @@ &usb_dwc3_0 {
+ 	dr_mode = "host";
+         snps,dis-u1-entry-quirk;
+         snps,dis-u2-entry-quirk;
++	snps,parkmode-disable-hs-quirk;
+ 	status = "okay";
+ };
+ 
