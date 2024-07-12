@@ -1,4 +1,4 @@
-From 25cd79c7fb4cbe74e003972c0ebba2ce42a49244 Mon Sep 17 00:00:00 2001
+From cfae087d162e7ada6f523d800408473b01fac14f Mon Sep 17 00:00:00 2001
 From: Mikhail Anikin <mikhail.anikin@solid-run.com>
 Date: Thu, 3 Aug 2023 11:01:09 +0300
 Subject: [PATCH] Move M.2 PCIe reset from M.2 rfkill to PCIe node

@@ -1,8 +1,8 @@
-From fff9b0fbc7577527a4364bc13dc1c9a6d181a7b1 Mon Sep 17 00:00:00 2001
+From 6a839467c662bd6ef50f58cf660baab6d128e3ca Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Fri, 19 Apr 2024 17:35:18 +0200
-Subject: [PATCH 102/103] net: phy: adin: add support for setting led-,
- link-status-pin polarity
+Subject: [PATCH] net: phy: adin: add support for setting led-, link-status-pin
+ polarity
 
 ADIN1300 supports software control over pin polarity for both LED_0 and
 LINK_ST pins.
@@ -23,7 +23,7 @@ Signed-off-by: Josua Mayer <josua@solid-run.com>
  1 file changed, 53 insertions(+)
 
 diff --git a/drivers/net/phy/adin.c b/drivers/net/phy/adin.c
-index 5ce6da62cc8e..abe160068996 100644
+index 134637584a83..89ad1ef1f063 100644
 --- a/drivers/net/phy/adin.c
 +++ b/drivers/net/phy/adin.c
 @@ -96,6 +96,9 @@
@@ -36,7 +36,7 @@ index 5ce6da62cc8e..abe160068996 100644
  #define ADIN1300_GE_SOFT_RESET_REG		0xff0c
  #define   ADIN1300_GE_SOFT_RESET		BIT(0)
  
-@@ -131,6 +134,9 @@
+@@ -140,6 +143,9 @@
  #define ADIN1300_RMII_20_BITS			0x0004
  #define ADIN1300_RMII_24_BITS			0x0005
  
@@ -46,8 +46,8 @@ index 5ce6da62cc8e..abe160068996 100644
  /**
   * struct adin_cfg_reg_map - map a config value to aregister value
   * @cfg:	value in device configuration
-@@ -433,6 +439,49 @@ static int adin_set_tunable(struct phy_device *phydev,
- 	}
+@@ -469,6 +475,49 @@ static int adin_config_clk_out(struct phy_device *phydev)
+ 			      ADIN1300_GE_CLK_CFG_MASK, sel);
  }
  
 +static int adin_config_pin_polarity(struct phy_device *phydev)
@@ -96,7 +96,7 @@ index 5ce6da62cc8e..abe160068996 100644
  static int adin_config_init(struct phy_device *phydev)
  {
  	int rc;
-@@ -455,6 +504,10 @@ static int adin_config_init(struct phy_device *phydev)
+@@ -495,6 +544,10 @@ static int adin_config_init(struct phy_device *phydev)
  	if (rc < 0)
  		return rc;
  

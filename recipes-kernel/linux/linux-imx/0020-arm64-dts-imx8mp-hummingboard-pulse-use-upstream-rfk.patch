@@ -1,4 +1,4 @@
-From 76ce3a836b822aca8188264ca7811c6a25d4ffbc Mon Sep 17 00:00:00 2001
+From 8f0b44f039e2853ffd7e8c2b29f64b9e71e10e43 Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Sun, 28 Apr 2024 15:13:39 +0200
 Subject: [PATCH] arm64: dts: imx8mp-hummingboard-pulse: use upstream rfkill
@@ -13,7 +13,7 @@ Signed-off-by: Josua Mayer <josua@solid-run.com>
  1 file changed, 6 insertions(+), 6 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dtsi
-index 9a9ab1437..2339f8166 100644
+index ba8f195350d9..ea4c76cf24c6 100644
 --- a/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dtsi
 +++ b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dtsi
 @@ -104,8 +104,8 @@ rfkill_m2_wdis {

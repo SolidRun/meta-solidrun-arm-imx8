@@ -1,4 +1,4 @@
-From 1eeebfb2f03e5e6abd28614aabb1b97a0c499ddd Mon Sep 17 00:00:00 2001
+From fff08903a31696123a5cb43eaba863b29595bff2 Mon Sep 17 00:00:00 2001
 From: Mikhail Anikin <mikhail.anikin@solid-run.com>
 Date: Sun, 3 Sep 2023 15:52:29 +0300
 Subject: [PATCH] arm64: dts: split pcie reset signals for hb-pulse and
