@@ -1,0 +1,138 @@
+From 77b1924b6c6f3c4c452f2233137cd98901afcc4e Mon Sep 17 00:00:00 2001
+From: Omar El-Domeiri <github@doesnotexist.com>
+Date: Tue, 9 Jul 2024 16:43:59 +0000
+Subject: [PATCH] board/solidrun/imx8mp updates to successfully compile/boot on
+ v2024.4:
+
+* imx8mp_solidrun.c:
+  - fix function name and type signature which is now
+    int dm_usb_gadget_handle_interrupts(struct udevice *dev)
+  - fix constant name CONFIG_SYS_SDRAM_BASE -> CFG_SYS_SDRAM_BASE
+
+* spl.c:
+  - Add #include <asm/sections>
+    needed for the definitions of  __bss_start and __bss_end
+  - Call preloader_console_init() later in board_init_f() otherwise
+    boot fails when serial console fails to initialize
+  - fix constant name CONFIG_SYS_SDRAM_BASE -> CFG_SYS_SDRAM_BASE
+---
+ .../imx8mp_solidrun/imx8mp_solidrun.c         | 10 ++++----
+ board/solidrun/imx8mp_solidrun/spl.c          | 23 +++++++------------
+ 2 files changed, 13 insertions(+), 20 deletions(-)
+
+diff --git a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
+index f53c6d0f313..eaf17402eb3 100644
+--- a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
++++ b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
+@@ -108,7 +108,7 @@ int check_mirror_ddr_tmp(unsigned int addr_1, unsigned int addr_2)
+ 	volatile unsigned int *ptr;
+ 
+ 	retrain_tmp = 0;
+-	ptr = (volatile unsigned int *)CONFIG_SYS_SDRAM_BASE;
++	ptr = (volatile unsigned int *)CFG_SYS_SDRAM_BASE;
+ 	save1 = ptr[addr_1];
+ 	save2 = ptr[addr_2];
+ 	ptr[addr_2] = save1 << 1;
+@@ -313,9 +313,9 @@ static struct dwc3_device dwc3_device_data = {
+ 	.power_down_scale = 2,
+ };
+ 
+-int usb_gadget_handle_interrupts(int index)
++int dm_usb_gadget_handle_interrupts(struct udevice *dev)
+ {
+-	dwc3_uboot_handle_interrupt(index);
++	dwc3_uboot_handle_interrupt(dev);
+ 	return 0;
+ }
+ 
+@@ -649,9 +649,9 @@ bool is_power_key_pressed(void) {
+ }
+ #endif
+ 
+-#ifdef CONFIG_SPL_MMC_SUPPORT
++#ifdef CONFIG_SPL_MMC
+ #define UBOOT_RAW_SECTOR_OFFSET 0x40
+-unsigned long spl_mmc_get_uboot_raw_sector(struct mmc *mmc)
++unsigned long spl_mmc_get_uboot_raw_sector(struct mmc *mmc, unsigned long raw_sect)
+ {
+ 	u32 boot_dev = spl_boot_device();
+ 	switch (boot_dev) {
+diff --git a/board/solidrun/imx8mp_solidrun/spl.c b/board/solidrun/imx8mp_solidrun/spl.c
+index 3f76caad17b..054369f4647 100644
+--- a/board/solidrun/imx8mp_solidrun/spl.c
++++ b/board/solidrun/imx8mp_solidrun/spl.c
+@@ -1,5 +1,5 @@
+ /*
+- * Copyright 2018-2019 NXP
++ * Copyright 2018-2019, 2021 NXP
+  *
+  * SPDX-License-Identifier:	GPL-2.0+
+  */
+@@ -30,10 +30,10 @@
+ #include <fsl_esdhc_imx.h>
+ #include <mmc.h>
+ #include <asm/arch/ddr.h>
++#include <asm/sections.h>
+ 
+ #include "lpddr4_timing.h"
+ 
+-#define ONE_GB 0x40000000ULL
+ DECLARE_GLOBAL_DATA_PTR;
+ 
+ int spl_board_boot_device(enum boot_device boot_dev_spl)
+@@ -169,8 +169,8 @@ static bool spl_dram_is_1G(void)
+ 	/* The idea is to write a value in offset 1G and see if it is
+ 	 * written in offset 0 as well
+ 	 */
+-	base1 = (volatile uint32_t *)CONFIG_SYS_SDRAM_BASE;
+-	base2 = (volatile uint32_t *)((uint64_t)CONFIG_SYS_SDRAM_BASE + SZ_1G);
++	base1 = (volatile uint32_t *)CFG_SYS_SDRAM_BASE;
++	base2 = (volatile uint32_t *)((uint64_t)CFG_SYS_SDRAM_BASE + SZ_1G);
+ 
+ 	backup1 = *base1;
+ 	backup2 = *base2;
+@@ -371,7 +371,7 @@ err:
+ 	return NULL;
+ }
+ 
+-static void spl_dram_init(void)
++void spl_dram_init(void)
+ {
+ 	struct dram_timing_info *dram_info;
+ 	int ret = -1;
+@@ -440,14 +440,7 @@ int power_init_board(void)
+ 
+ void spl_board_init(void)
+ {
+-	if (IS_ENABLED(CONFIG_FSL_CAAM)) {
+-		struct udevice *dev;
+-		int ret;
+-
+-		ret = uclass_get_device_by_driver(UCLASS_MISC, DM_DRIVER_GET(caam_jr), &dev);
+-		if (ret)
+-			printf("Failed to initialize caam_jr: %d\n", ret);
+-	}
++	arch_misc_init();
+ 
+ 	/* Set GIC clock to 500Mhz for OD VDD_SOC. Kernel driver does not allow to change it.
+ 	 * Should set the clock after PMIC setting done.
+@@ -486,8 +479,6 @@ void board_init_f(ulong dummy)
+ 
+ 	timer_init();
+ 
+-	preloader_console_init();
+-
+ 	ret = spl_early_init();
+ 	if (ret) {
+ 		debug("spl_early_init() failed: %d\n", ret);
+@@ -502,6 +493,8 @@ void board_init_f(ulong dummy)
+ 		hang();
+ 	}
+ 
++	preloader_console_init();
++
+ 	enable_tzc380();
+ 
+ 	power_init_board();
+-- 
+2.40.1

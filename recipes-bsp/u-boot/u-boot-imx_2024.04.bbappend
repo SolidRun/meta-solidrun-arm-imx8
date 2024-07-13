@@ -31,6 +31,13 @@ SRC_URI += " \
     file://0032-net-phy-genphy_config-disable-BMCR_PDOWN-if-set.patch \
     file://0034-board-solidrun-imx8mp-enable-second-on-soc-ethernet.patch \
     file://0036-configs-imx8mp-solidrun-move-environment-to-fit-with.patch \
+    file://0038-board-solidrun-imx8mp_solidrun-remove-freescale-Kcon.patch \
+    file://0039-board-solidrun-devicetree-remove-optee-and-CAAM-node.patch \
+    file://0040-migrate-to-new-schema-for-u-boot-dm-tags-to-bootph.patch \
+    file://0041-board-solidrun-imx8mp-updates-to-successfully-compil.patch \
+    file://0042-board-solidrun-imx8mp-updates-to-successfully-compil.patch \
+    file://0043-arch-imx8m-clock.h-add-declaration-for-set_clk_eqos.patch \
+    file://0045-imx8mp-read-mac-from-tlv-eeprom.patch \
 "
 
 LTO:class-target = ""

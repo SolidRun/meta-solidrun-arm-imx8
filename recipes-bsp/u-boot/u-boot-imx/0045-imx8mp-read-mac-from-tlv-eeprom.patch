@@ -1,0 +1,203 @@
+From 0cf8bb126f35caeffcd092204bb73810e480e183 Mon Sep 17 00:00:00 2001
+From: Omar El-Domeiri <github@doesnotexist.com>
+Date: Sat, 13 Jul 2024 04:02:14 +0000
+Subject: [PATCH] imx8mp: read mac from tlv eeprom
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Re-implemented for v2024.4 tree's changes now that there is a
+imx specific eqos implementation.
+
+Replaces patches:
+ - 0018-imx8mp-move-mac-address-selection-logic-to-board-fil.patch
+ - 0019-imx8mp-read-mac-from-tlv-eeprom.patch
+ - 0033-board-solidrun-imx8mp-fix-mac-address-calculation.patch
+ - 0037-net-fec_mxc-add-weak-implementation-of-board_get_mac.patch
+
+and parts of the following patches:
+ ─ 0021-solidrun-imx8mp-unify-TLV-parsing-and-storage.patch
+ ─ 0034-board-solidrun-imx8mp-enable-second-on-soc-ethernet.patch
+---
+ arch/arm/dts/imx8mp-solidrun-u-boot.dtsi      |  2 +-
+ arch/arm/include/asm/mach-imx/sys_proto.h     |  1 +
+ .../imx8mp_solidrun/imx8mp_solidrun.c         | 76 +++++++++++++++++++
+ drivers/net/dwc_eth_qos.c                     |  2 +-
+ drivers/net/dwc_eth_qos_imx.c                 |  3 +-
+ drivers/net/fec_mxc.c                         | 13 +++-
+ 6 files changed, 91 insertions(+), 6 deletions(-)
+
+diff --git a/arch/arm/dts/imx8mp-solidrun-u-boot.dtsi b/arch/arm/dts/imx8mp-solidrun-u-boot.dtsi
+index 631f34fa764..d6f0f751391 100644
+--- a/arch/arm/dts/imx8mp-solidrun-u-boot.dtsi
++++ b/arch/arm/dts/imx8mp-solidrun-u-boot.dtsi
+@@ -158,7 +158,7 @@
+ };
+ 
+ &eqos {
+-	compatible = "fsl,imx-eqos";
++	compatible = "nxp,imx8mp-dwmac-eqos";
+ 	/delete-property/ assigned-clocks;
+ 	/delete-property/ assigned-clock-parents;
+ 	/delete-property/ assigned-clock-rates;
+diff --git a/arch/arm/include/asm/mach-imx/sys_proto.h b/arch/arm/include/asm/mach-imx/sys_proto.h
+index dc589e03cec..8f801ed26bd 100644
+--- a/arch/arm/include/asm/mach-imx/sys_proto.h
++++ b/arch/arm/include/asm/mach-imx/sys_proto.h
+@@ -347,6 +347,7 @@ unsigned long call_imx_sip_ret2(unsigned long id, unsigned long reg0,
+ 				unsigned long reg3);
+ 
+ void imx_get_mac_from_fuse(int dev_id, unsigned char *mac);
++int board_get_mac(int dev_id, unsigned char *mac);
+ 
+ #if defined(CONFIG_MX6) || defined(CONFIG_MX7) || defined(CONFIG_MX7ULP)
+ void enable_ca7_smp(void);
+diff --git a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
+index eaf17402eb3..47e95bd6cc2 100644
+--- a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
++++ b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
+@@ -643,6 +643,82 @@ int board_late_init(void)
+ 	return 0;
+ }
+ 
++// calculate n-th mac from base
++static void mac_add_n(unsigned char *base, u16 n) {
++	if (n == 0)
++		return;
++
++	/*
++	 * There is no 48 or 64-bit capable big-endian / host order
++	 * conversion function available, increment byte for byte ...
++	 */
++	base[5]++;
++	if (base[5] == 0) {
++		base[4]++;
++		if (base[4] == 0) {
++			base[3]++;
++			if (base[3] == 0) {
++				base[2]++;
++				if (base[2] == 0) {
++					base[1]++;
++					if (base[1] == 0)
++						base[0]++;
++				}
++			}
++		}
++	}
++
++	return mac_add_n(base, n-1);
++}
++
++/*
++ * select board mac address for given interface
++ */
++int board_get_mac(int dev_id, unsigned char *mac) {
++	int i;
++
++	/*
++	 * Note: Environment ethaddr (eth1addr, eth2addr, ...) has first priority,
++	 * therefore it should be read and returned here.
++	 * However the fec driver will write the result from this function to the environment,
++	 * causing a feedback loop.
++	 */
++
++	// tlv eeproms
++	i = dev_id;
++	for(int j = 0; j < TLV_MAX_DEVICES; j++) {
++		if(!is_valid_ethaddr(&hb_tlv_data.tlv_mac_base[j]))
++			continue;
++
++		// count if enough macs are provided
++		if (i >= hb_tlv_data.tlv_mac_count[j]) {
++			i -= hb_tlv_data.tlv_mac_count[j];
++			continue;
++		}
++
++		// compute i-th mac
++		memcpy(mac, &hb_tlv_data.tlv_mac_base[j], 6);
++		mac_add_n(mac, i);
++
++		if (is_valid_ethaddr(mac)) {
++			printf("%s: interface %i: using mac from tlv eeprom: %02X:%02X:%02X:%02X:%02X:%02X\n", __func__, dev_id, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
++			return 0;
++		} else {
++			pr_debug("%s: computed mac %02X:%02X:%02X:%02X:%02X:%02X is invalid\n", __func__, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
++			break;
++		}
++	}
++
++	// fuses
++	imx_get_mac_from_fuse(dev_id, mac);
++	if(is_valid_ethaddr(mac)) {
++		printf("%s: interface %i: using mac from fuses: %02X:%02X:%02X:%02X:%02X:%02X\n", __func__, dev_id, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
++		return 0;
++	}
++
++	return -ENOENT;
++}
++
+ #ifdef CONFIG_ANDROID_SUPPORT
+ bool is_power_key_pressed(void) {
+ 	return (bool)(!!(readl(SNVS_HPSR) & (0x1 << 6)));
+diff --git a/drivers/net/dwc_eth_qos.c b/drivers/net/dwc_eth_qos.c
+index fcd348573de..992f4d0270e 100644
+--- a/drivers/net/dwc_eth_qos.c
++++ b/drivers/net/dwc_eth_qos.c
+@@ -713,7 +713,7 @@ static int eqos_write_hwaddr(struct udevice *dev)
+ 		(plat->enetaddr[0]);
+ 	writel(val, &eqos->mac_regs->address0_low);
+ 
+-	if (stop_clocks > 1)
++	if (stop_clocks)
+                 ret = eqos->config->ops->eqos_stop_clks(dev);
+ 
+ 	return 0;
+diff --git a/drivers/net/dwc_eth_qos_imx.c b/drivers/net/dwc_eth_qos_imx.c
+index 8976b2ed06a..b532b2e4a73 100644
+--- a/drivers/net/dwc_eth_qos_imx.c
++++ b/drivers/net/dwc_eth_qos_imx.c
+@@ -210,8 +210,7 @@ static int eqos_get_enetaddr_imx(struct udevice *dev)
+ {
+ 	struct eth_pdata *pdata = dev_get_plat(dev);
+ 
+-	imx_get_mac_from_fuse(dev_seq(dev), pdata->enetaddr);
+-
++	board_get_mac(dev_seq(dev), pdata->enetaddr);
+ 	return 0;
+ }
+ 
+diff --git a/drivers/net/fec_mxc.c b/drivers/net/fec_mxc.c
+index 8a866ca8b79..73e4fc642a2 100644
+--- a/drivers/net/fec_mxc.c
++++ b/drivers/net/fec_mxc.c
+@@ -394,9 +394,14 @@ static void fec_rbd_clean(int last, struct fec_bd *prbd)
+ 	writew(0, &prbd->data_length);
+ }
+ 
++__weak int board_get_mac(int dev_id, unsigned char *mac)
++{
++	return -EOPNOTSUPP;
++};
++
+ static int fec_get_hwaddr(int dev_id, unsigned char *mac)
+ {
+-	imx_get_mac_from_fuse(dev_id, mac);
++	board_get_mac(dev_id, mac);
+ 	return !is_valid_ethaddr(mac);
+ }
+ 
+@@ -1103,7 +1108,11 @@ static int fecmxc_read_rom_hwaddr(struct udevice *dev)
+ 	struct fec_priv *priv = dev_get_priv(dev);
+ 	struct eth_pdata *pdata = dev_get_plat(dev);
+ 
+-	return fec_get_hwaddr(priv->dev_id, pdata->enetaddr);
++	int ret = fec_get_hwaddr(priv->dev_id, pdata->enetaddr);
++	if (ret == 0)
++		debug("got MAC%d address from board-file: %pM\n", priv->dev_id, pdata->enetaddr);
++
++	return ret;
+ }
+ 
+ static int fecmxc_set_promisc(struct udevice *dev, bool enable)
+-- 
+2.40.1
