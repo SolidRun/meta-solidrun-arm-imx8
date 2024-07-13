@@ -1,7 +1,7 @@
-From 11f130a78c94a9a2cfbc17bcd970e426313c98e0 Mon Sep 17 00:00:00 2001
+From 47322b2c8cbd62378100511e3add391ec90d058f Mon Sep 17 00:00:00 2001
 From: Jon Nettleton <jon@solid-run.com>
 Date: Tue, 30 May 2023 15:02:38 +0200
-Subject: [PATCH 2/2] imx8mp-solidrun: For yocto only pass the fdtfile
+Subject: [PATCH] imx8mp-solidrun: For yocto only pass the fdtfile
 
 We should not be setting a subdirectory for the BSP's, this is
 a discrepancy with mainline distributions.
@@ -12,7 +12,7 @@ Signed-off-by: Jon Nettleton <jon@solid-run.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
-index b0af978e37..c195cc6036 100644
+index bcaec720e35..1c315078930 100644
 --- a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 +++ b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 @@ -539,7 +539,7 @@ int board_late_init(void)
@@ -26,4 +26,3 @@ index b0af978e37..c195cc6036 100644
  		env_set("fdtfile", fdtfile);
 -- 
 2.40.1
-

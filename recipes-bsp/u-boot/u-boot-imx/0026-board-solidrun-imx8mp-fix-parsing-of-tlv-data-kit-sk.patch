@@ -1,4 +1,4 @@
-From 9e60760236edea26f1b37b579ef489c8bd35ef29 Mon Sep 17 00:00:00 2001
+From 1835043c8945c4715a68d9c886f48855b643e98c Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Thu, 17 Aug 2023 15:54:38 +0200
 Subject: [PATCH] board: solidrun: imx8mp: fix parsing of tlv data kit sku
@@ -18,7 +18,7 @@ Signed-off-by: Josua Mayer <josua@solid-run.com>
  2 files changed, 8 insertions(+), 4 deletions(-)
 
 diff --git a/board/solidrun/common/tlv_data.c b/board/solidrun/common/tlv_data.c
-index 1b181bd889..debf103be3 100644
+index f3c9e13d658..8e24db7a9c4 100644
 --- a/board/solidrun/common/tlv_data.c
 +++ b/board/solidrun/common/tlv_data.c
 @@ -76,9 +76,11 @@ static void parse_tlv_vendor_ext(struct tlvinfo_tlv *tlv_entry,
@@ -33,11 +33,11 @@ index 1b181bd889..debf103be3 100644
 +					sizeof(td->tlv_kit_number[index]) - 1);
 +		memcpy(dest, &tlv_entry->value[5], len);
 +		dest[len] = '\0';
- 		break;	
+ 		break;
  	default:
  		break;
 diff --git a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
-index 35cb3dc122..02242e1090 100644
+index 783bfd05046..4ca17651492 100644
 --- a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 +++ b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 @@ -555,7 +555,9 @@ static void board_id_from_tlv_info(void) {
@@ -53,4 +53,3 @@ index 35cb3dc122..02242e1090 100644
  		}
 -- 
 2.35.3
-

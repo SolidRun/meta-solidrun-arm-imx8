@@ -1,7 +1,7 @@
-From 83c2eaa59e169cc394288f9de888ad650115a647 Mon Sep 17 00:00:00 2001
+From 58322597847b82d1c9086459700188aa2cf32e2a Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Thu, 31 Mar 2022 20:16:22 +0300
-Subject: [PATCH 16/21] imx8mp: detect board from tlv eeprom
+Subject: [PATCH] imx8mp: detect board from tlv eeprom
 
 ---
  arch/arm/mach-imx/imx8m/Kconfig               |   1 +
@@ -9,10 +9,10 @@ Subject: [PATCH 16/21] imx8mp: detect board from tlv eeprom
  2 files changed, 196 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm/mach-imx/imx8m/Kconfig b/arch/arm/mach-imx/imx8m/Kconfig
-index 1674dd4706..8bbe2a2ffc 100644
+index 272a47be7f9..798df8be977 100644
 --- a/arch/arm/mach-imx/imx8m/Kconfig
 +++ b/arch/arm/mach-imx/imx8m/Kconfig
-@@ -260,6 +260,7 @@ config TARGET_IMX8MP_SOLIDRUN
+@@ -344,6 +344,7 @@ config TARGET_IMX8MP_SOLIDRUN
  	select FSL_CAAM
  	select FSL_BLOB
  	select ARCH_MISC_INIT
@@ -21,7 +21,7 @@ index 1674dd4706..8bbe2a2ffc 100644
  
  config TARGET_PICO_IMX8MQ
 diff --git a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
-index 38f4810b26..0f71a4beaa 100644
+index 38f4810b262..0f71a4beaad 100644
 --- a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 +++ b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 @@ -32,6 +32,10 @@
@@ -243,4 +243,3 @@ index 38f4810b26..0f71a4beaa 100644
  	return 0;
 -- 
 2.40.1
-

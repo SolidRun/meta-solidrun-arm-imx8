@@ -1,8 +1,8 @@
-From ebf6a3860bbe8c22fb5d3f0c5e8cd1d602af7f9e Mon Sep 17 00:00:00 2001
+From 7f3633a41496965f65318d7e4c53141f06921988 Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Mon, 2 May 2022 17:18:30 +0300
-Subject: [PATCH 07/21] cmd: tlv_eeprom: convert functions used by command to
- api functions
+Subject: [PATCH] cmd: tlv_eeprom: convert functions used by command to api
+ functions
 
 - prog_eeprom: write_tlvinfo_tlv_eeprom
 - update_crc: tlvinfo_update_crc
@@ -16,7 +16,7 @@ Signed-off-by: Josua Mayer <josua@solid-run.com>
  2 files changed, 76 insertions(+), 37 deletions(-)
 
 diff --git a/cmd/tlv_eeprom.c b/cmd/tlv_eeprom.c
-index 00c5b5f840..1b4f2537f6 100644
+index 485af4745b5..a8ba1557000 100644
 --- a/cmd/tlv_eeprom.c
 +++ b/cmd/tlv_eeprom.c
 @@ -28,13 +28,9 @@ DECLARE_GLOBAL_DATA_PTR;
@@ -68,7 +68,7 @@ index 00c5b5f840..1b4f2537f6 100644
  {
  	struct tlvinfo_header *eeprom_hdr = to_header(eeprom);
  	struct tlvinfo_tlv    *eeprom_crc;
-@@ -137,11 +119,11 @@ static int read_eeprom(int devnum, u8 *eeprom)
+@@ -139,11 +121,11 @@ static int read_eeprom(int devnum, u8 *eeprom)
  
  	// If the contents are invalid, start over with default contents
  	if (!is_valid_tlvinfo_header(eeprom_hdr) ||
@@ -82,7 +82,7 @@ index 00c5b5f840..1b4f2537f6 100644
  	}
  
  #ifdef DEBUG
-@@ -183,7 +165,7 @@ static void show_eeprom(int devnum, u8 *eeprom)
+@@ -185,7 +167,7 @@ static void show_eeprom(int devnum, u8 *eeprom)
  	tlv_end  = HDR_SIZE + be16_to_cpu(eeprom_hdr->totallen);
  	while (curr_tlv < tlv_end) {
  		eeprom_tlv = to_entry(&eeprom[curr_tlv]);
@@ -91,7 +91,7 @@ index 00c5b5f840..1b4f2537f6 100644
  			printf("Invalid TLV field starting at EEPROM offset %d\n",
  			       curr_tlv);
  			return;
-@@ -193,7 +175,7 @@ static void show_eeprom(int devnum, u8 *eeprom)
+@@ -195,7 +177,7 @@ static void show_eeprom(int devnum, u8 *eeprom)
  	}
  
  	printf("Checksum is %s.\n",
@@ -100,7 +100,7 @@ index 00c5b5f840..1b4f2537f6 100644
  
  #ifdef DEBUG
  	printf("EEPROM dump: (0x%x bytes)", TLV_INFO_MAX_LEN);
-@@ -340,13 +322,13 @@ static void decode_tlv(struct tlvinfo_tlv *tlv)
+@@ -342,13 +324,13 @@ static void decode_tlv(struct tlvinfo_tlv *tlv)
  }
  
  /**
@@ -116,7 +116,7 @@ index 00c5b5f840..1b4f2537f6 100644
  {
  	struct tlvinfo_header *eeprom_hdr = to_header(eeprom);
  	struct tlvinfo_tlv    *eeprom_crc;
-@@ -376,20 +358,20 @@ static void update_crc(u8 *eeprom)
+@@ -378,20 +360,20 @@ static void update_crc(u8 *eeprom)
  }
  
  /**
@@ -142,7 +142,7 @@ index 00c5b5f840..1b4f2537f6 100644
  	if (ret) {
  		printf("Programming failed.\n");
  		return -1;
-@@ -462,13 +444,13 @@ int do_tlv_eeprom(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
+@@ -489,13 +471,13 @@ int do_tlv_eeprom(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
  	if (argc == 2) {
  		switch (cmd) {
  		case 'w':   /* write */
@@ -158,7 +158,7 @@ index 00c5b5f840..1b4f2537f6 100644
  			printf("EEPROM data in memory reset.\n");
  			break;
  		case 'l':   /* list */
-@@ -549,7 +531,7 @@ U_BOOT_CMD(tlv_eeprom, 4, 1,  do_tlv_eeprom,
+@@ -564,7 +546,7 @@ U_BOOT_CMD(tlv_eeprom, 4, 1,  do_tlv_eeprom,
   *  An offset from the beginning of the EEPROM is returned in the
   *  eeprom_index parameter if the TLV is found.
   */
@@ -167,7 +167,7 @@ index 00c5b5f840..1b4f2537f6 100644
  {
  	struct tlvinfo_header *eeprom_hdr = to_header(eeprom);
  	struct tlvinfo_tlv    *eeprom_tlv;
-@@ -561,7 +543,7 @@ static bool tlvinfo_find_tlv(u8 *eeprom, u8 tcode, int *eeprom_index)
+@@ -576,7 +558,7 @@ static bool tlvinfo_find_tlv(u8 *eeprom, u8 tcode, int *eeprom_index)
  	eeprom_end = HDR_SIZE + be16_to_cpu(eeprom_hdr->totallen);
  	while (*eeprom_index < eeprom_end) {
  		eeprom_tlv = to_entry(&eeprom[*eeprom_index]);
@@ -176,7 +176,7 @@ index 00c5b5f840..1b4f2537f6 100644
  			return false;
  		if (eeprom_tlv->type == tcode)
  			return true;
-@@ -594,7 +576,7 @@ static bool tlvinfo_delete_tlv(u8 *eeprom, u8 code)
+@@ -609,7 +591,7 @@ static bool tlvinfo_delete_tlv(u8 *eeprom, u8 code)
  		eeprom_hdr->totallen =
  			cpu_to_be16(be16_to_cpu(eeprom_hdr->totallen) -
  				    tlength);
@@ -185,7 +185,7 @@ index 00c5b5f840..1b4f2537f6 100644
  		return true;
  	}
  	return false;
-@@ -695,7 +677,7 @@ static bool tlvinfo_add_tlv(u8 *eeprom, int tcode, char *strval)
+@@ -710,7 +692,7 @@ static bool tlvinfo_add_tlv(u8 *eeprom, int tcode, char *strval)
  	// Update the total length and calculate (add) a new CRC-32 TLV
  	eeprom_hdr->totallen = cpu_to_be16(be16_to_cpu(eeprom_hdr->totallen) +
  			ENT_SIZE + new_tlv_len);
@@ -194,7 +194,7 @@ index 00c5b5f840..1b4f2537f6 100644
  
  	return true;
  }
-@@ -986,7 +968,7 @@ int read_tlvinfo_tlv_eeprom(void *eeprom, struct tlvinfo_header **hdr,
+@@ -1001,7 +983,7 @@ int read_tlvinfo_tlv_eeprom(void *eeprom, struct tlvinfo_header **hdr,
  			      be16_to_cpu(tlv_hdr->totallen), dev_num);
  	if (ret < 0)
  		return ret;
@@ -204,10 +204,10 @@ index 00c5b5f840..1b4f2537f6 100644
  
  	*hdr = tlv_hdr;
 diff --git a/include/tlv_eeprom.h b/include/tlv_eeprom.h
-index fd45e5f6eb..30626a1067 100644
+index 2b1e19b2bdd..7fda5b886ab 100644
 --- a/include/tlv_eeprom.h
 +++ b/include/tlv_eeprom.h
-@@ -111,6 +111,51 @@ int write_tlv_eeprom(void *eeprom, int len, int dev);
+@@ -113,6 +113,51 @@ int write_tlv_eeprom(void *eeprom, int len, int dev);
  int read_tlvinfo_tlv_eeprom(void *eeprom, struct tlvinfo_header **hdr,
  			    struct tlvinfo_tlv **first_entry, int dev);
  
@@ -259,7 +259,7 @@ index fd45e5f6eb..30626a1067 100644
  #else /* !CONFIG_IS_ENABLED(CMD_TLV_EEPROM) */
  
  static inline int read_tlv_eeprom(void *eeprom, int offset, int len, int dev)
-@@ -150,4 +195,16 @@ static inline bool is_valid_tlvinfo_header(struct tlvinfo_header *hdr)
+@@ -152,4 +197,16 @@ static inline bool is_valid_tlvinfo_header(struct tlvinfo_header *hdr)
  		(be16_to_cpu(hdr->totallen) <= TLV_TOTAL_LEN_MAX));
  }
  
@@ -278,4 +278,3 @@ index fd45e5f6eb..30626a1067 100644
  #endif /* __TLV_EEPROM_H_ */
 -- 
 2.40.1
-

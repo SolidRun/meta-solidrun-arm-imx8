@@ -1,15 +1,15 @@
-From cd9c29b6e48d41710ab170ce79b6b36e2639649a Mon Sep 17 00:00:00 2001
+From 99b63555250a076b1ba1dabb3c1a4be728a1fcd4 Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Mon, 4 Apr 2022 09:47:22 +0300
-Subject: [PATCH 20/21] imx8mp: implement tlv eeprom vendor extension for kit
- sku number
+Subject: [PATCH] imx8mp: implement tlv eeprom vendor extension for kit sku
+ number
 
 ---
  .../imx8mp_solidrun/imx8mp_solidrun.c         | 122 +++++++++++++++++-
  1 file changed, 121 insertions(+), 1 deletion(-)
 
 diff --git a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
-index 7fa59acc9d..bdfa8af08a 100644
+index 0f71a4beaad..8ab571a143c 100644
 --- a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 +++ b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 @@ -399,11 +399,78 @@ static bool get_tlvinfo_from_eeprom(int index, u8 *buffer, size_t length) {
@@ -176,4 +176,3 @@ index 7fa59acc9d..bdfa8af08a 100644
  	return 0;
 -- 
 2.40.1
-

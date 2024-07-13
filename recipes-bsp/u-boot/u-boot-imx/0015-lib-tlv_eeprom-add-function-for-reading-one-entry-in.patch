@@ -1,8 +1,8 @@
-From cd5903a44c68d30c72eedf000888560e492b2159 Mon Sep 17 00:00:00 2001
+From a308031aaef29da8205cde4cfa32e899f06adcf2 Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Mon, 2 May 2022 17:18:38 +0300
-Subject: [PATCH 15/21] lib: tlv_eeprom: add function for reading one entry
- into a C string
+Subject: [PATCH] lib: tlv_eeprom: add function for reading one entry into a C
+ string
 
 This solves the potentially common problem of getting a specific tlv
 entry from an eeprom in board-files, without having to introduce several
@@ -15,10 +15,10 @@ Signed-off-by: Josua Mayer <josua@solid-run.com>
  2 files changed, 37 insertions(+)
 
 diff --git a/include/tlv_eeprom.h b/include/tlv_eeprom.h
-index c81c58837d..5989c611f5 100644
+index 574d94ead1f..2779f8d2c59 100644
 --- a/include/tlv_eeprom.h
 +++ b/include/tlv_eeprom.h
-@@ -166,6 +166,18 @@ bool tlvinfo_add_tlv(u8 *eeprom, int code, char *strval);
+@@ -168,6 +168,18 @@ bool tlvinfo_add_tlv(u8 *eeprom, int code, char *strval);
   */
  bool tlvinfo_delete_tlv(u8 *eeprom, u8 code);
  
@@ -38,7 +38,7 @@ index c81c58837d..5989c611f5 100644
   *  tlvinfo_update_crc
   *
 diff --git a/lib/tlv/tlv_eeprom.c b/lib/tlv/tlv_eeprom.c
-index 464f0aa1fa..205960e8f2 100644
+index fac76986fc7..6495ade2db3 100644
 --- a/lib/tlv/tlv_eeprom.c
 +++ b/lib/tlv/tlv_eeprom.c
 @@ -350,6 +350,31 @@ bool tlvinfo_add_tlv(u8 *eeprom, int tcode, char *strval)
@@ -75,4 +75,3 @@ index 464f0aa1fa..205960e8f2 100644
   *
 -- 
 2.40.1
-
