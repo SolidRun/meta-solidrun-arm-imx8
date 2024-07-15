@@ -1,7 +1,7 @@
-From 68bab64b8d282c9dc22988e44a0b8e323f499bba Mon Sep 17 00:00:00 2001
+From b9495530e09863dd1cd6edaaf6e06100198df3e8 Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Mon, 4 Apr 2022 14:26:04 +0300
-Subject: [PATCH 17/21] imx8mp: don't pre-define fdtfile environment variable
+Subject: [PATCH] imx8mp: don't pre-define fdtfile environment variable
 
 Signed-off-by: Josua Mayer <josua@solid-run.com>
 ---
@@ -9,7 +9,7 @@ Signed-off-by: Josua Mayer <josua@solid-run.com>
  1 file changed, 1 deletion(-)
 
 diff --git a/include/configs/imx8mp_solidrun.h b/include/configs/imx8mp_solidrun.h
-index cf3cac9a16..8fb5560d53 100644
+index cf3cac9a162..8fb5560d533 100644
 --- a/include/configs/imx8mp_solidrun.h
 +++ b/include/configs/imx8mp_solidrun.h
 @@ -107,7 +107,6 @@
@@ -22,4 +22,3 @@ index cf3cac9a16..8fb5560d53 100644
  	"mmcpart=1\0" \
 -- 
 2.40.1
-

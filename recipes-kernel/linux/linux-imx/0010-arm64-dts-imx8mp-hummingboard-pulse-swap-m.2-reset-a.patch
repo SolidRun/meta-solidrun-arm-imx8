@@ -1,8 +1,8 @@
-From efbadb93184e2b74c63089f022d9780633fdecc3 Mon Sep 17 00:00:00 2001
+From 3adaf17368d8a75c7b8913b35a344458d777cc2c Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Sun, 20 Aug 2023 13:42:12 +0200
-Subject: [PATCH 10/10] arm64: dts: imx8mp-hummingboard-pulse: swap m.2 reset
- and w_disable IOs
+Subject: [PATCH] arm64: dts: imx8mp-hummingboard-pulse: swap m.2 reset and
+ w_disable IOs
 
 According to schematics the M.2 reset signal is controlled by
 GPIO1_IO06, while W_DISABLE uses GPIO1_IO13.

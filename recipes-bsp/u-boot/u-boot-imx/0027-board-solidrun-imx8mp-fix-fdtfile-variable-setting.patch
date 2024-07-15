@@ -1,4 +1,4 @@
-From b24c082d327fd81d61101cc60d89513d3dafdba8 Mon Sep 17 00:00:00 2001
+From 225e413bfce56768984a57ed2af25977ace8286e Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Thu, 17 Aug 2023 16:18:47 +0200
 Subject: [PATCH] board: solidrun: imx8mp: fix fdtfile variable setting
@@ -28,14 +28,14 @@ Signed-off-by: Josua Mayer <josua@solid-run.com>
  1 file changed, 1 insertion(+), 8 deletions(-)
 
 diff --git a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
-index 140c6c49b8..e4e3745b93 100644
+index 4ca17651492..fc2422a6520 100644
 --- a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 +++ b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
-@@ -643,14 +643,7 @@ int board_late_init(void)
+@@ -635,14 +635,7 @@ int board_late_init(void)
  
  	// auto-select device-tree
  	if (!env_get("fdtfile")) {
--		
+-
 -		char carrier_name[32] = "hummingboard-pulse";
 -		// if not extended board
 -		if (strcmp(board_id.carrier_name, "hummingboard-extended") != 0) {
@@ -49,4 +49,3 @@ index 140c6c49b8..e4e3745b93 100644
  		env_set("fdtfile", fdtfile);
 -- 
 2.35.3
-

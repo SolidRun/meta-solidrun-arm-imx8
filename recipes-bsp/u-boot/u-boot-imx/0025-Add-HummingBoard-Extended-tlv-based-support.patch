@@ -1,4 +1,4 @@
-From 6d69de2dd589231257d352e43126f6106459c7da Mon Sep 17 00:00:00 2001
+From e4a61623a641c3604602ccd8ba47ea2ae9bdad2f Mon Sep 17 00:00:00 2001
 From: Mikhail Anikin <mikhail.anikin@solid-run.com>
 Date: Sun, 6 Aug 2023 09:29:51 +0300
 Subject: [PATCH] Add HummingBoard Extended tlv-based support
@@ -8,7 +8,7 @@ Subject: [PATCH] Add HummingBoard Extended tlv-based support
  1 file changed, 39 insertions(+), 11 deletions(-)
 
 diff --git a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
-index f728ff770c..35cb3dc122 100644
+index 209e0feb18d..783bfd05046 100644
 --- a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 +++ b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 @@ -91,6 +91,15 @@ struct efi_capsule_update_info update_info = {
@@ -34,14 +34,14 @@ index f728ff770c..35cb3dc122 100644
 +	if (strcmp(board_id.carrier_name, "hummingboard-extended") == 0) {
 +		pr_info("Disabling M.2 rfkill for hummingboard extended \n");
 +		char *path = "/rfkill_m2_wdis";
-+    	int nodeoffset = fdt_path_offset(blob, path);
-+    	if (nodeoffset < 0) {
-+        	printf("Unable to find node %s\n", path);
-+        	return -1;
-+    	}
++	int nodeoffset = fdt_path_offset(blob, path);
++	if (nodeoffset < 0) {
++		printf("Unable to find node %s\n", path);
++		return -1;
++	}
 +
 +		const char *name = "status";
-+    	const char *val = "disabled";
++	const char *val = "disabled";
 +		int rc = fdt_setprop_string(blob, nodeoffset, name, val);
 +		if (rc < 0) {
 +			printf("Unable to set property %s to %s\n", name, val);
@@ -88,7 +88,7 @@ index f728ff770c..35cb3dc122 100644
  	// auto-select device-tree
  	if (!env_get("fdtfile")) {
 -		if(snprintf(fdtfile, sizeof(fdtfile), "%s-%s.dtb", board_id.som_name, board_id.carrier_name) >= sizeof(fdtfile)) {
-+		
++
 +		char carrier_name[32] = "hummingboard-pulse";
 +		// if not extended board
 +		if (strcmp(board_id.carrier_name, "hummingboard-extended") != 0) {
@@ -101,4 +101,3 @@ index f728ff770c..35cb3dc122 100644
  		env_set("fdtfile", fdtfile);
 -- 
 2.41.0
-

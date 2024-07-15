@@ -1,7 +1,7 @@
-From b7cd25debb250a6a03e006c216fecac5c56b13a9 Mon Sep 17 00:00:00 2001
+From 11ed53b7ac77754cd458dc004f6ff12ff6637ece Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Sun, 20 Aug 2023 14:01:20 +0200
-Subject: [PATCH 11/12] arm64: dts: imx8mp-sr-som: add second ethernet phy
+Subject: [PATCH] arm64: dts: imx8mp-sr-som: add second ethernet phy
 
 SoM can have optional ethernet phy (assembly option) on U13, using the
 (secondary) FEC ethernet controller.

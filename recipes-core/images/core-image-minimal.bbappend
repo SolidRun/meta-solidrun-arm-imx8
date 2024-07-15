@@ -1,1 +1,1 @@
-IMAGE_INSTALL:append = " linux-firmware-bcm43455-sr"
+IMAGE_INSTALL:append = " firmware-nxp-wifi-bcm43455-sr"

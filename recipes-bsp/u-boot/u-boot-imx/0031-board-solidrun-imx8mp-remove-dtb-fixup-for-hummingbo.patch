@@ -1,4 +1,4 @@
-From 2d8d08f66d47a471828851cda71b5f1d1957094d Mon Sep 17 00:00:00 2001
+From db20a786c0ba2c4d1815128f5b83511a0003c7b1 Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Sun, 20 Aug 2023 14:17:44 +0200
 Subject: [PATCH] board: solidrun: imx8mp: remove dtb fixup for hummingboard
@@ -13,7 +13,7 @@ Signed-off-by: Josua Mayer <josua@solid-run.com>
  1 file changed, 18 deletions(-)
 
 diff --git a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
-index e4e3745b93..50909a2879 100644
+index 2c29bbd38be..9d971eac128 100644
 --- a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 +++ b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
 @@ -273,24 +273,6 @@ int ft_board_setup(void *blob, struct bd_info *bd)
@@ -23,14 +23,14 @@ index e4e3745b93..50909a2879 100644
 -	if (strcmp(board_id.carrier_name, "hummingboard-extended") == 0) {
 -		pr_info("Disabling M.2 rfkill for hummingboard extended \n");
 -		char *path = "/rfkill_m2_wdis";
--    	int nodeoffset = fdt_path_offset(blob, path);
--    	if (nodeoffset < 0) {
--        	printf("Unable to find node %s\n", path);
--        	return -1;
--    	}
+-	int nodeoffset = fdt_path_offset(blob, path);
+-	if (nodeoffset < 0) {
+-		printf("Unable to find node %s\n", path);
+-		return -1;
+-	}
 -
 -		const char *name = "status";
--    	const char *val = "disabled";
+-	const char *val = "disabled";
 -		int rc = fdt_setprop_string(blob, nodeoffset, name, val);
 -		if (rc < 0) {
 -			printf("Unable to set property %s to %s\n", name, val);
@@ -43,4 +43,3 @@ index e4e3745b93..50909a2879 100644
  
 -- 
 2.35.3
-

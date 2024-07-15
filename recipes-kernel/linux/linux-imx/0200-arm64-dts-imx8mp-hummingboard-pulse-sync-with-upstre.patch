@@ -1,0 +1,217 @@
+From 1e2fc0ac153715f424eb8c4d4649aedfa7acaff5 Mon Sep 17 00:00:00 2001
+From: Omar El-Domeiri <github@doesnotexist.com>
+Date: Sun, 7 Jul 2024 16:49:54 +0000
+Subject: [PATCH] arm64: dts: imx8mp-hummingboard-pulse sync with upstream
+
+1) Audio clock constants should match upstream changes in
+   include/dt-bindings/clock/imx8mp-clock.h
+   https://github.com/nxp-imx/linux-imx/commit/849af490b6a674ba0636fbf95ac048b87ad2eb95
+
+2) Pin values were corrected in upstream for similar board
+   imx8mp-evk.dts. In commits such as
+   c02a27768b1e787ec26cd93fca1c0326b1204f15
+   95587ecfcf25e1b9e7810ed91df084d823ee8023
+   Mirroring pin values here to match.
+
+3) Upstream implementation of devicetree for userspace-consumer
+   regulator differs.
+   See Documentation/devicetree/bindings/regulator/regulator-output.yaml
+   It only expects two required properties
+	{
+		compatible = "regulator-output"
+		vout-supply = <phandle to underlying regulator>
+	}
+   Also instead of reading init_on from device tree as was done previously
+   same effect can be achieved just using regulator-boot-on property
+   on the underlying regulator.
+   https://github.com/nxp-imx/linux-imx/commit/5c51d4afcf3fd36159713556402e16cfab794ae9
+
+   Tested userspace control from shell with:
+
+   echo "disabled" > /sys/devices/platform/power-usb-port1/state
+   echo "disabled" > /sys/devices/platform/power-usb-port2/state
+   echo "enabled" > /sys/devices/platform/power-usb-port1/state
+   echo "enabled" > /sys/devices/platform/power-usb-port2/state
+
+4) The pca,i2c-lt-en devicetree property is no longer correct
+   Upstream implemented the same feature but with property nxp,i2c-lt-enable
+   See
+   https://github.com/nxp-imx/linux-imx/commit/62139f52b7e588d565aa9df81ea0a0548a68b823
+   and
+   https://github.com/nxp-imx/linux-imx/commit/e721b161399b30e085faa2f4b930ebeb15df36a7
+---
+ .../freescale/imx8mp-hummingboard-pulse.dtsi  | 58 +++++++++----------
+ .../boot/dts/freescale/imx8mp-sr-som.dtsi     |  2 +-
+ 2 files changed, 28 insertions(+), 32 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dtsi
+index ea4c76cf24c6..89bfb274e54b 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pulse.dtsi
+@@ -20,29 +20,20 @@ leds {
+ 	};
+ 
+ 	power-m2-mpcie {
+-        	compatible = "reg-userspace-consumer";
+-        	regulator-name = "m2-mpcie-pwr-consumer";
+-		regulator-boot-on;
+-		regulator-supplies = "vcc";
+-        	vcc-supply = <&reg_m2_mpcie_pwr>;
++		compatible = "regulator-output";
++        	vout-supply = <&reg_m2_mpcie_pwr>;
+         	comment = "m.2 and mpcie 3.3V connector switch";
+     	};
+ 
+ 	power-usb-port1 {
+-        	compatible = "reg-userspace-consumer";
+-        	regulator-name = "usb-port1-pwr-consumer";
+-		regulator-boot-on;
+-		regulator-supplies = "vcc";
+-        	vcc-supply = <&reg_usb1_host_vbus>;
++		compatible = "regulator-output";
++        	vout-supply = <&reg_usb1_host_vbus>;
+         	comment = "USB Port1 vbus power switch";
+     	};
+ 
+ 	power-usb-port2 {
+-        	compatible = "reg-userspace-consumer";
+-        	regulator-name = "usb-port2-pwr-consumer";
+-		regulator-boot-on;
+-		regulator-supplies = "vcc";
+-        	vcc-supply = <&reg_usb1_vbus>;
++		compatible = "regulator-output";
++        	vout-supply = <&reg_usb1_vbus>;
+         	comment = "USB Port2 vbus power switch";
+     	};
+ 
+@@ -53,6 +44,7 @@ reg_m2_mpcie_pwr: regulator-m2-mpcie-pwr {
+ 		pinctrl-0 = <&pinctrl_m2_pwr>;
+ 		regulator-min-microvolt = <5000000>;
+ 		regulator-max-microvolt = <5000000>;
++		regulator-boot-on;
+ 		gpio = <&gpio1 10 GPIO_ACTIVE_HIGH>;
+ 		enable-active-high;
+ 	};
+@@ -64,6 +56,7 @@ reg_usb1_host_vbus: regulator-usb1-host-vbus {
+ 		pinctrl-0 = <&pinctrl_usb1_host_vbus>;
+ 		regulator-min-microvolt = <5000000>;
+ 		regulator-max-microvolt = <5000000>;
++		regulator-boot-on;
+ 		gpio = <&gpio1 14 GPIO_ACTIVE_HIGH>;
+ 		enable-active-high;
+ 	};
+@@ -75,6 +68,7 @@ reg_usb1_vbus: regulator-usb1-vbus {
+ 		pinctrl-0 = <&pinctrl_usb1_vbus>;
+ 		regulator-min-microvolt = <5000000>;
+ 		regulator-max-microvolt = <5000000>;
++		regulator-boot-on;
+ 		gpio = <&gpio1 15 GPIO_ACTIVE_HIGH>;
+ 		enable-active-high;
+ 	};
+@@ -410,9 +404,11 @@ &sai3 {
+         assigned-clocks = <&clk IMX8MP_CLK_SAI3>;
+         assigned-clock-parents = <&clk IMX8MP_AUDIO_PLL1_OUT>;
+         assigned-clock-rates = <12288000>;
+-        clocks = <&audio_blk_ctrl IMX8MP_CLK_AUDIO_BLK_CTRL_SAI3_IPG>, <&clk IMX8MP_CLK_DUMMY>,
+-                 <&audio_blk_ctrl IMX8MP_CLK_AUDIO_BLK_CTRL_SAI3_MCLK1>, <&clk IMX8MP_CLK_DUMMY>,
+-                 <&clk IMX8MP_CLK_DUMMY>;
++		clocks = <&audio_blk_ctrl IMX8MP_CLK_AUDIOMIX_SAI3_IPG>,
++			 <&clk IMX8MP_CLK_DUMMY>,
++			 <&audio_blk_ctrl IMX8MP_CLK_AUDIOMIX_SAI3_MCLK1>,
++			 <&clk IMX8MP_CLK_DUMMY>,
++			 <&clk IMX8MP_CLK_DUMMY>;
+         clock-names = "bus", "mclk0", "mclk1", "mclk2", "mclk3";
+         fsl,sai-mclk-direction-output;
+ 	status = "okay";
+@@ -512,24 +508,24 @@ MX8MP_IOMUXC_UART4_RXD__GPIO5_IO28		0x19
+ 
+ 	pinctrl_hog: hoggrp {
+ 		fsl,pins = <
+-			MX8MP_IOMUXC_HDMI_DDC_SCL__HDMIMIX_HDMI_SCL	0x400001c3
+-			MX8MP_IOMUXC_HDMI_DDC_SDA__HDMIMIX_HDMI_SDA	0x400001c3
+-			MX8MP_IOMUXC_HDMI_HPD__HDMIMIX_HDMI_HPD		0x40000019
+-			MX8MP_IOMUXC_HDMI_CEC__HDMIMIX_HDMI_CEC		0x40000019
++			MX8MP_IOMUXC_HDMI_DDC_SCL__HDMIMIX_HDMI_SCL	0x400001c2
++			MX8MP_IOMUXC_HDMI_DDC_SDA__HDMIMIX_HDMI_SDA	0x400001c2
++			MX8MP_IOMUXC_HDMI_HPD__HDMIMIX_HDMI_HPD		0x40000010
++			MX8MP_IOMUXC_HDMI_CEC__HDMIMIX_HDMI_CEC		0x40000010
+ 		>;
+ 	};
+ 
+ 	pinctrl_i2c2: i2c2grp {
+ 		fsl,pins = <
+-			MX8MP_IOMUXC_I2C2_SCL__I2C2_SCL			0x400001c3
+-			MX8MP_IOMUXC_I2C2_SDA__I2C2_SDA			0x400001c3
++			MX8MP_IOMUXC_I2C2_SCL__I2C2_SCL			0x400001c2
++			MX8MP_IOMUXC_I2C2_SDA__I2C2_SDA			0x400001c2
+ 		>;
+ 	};
+ 
+ 	pinctrl_i2c3: i2c3grp {
+ 		fsl,pins = <
+-			MX8MP_IOMUXC_I2C3_SCL__I2C3_SCL			0x400001c3
+-			MX8MP_IOMUXC_I2C3_SDA__I2C3_SDA			0x400001c3
++			MX8MP_IOMUXC_I2C3_SCL__I2C3_SCL			0x400001c2
++			MX8MP_IOMUXC_I2C3_SDA__I2C3_SDA			0x400001c2
+ 		>;
+ 	};
+ 
+@@ -617,13 +613,13 @@ MX8MP_IOMUXC_ECSPI1_MISO__UART3_DCE_CTS		0x140
+ 
+ 	pinctrl_usb1_host_vbus: usb1hostgrp {
+ 		fsl,pins = <
+-			MX8MP_IOMUXC_GPIO1_IO14__GPIO1_IO14		0x19
++			MX8MP_IOMUXC_GPIO1_IO14__GPIO1_IO14		0x10
+ 		>;
+ 	};
+ 
+ 	pinctrl_usb1_vbus: usb1grp {
+ 		fsl,pins = <
+-			MX8MP_IOMUXC_GPIO1_IO15__GPIO1_IO15		0x19
++			MX8MP_IOMUXC_GPIO1_IO15__GPIO1_IO15		0x10
+ 		>;
+ 	};
+ 
+@@ -635,7 +631,7 @@ MX8MP_IOMUXC_SD2_DATA0__USDHC2_DATA0		0x1d0
+ 			MX8MP_IOMUXC_SD2_DATA1__USDHC2_DATA1		0x1d0
+ 			MX8MP_IOMUXC_SD2_DATA2__USDHC2_DATA2		0x1d0
+ 			MX8MP_IOMUXC_SD2_DATA3__USDHC2_DATA3		0x1d0
+-			MX8MP_IOMUXC_GPIO1_IO04__USDHC2_VSELECT		0xc1
++			MX8MP_IOMUXC_GPIO1_IO04__USDHC2_VSELECT		0xc0
+ 		>;
+ 	};
+ 
+@@ -647,7 +643,7 @@ MX8MP_IOMUXC_SD2_DATA0__USDHC2_DATA0		0x1d4
+ 			MX8MP_IOMUXC_SD2_DATA1__USDHC2_DATA1		0x1d4
+ 			MX8MP_IOMUXC_SD2_DATA2__USDHC2_DATA2		0x1d4
+ 			MX8MP_IOMUXC_SD2_DATA3__USDHC2_DATA3		0x1d4
+-			MX8MP_IOMUXC_GPIO1_IO04__USDHC2_VSELECT 	0xc1
++			MX8MP_IOMUXC_GPIO1_IO04__USDHC2_VSELECT 	0xc0
+ 		>;
+ 	};
+ 
+@@ -659,7 +655,7 @@ MX8MP_IOMUXC_SD2_DATA0__USDHC2_DATA0		0x1d6
+ 			MX8MP_IOMUXC_SD2_DATA1__USDHC2_DATA1		0x1d6
+ 			MX8MP_IOMUXC_SD2_DATA2__USDHC2_DATA2		0x1d6
+ 			MX8MP_IOMUXC_SD2_DATA3__USDHC2_DATA3		0x1d6
+-			MX8MP_IOMUXC_GPIO1_IO04__USDHC2_VSELECT 	0xc1
++			MX8MP_IOMUXC_GPIO1_IO04__USDHC2_VSELECT 	0xc0
+ 		>;
+ 	};
+ 
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-sr-som.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-sr-som.dtsi
+index f18ba562089c..671c92c639e1 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-sr-som.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mp-sr-som.dtsi
+@@ -211,7 +211,7 @@ pmic: pca9450@25 {
+ 		pinctrl-0 = <&pinctrl_pmic>;
+ 		interrupt-parent = <&gpio1>;
+ 		interrupts = <3 GPIO_ACTIVE_LOW>;
+-		pca,i2c-lt-en = /bits/ 8 <0x2>;
++		nxp,i2c-lt-enable = /bits/ 8 <0x2>;
+ 
+ 		regulators {
+ 			buck1: BUCK1 {
+-- 
+2.35.3
+
