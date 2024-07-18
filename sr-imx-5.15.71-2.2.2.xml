@@ -41,4 +41,5 @@
   <project name="meta-solidrun-arm-imx8" path="sources/meta-solidrun-arm-imx8" remote="solidrun" revision="kirkstone-imx8m">
     <linkfile dest="imx-setup-release.sh" src="setup.sh"/>
   </project>
+  <project name="meta-arm"  path="sources/meta-arm" remote="yocto" revision="kirkstone"/>
 </manifest>
