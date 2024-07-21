@@ -145,3 +145,37 @@ You can enable mender OTA with these steps:
     BBLAYERS += "${BSPDIR}/sources/meta-mender/meta-mender-core"
 	
 2. Configure mender. You can find sample configuration in conf/sample/local.conf.mender.sample
+
+# Usage Hints
+
+## Connecting to WiFi
+
+### systemd-networkd
+
+`core-image-*` images come with systemd-networkd by default.
+For connecting to a protected WiFi network using WPA:
+
+1. ensure image includes `wpa_supplicant`:
+
+       IMAGE_INSTALL_append = " wpa-supplicant"
+
+2. create wpa config file `/etc/wpa_supplicant/wpa_supplicant-wlan0.conf`:
+
+       mkdir -p /etc/wpa_supplicant
+       wpa_passphrase <SSID> > /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
+       # reading passphrase from stdin
+       <type password>
+       cat /etc/wpa_supplicant.conf
+
+3. configure wlan0 interface, create `/etc/systemd/network/00-wlan0.network`:
+
+       [Match]
+       Name=wlan0
+
+       [Network]
+       DHCP=yes
+
+3. enable interface:
+
+       networkctl reload
+       systemctl enable --now wpa_supplicant@wlan0.conf
