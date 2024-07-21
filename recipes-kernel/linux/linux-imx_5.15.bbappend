@@ -27,6 +27,8 @@ SRC_URI += " \
 	file://0102-net-phy-adin-add-support-for-setting-led-link-status.patch \
 	file://0103-arm64-dts-add-description-for-solidrun-solidsense-n8.patch \
 	file://0104-arm64-dts-imx8mn-solidsense-n8-add-power-controls-fo.patch \
+	file://0105-arm64-dts-imx8mn-solidsense-n8-set-bluetooth-max-bau.patch \
+	file://0106-arm64-dts-imx8mn-solidsense-n8-set-bluetooth-max-bau.patch \
 "
 
 KERNEL_MODULE_AUTOLOAD += "imx-sdma"

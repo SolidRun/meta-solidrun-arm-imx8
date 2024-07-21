@@ -1,0 +1,31 @@
+From 5162cb36115d5c40fbda8399654e51488e9c80d0 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Sun, 14 Jul 2024 11:43:46 +0200
+Subject: [PATCH] arm64: dts: imx8mn-solidsense-n8: set bluetooth max baudrate
+ to 1.5Mbps
+
+Murata LBEE5HY1MW Bluetooth component theoretically supports up to 4Mbps
+baudrate. With current drivers only 1.5Mbps is stable.
+
+Set maximum speed to 1.5M.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ arch/arm64/boot/dts/freescale/imx8mn-solidsense-n8-compact.dts | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mn-solidsense-n8-compact.dts b/arch/arm64/boot/dts/freescale/imx8mn-solidsense-n8-compact.dts
+index 6c842667f..3658317d9 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mn-solidsense-n8-compact.dts
++++ b/arch/arm64/boot/dts/freescale/imx8mn-solidsense-n8-compact.dts
+@@ -743,6 +743,7 @@ bluetooth {
+ 		device-wakeup-gpios = <&gpio2 7 GPIO_ACTIVE_HIGH>;
+ 		host-wakeup-gpios = <&gpio2 8 GPIO_ACTIVE_HIGH>;
+ 		shutdown-gpios = <&gpio2 6 GPIO_ACTIVE_HIGH>;
++		max-speed = <1500000>;
+ 	};
+ };
+ 
+-- 
+2.35.3
+
