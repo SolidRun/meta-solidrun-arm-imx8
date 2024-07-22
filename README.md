@@ -8,35 +8,34 @@ use with OpenEmbedded and Yocto Freescale's BSP layer.
 # Instructions
 1. Create working folder for sources and build files:
 
-		$ mkdir imx-yocto
-		$ cd imx-yocto
+       mkdir imx-yocto
+       cd imx-yocto
 
 2. Get NXP Ycoto sources(require repo app):
 
-		$ repo init -u https://github.com/SolidRun/meta-solidrun-arm-imx8 -b kirkstone-imx8m -m sr-imx-5.15.71-2.2.0.xml
-		$ repo sync
+       repo init -u https://github.com/SolidRun/meta-solidrun-arm-imx8 -b kirkstone-imx8m -m sr-imx-5.15.71-2.2.0.xml
+       repo sync
 
 3. Add the meta-solidrun-arm-imx8 layer (curent git repository) into the sources directory, the directory layout should be like this:
-				<pre>
-					.
-					├── sources
-					│   	├── base
-					│   	├── meta-browser
-					│   	├── meta-freescale
-					│   	├── meta-freescale-3rdparty
-					│   	├── meta-freescale-distro
-					│   	├── meta-fsl-bsp-release
-					│   	├── meta-hailo
-					│   	├── meta-openembedded
-					│   	├── meta-qt5
-					│   	├── meta-rust
-					│   	├── meta-solidrun-arm-imx8
-					│   	├── meta-timesys
-					│   	└── poky
-					│
-					├── downloads
-					└── ...
-				</pre>
+
+       .
+       ├── sources
+       │       ├── base
+       │       ├── meta-browser
+       │       ├──  meta-freescale
+       │       ├──  meta-freescale-3rdparty
+       │       ├──  meta-freescale-distro
+       │       ├──  meta-fsl-bsp-release
+       │       ├──  meta-hailo
+       │       ├──  meta-openembedded
+       │       ├──  meta-qt5
+       │       ├──  meta-rust
+       │       ├──  meta-solidrun-arm-imx8
+       │       ├──  meta-timesys
+       │       └── poky
+       │
+       ├── downloads
+       └── ...
 
 4. Configure target machine and distro:
 
@@ -71,27 +70,27 @@ use with OpenEmbedded and Yocto Freescale's BSP layer.
 5. Build Yocto image by running the first, which is a minimal image (lacks firmwares) and then second which is full image including demos:
 (**The following command can take several hours**)
 
-    $ bitbake core-image-minimal
-    $ bitbake imx-image-full
-	$ bitbake imx-hailo-demo-image
+       bitbake core-image-minimal
+       bitbake imx-image-full
+       bitbake imx-hailo-demo-image
 
-The image will be ready at tmp/deploy/images/imx8mpsolidrun and should look as follow:
+   The image will be ready at tmp/deploy/images/imx8mpsolidrun and should look as follow:
 
-    tmp/deploy/images/imx8mpsolidrun/core-image-minimal-imx8mpsolidrun.wic.zst
+       tmp/deploy/images/imx8mpsolidrun/core-image-minimal-imx8mpsolidrun.wic.zst
 
-or
+   or
 
-    tmp/deploy/images/imx8mpsolidrun/imx-image-full-imx8mpsolidrun.wic.zst
+       tmp/deploy/images/imx8mpsolidrun/imx-image-full-imx8mpsolidrun.wic.zst
 
-To flash the image to a micro SD run -
+   To flash the image to a micro SD run -
 
-	zstd -d -c tmp/deploy/images/imx8mpsolidrun/imx-image-full-imx8mpsolidrun.wic.zst | sudo dd of=/dev/sdX bs=1M
+       zstd -d -c tmp/deploy/images/imx8mpsolidrun/imx-image-full-imx8mpsolidrun.wic.zst | sudo dd of=/dev/sdX bs=1M
 
-Or for a multi-core machine this can done faster using
+   Or for a multi-core machine this can done faster using
 
-    pzstd -d -c tmp/deploy/images/imx8mpsolidrun/imx-image-full-imx8mpsolidrun.wic.zst | sudo dd of=/dev/sdX bs=4M conv=fsync
+       pzstd -d -c tmp/deploy/images/imx8mpsolidrun/imx-image-full-imx8mpsolidrun.wic.zst | sudo dd of=/dev/sdX bs=4M conv=fsync
 
-(**Notice that /dev/sdX is the block device points to your micro SD**)
+   (**Notice that /dev/sdX is the block device points to your micro SD**)
 
 
 # Instructions for building under docker container
@@ -127,7 +126,8 @@ To achieve better performance on the platform you can enable building the source
     DISTRO_FEATURES:append = " lto"
 
 ## Include NetworkManager and ModemManager for network control
-If you prefer to use NetworkManager and ModemManager rather than the default Yocto configuration of connman and ofono please add the following snippet to your local.conf
+If you prefer to use NetworkManager and ModemManager rather than the default Yocto configuration of connman and ofono please add the following snippet to your local.conf:
+
     IMAGE_INSTALL_remove += " ofono connman connman-gnome connman-conf"
     IMAGE_INSTALL_remove += " packagegroup-core-tools-testapps"
     PACKAGE_EXCLUDE += "ofono connman connman-gnome connman-conf"
@@ -139,12 +139,14 @@ If you prefer to use NetworkManager and ModemManager rather than the default Yoc
     PACKAGECONFIG_append_pn-networkmanager = " modemmanager ppp"
 
 ## Enabling Mender
+
 You can enable mender OTA with these steps:
+
 1. Add mender-core to bblayers.conf:
 
-    BBLAYERS += "${BSPDIR}/sources/meta-mender/meta-mender-core"
-	
-2. Configure mender. You can find sample configuration in conf/sample/local.conf.mender.sample
+       BBLAYERS += "${BSPDIR}/sources/meta-mender/meta-mender-core"
+
+2. Configure mender. You can find sample configuration in `conf/sample/local.conf.mender.sample`
 
 # Usage Hints
 
@@ -178,4 +180,4 @@ For connecting to a protected WiFi network using WPA:
 3. enable interface:
 
        networkctl reload
-       systemctl enable --now wpa_supplicant@wlan0.conf
+       systemctl enable --now wpa_supplicant@wlan0.service
