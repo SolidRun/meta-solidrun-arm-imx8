@@ -36,7 +36,7 @@
   <project name="meta-timesys" path="sources/meta-timesys" remote="Timesys" revision="d1ad27bfacc937048e7f9084b17f4d7c917d2004" upstream="master"/>
   <project name="meta-virtualization" path="sources/meta-virtualization" remote="yocto" revision="9d056f957b42e31f1c2c5bad0af1ab6c84b53ee6" upstream="kirkstone"/>
   <project name="poky" path="sources/poky" remote="yocto" revision="f53ab3a2ff206a130cdc843839dd0ea5ec4ad02f" upstream="kirkstone"/>
-  <project name="meta-hailo" path="sources/meta-hailo" remote="hailo-ai" revision="7c1fbd2e312b04dae53accf5ff8fe77d1e52e488" upstream="kirkstone"/>
+  <project name="meta-hailo" path="sources/meta-hailo" remote="hailo-ai" revision="c093ed15914abd456afd6d81ced6e6b2b77e180e" upstream="kirkstone"/>
   <project name="meta-mender" path="sources/meta-mender" remote="mender" revision="eb5b14577295ec3a15d3b21602ac4607a0cb3ad8" upstream="kirkstone"/>
   <project name="meta-solidrun-arm-imx8" path="sources/meta-solidrun-arm-imx8" remote="solidrun" revision="kirkstone-imx8m">
     <linkfile dest="imx-setup-release.sh" src="setup.sh"/>
