@@ -67,7 +67,7 @@ use with OpenEmbedded and Yocto Freescale's BSP layer.
 
        DISTRO=$DISTRO MACHINE=$MACHINE source imx-setup-release.sh -b build-$DISTRO-$MACHINE
 
-5. Build Yocto image by running the first, which is a minimal image (lacks firmwares) and then second which is full image including demos:
+5. Build Yocto image by running the first, which is a minimal image (lacks firmwares), the second is the full image excluding demos, and the third builds the demos for the full image build:
 (**The following command can take several hours**)
 
        bitbake core-image-minimal
