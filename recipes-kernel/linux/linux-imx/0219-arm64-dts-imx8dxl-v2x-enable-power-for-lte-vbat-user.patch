@@ -1,0 +1,30 @@
+From ea94cee2e737668f43af4ae645146d3dd8561899 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Tue, 2 May 2023 15:55:37 +0300
+Subject: [PATCH 219/224] arm64: dts: imx8dxl-v2x: enable power for lte-vbat
+ userspace-consumer
+
+userspace-consumer needs its own status indication, or it will turn off
+its managed regulator after boot.
+Add regulator-boot-on to keep lte-vbat enabled by default.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway.dtsi | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway.dtsi b/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway.dtsi
+index 9a78f9a37de3..3923a535c11f 100644
+--- a/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway.dtsi
+@@ -57,6 +57,7 @@ userspace-consumer-lte-vbat {
+ 		regulator-name = "userspace-consumer-lte-vbat";
+ 		regulator-supplies = "lte_vbat_reg";
+ 		lte_vbat_reg-supply = <&lte_vbat_reg>;
++		regulator-boot-on;
+     };
+ };
+ 
+-- 
+2.43.0
+

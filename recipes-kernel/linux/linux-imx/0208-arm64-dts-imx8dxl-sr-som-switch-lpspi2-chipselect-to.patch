@@ -1,0 +1,62 @@
+From 0923b33b9cc6064a1c5ddcc04d95779482c4c525 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Mon, 19 Dec 2022 12:36:21 +0200
+Subject: [PATCH 208/224] arm64: dts: imx8dxl-sr-som: switch lpspi2 chipselect
+ to gpio
+
+There is a strange issue with native chipselect and large (22 byte)
+messages where the device is not selected for the complete time.
+Work around this by using linux gpio function for chip-select.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi | 12 +++++++++---
+ 1 file changed, 9 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi b/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
+index d1a027d42b2c..97eea7f4fe17 100644
+--- a/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
+@@ -149,7 +149,7 @@ pinctrl_lpspi2: lpspi2grp {
+ 				IMX8DXL_USDHC1_RESET_B_ADMA_SPI2_SCK	0x600004c
+ 				IMX8DXL_USDHC1_VSELECT_ADMA_SPI2_SDO	0x600004c
+ 				IMX8DXL_USDHC1_WP_ADMA_SPI2_SDI			0x600004c
+-				IMX8DXL_USDHC1_CD_B_ADMA_SPI2_CS0		0x600004c
++				IMX8DXL_USDHC1_CD_B_LSIO_GPIO4_IO22		0x6000021
+ 			>;
+ 		};
+ 
+@@ -318,8 +318,8 @@ IMX8DXL_QSPI0B_DATA1_LSIO_GPIO3_IO19	0x0000021
+ 				 */
+ 				IMX8DXL_QSPI0B_DATA2_LSIO_GPIO3_IO20	0x0000021
+ 
+-				/* v2x-secure-element gpio1: io without pull-up */
+-				IMX8DXL_QSPI0B_DATA3_LSIO_GPIO3_IO21	0x0000061
++				/* v2x-secure-element gpio1: io with pull-up */
++				IMX8DXL_QSPI0B_DATA3_LSIO_GPIO3_IO21	0x0000021
+ 			>;
+ 		};
+ 
+@@ -355,6 +355,7 @@ &lpspi2 {
+ 	fsl,spi-num-chipselects = <1>;
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_lpspi2>;
++	cs-gpios = <&lsio_gpio4 22 GPIO_ACTIVE_LOW>;
+ 	status = "okay";
+ 
+ 	/* SXF1800 (SoM) */
+@@ -403,6 +404,11 @@ &lsio_gpio2 {
+ 
+ &lsio_gpio3 {
+ 	status = "okay";
++
++	gpio-line-names = "", "", "", "", "", "", "", "",
++					  "", "", "", "", "", "", "", "",
++					  "", "", "", "SXF_RST", "SXF_GPIO0", "SXF_GPIO1", "", "",
++					  "", "", "", "", "", "", "", "";
+ };
+ 
+ /* OTG port for boot */
+-- 
+2.43.0
+

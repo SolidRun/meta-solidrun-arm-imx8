@@ -1,0 +1,27 @@
+From 039677a242c8e3a4c1077f72f4fea7b7aaa7e296 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Sun, 25 Dec 2022 11:05:52 +0200
+Subject: [PATCH 209/224] arm64: dts: imx8dxl-sr-som: sxf1800: change maximum
+ frequency to 5MHz
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi b/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
+index 97eea7f4fe17..079edfcc4d76 100644
+--- a/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
+@@ -364,7 +364,7 @@ v2x_secure_element: sxf1800@0 {
+ 		pinctrl-0 = <&pinctrl_v2x_secure>;
+ 		reg = <0>;
+ 		compatible = "rohm,dh2228fv";
+-		spi-max-frequency = <30000000>;
++		spi-max-frequency = <5000000>;
+ 		power-supply = <&v2x_secure_reg_1v8>;
+ 	};
+ };
+-- 
+2.43.0
+

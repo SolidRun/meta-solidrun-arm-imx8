@@ -1,0 +1,33 @@
+From af0adb1d8205488635ae87b5728e8bb815fdc039 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Thu, 1 Dec 2022 19:47:03 +0200
+Subject: [PATCH 207/224] arm64: dts: imx8dxl-sr-som: add userspace consumer
+ node for sxf1800
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi b/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
+index f4b9c6353abe..d1a027d42b2c 100644
+--- a/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
+@@ -90,6 +90,14 @@ v2x_secure_reg_1v8: regulator-v2x-secure-1v8 {
+ 		gpio = <&lsio_gpio3 18 GPIO_ACTIVE_HIGH>;
+ 		enable-active-high;
+ 	};
++
++	userspace-consumer-v2x-secure-1v8 {
++		compatible = "reg-userspace-consumer";
++		regulator-name = "userspace-consumer-v2x-secure-1v8";
++		regulator-supplies = "v2x_secure_reg_1v8";
++		v2x_secure_reg_1v8-supply = <&v2x_secure_reg_1v8>;
++		regulator-boot-on;
++    };
+ };
+ 
+ &edma2 {
+-- 
+2.43.0
+

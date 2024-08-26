@@ -1,0 +1,152 @@
+From 37ad75f73fe124949a9daae395de408ae4bee215 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Sun, 3 Sep 2023 14:50:32 +0200
+Subject: [PATCH 223/224] arm64: dts: add solidrun v2x gateway with som
+ revision 2.1
+
+SoM revision 2.1 moved sensors from the carrier to the SoM,
+at same i2c bus but using different interrupt IOs.
+
+Add new dts specific to this combination.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ arch/arm64/boot/dts/freescale/Makefile        |  1 +
+ .../dts/freescale/imx8dxl-sr-som-v21.dtsi     | 50 +++++++++++++++++++
+ .../boot/dts/freescale/imx8dxl-sr-som.dtsi    |  2 +
+ .../freescale/imx8dxl-sr-v2x-gateway-v11.dtsi |  7 +++
+ .../dts/freescale/imx8dxl-v2x-v11-som-v21.dts | 18 +++++++
+ 5 files changed, 78 insertions(+)
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8dxl-sr-som-v21.dtsi
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8dxl-v2x-v11-som-v21.dts
+
+diff --git a/arch/arm64/boot/dts/freescale/Makefile b/arch/arm64/boot/dts/freescale/Makefile
+index 2aa1c9f496cf..cfbec0944333 100644
+--- a/arch/arm64/boot/dts/freescale/Makefile
++++ b/arch/arm64/boot/dts/freescale/Makefile
+@@ -240,3 +240,4 @@ dtb-$(CONFIG_ARCH_S32) += s32v234-evb.dtb \
+ 			  s32v234-sbc.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8dxl-v2x.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8dxl-v2x-v11.dtb
++dtb-$(CONFIG_ARCH_MXC) += imx8dxl-v2x-v11-som-v21.dtb
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-sr-som-v21.dtsi b/arch/arm64/boot/dts/freescale/imx8dxl-sr-som-v21.dtsi
+new file mode 100644
+index 000000000000..dc1068f8c4a3
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-sr-som-v21.dtsi
+@@ -0,0 +1,50 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright 2023 Josua Mayer <josua@solid-run.com>
++ */
++
++#undef SOM_REVISION
++#define SOM_REVISION 21
++
++&i2c3 {
++	magnetometer@1e {
++		pinctrl-0 = <&pinctrl_i2c3_magnetometer>;
++		pinctrl-names = "default";
++		compatible = "st,iis2mdc";
++		reg = <0x1e>;
++		interrupt-parent = <&lsio_gpio2>;
++		interrupts = <10 IRQ_TYPE_EDGE_RISING>;
++		st,drdy-int-pin = <1>;
++	};
++
++	inertial-sensor@6b {
++		pinctrl-0 = <&pinctrl_i2c3_intertial>;
++		pinctrl-names = "default";
++		compatible = "st,ism330dhcx";
++		reg = <0x6b>;
++		interrupt-parent = <&lsio_gpio2>;
++		interrupts = <11 IRQ_TYPE_EDGE_RISING>;
++		st,drdy-int-pin = <1>;
++	};
++
++	pressure-sensor@5c {
++		compatible = "st,lps22qs";
++		reg = <0x5c>;
++	};
++};
++
++&iomuxc {
++	pinctrl_i2c3_magnetometer: i2c3magnetometergrp {
++		fsl,pins = <
++			/* interrupt: io with pull-down */
++			IMX8DXL_SNVS_TAMPER_IN1_LSIO_GPIO2_IO10_IN		0x0000041
++		>;
++	};
++
++	pinctrl_i2c3_intertial: i2c3intertialgrp {
++		fsl,pins = <
++			/* interrupt: io with pull-down */
++			IMX8DXL_SNVS_TAMPER_IN2_LSIO_GPIO2_IO11_IN		0x0000041
++		>;
++	};
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi b/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
+index 36689c6d64dc..b3b8fa39519a 100644
+--- a/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
+@@ -3,6 +3,8 @@
+  * Copyright 2022 Josua Mayer <josua@solid-run.com>
+  */
+ 
++#define SOM_REVISION 20
++
+ / {
+ 	chosen {
+ 		stdout-path = &lpuart0;
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway-v11.dtsi b/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway-v11.dtsi
+index b5fb8fb9a72d..1a02432949fe 100644
+--- a/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway-v11.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway-v11.dtsi
+@@ -30,6 +30,12 @@ carrier_rtc: rtc@32 {
+ 	};
+ };
+ 
++/*
++ * Sensors can be assembled on either SoM or Carrier.
++ * When placed on carrier, they use gpio expander for interrupt signals.
++ * For SoM revision 2.1 or later assume placemnt on SoM.
++ */
++#if SOM_REVISION <= 20
+ &i2c3 {
+ 	magnetometer@1e {
+ 		compatible = "st,iis2mdc";
+@@ -52,6 +58,7 @@ pressure-sensor@5c {
+ 		reg = <0x5c>;
+ 	};
+ };
++#endif
+ 
+ &iomuxc {
+ 	/delete-node/ pinctrl_i2c2_gpio_rst;
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-v2x-v11-som-v21.dts b/arch/arm64/boot/dts/freescale/imx8dxl-v2x-v11-som-v21.dts
+new file mode 100644
+index 000000000000..230b1dcd3a31
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-v2x-v11-som-v21.dts
+@@ -0,0 +1,18 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright 2019~2020 NXP
++ * Copyright 2022-2023 Josua Mayer <josua@solid-run.com>
++ */
++
++/dts-v1/;
++
++#include "imx8dxl.dtsi"
++#include "imx8dxl-sr-som.dtsi"
++#include "imx8dxl-sr-som-v21.dtsi"
++#include "imx8dxl-sr-v2x-gateway.dtsi"
++#include "imx8dxl-sr-v2x-gateway-v11.dtsi"
++
++/ {
++	model = "SolidRun i.MX8DXL V2X Gateway";
++	compatible = "solidrun,v2x-gateway", "fsl,imx8dxl";
++};
+-- 
+2.43.0
+

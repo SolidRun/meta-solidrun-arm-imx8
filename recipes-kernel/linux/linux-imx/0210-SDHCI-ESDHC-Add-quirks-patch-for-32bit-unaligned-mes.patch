@@ -1,0 +1,27 @@
+From 88e7059c7f5a2dbe8b050885f050fd808ebaeebe Mon Sep 17 00:00:00 2001
+From: pferrao <pedro.ferrao@strypes.pt>
+Date: Fri, 13 Nov 2020 11:10:57 +0000
+Subject: [PATCH 210/224] SDHCI-ESDHC Add quirks patch for 32bit unaligned
+ messages
+
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 2314a7595eb4..9921449d1062 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -1698,6 +1698,9 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 	if (imx_data->socdata->flags & ESDHC_FLAG_ERR004536)
+ 		host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
+ 
++	host->quirks |= SDHCI_QUIRK_32BIT_DMA_ADDR;
++	host->quirks |= SDHCI_QUIRK_32BIT_ADMA_SIZE;
++
+ 	if (imx_data->socdata->flags & ESDHC_FLAG_HS400)
+ 		host->mmc->caps2 |= MMC_CAP2_HS400;
+ 
+-- 
+2.43.0
+

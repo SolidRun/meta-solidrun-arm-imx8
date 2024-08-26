@@ -1,0 +1,193 @@
+From 493b23839e0239af2d99cf3ea89e62876135ddb2 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Sun, 5 Mar 2023 11:20:57 +0200
+Subject: [PATCH 216/224] arm64: dts: imx8dxl-v2x: add solidrun v2x carrier
+ revision 1.1
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ arch/arm64/boot/dts/freescale/Makefile        |  1 +
+ .../boot/dts/freescale/imx8dxl-sr-som.dtsi    | 22 ++++-
+ .../freescale/imx8dxl-sr-v2x-gateway-v11.dtsi | 89 +++++++++++++++++++
+ .../boot/dts/freescale/imx8dxl-v2x-v11.dts    | 17 ++++
+ 4 files changed, 125 insertions(+), 4 deletions(-)
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway-v11.dtsi
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8dxl-v2x-v11.dts
+
+diff --git a/arch/arm64/boot/dts/freescale/Makefile b/arch/arm64/boot/dts/freescale/Makefile
+index aa13a00b9e4f..2aa1c9f496cf 100644
+--- a/arch/arm64/boot/dts/freescale/Makefile
++++ b/arch/arm64/boot/dts/freescale/Makefile
+@@ -239,3 +239,4 @@ dtb-$(CONFIG_ARCH_MXC) += imx93-9x9-qsb.dtb \
+ dtb-$(CONFIG_ARCH_S32) += s32v234-evb.dtb \
+ 			  s32v234-sbc.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8dxl-v2x.dtb
++dtb-$(CONFIG_ARCH_MXC) += imx8dxl-v2x-v11.dtb
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi b/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
+index 079edfcc4d76..da76dc05489f 100644
+--- a/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
+@@ -120,6 +120,16 @@ &i2c2 {
+ 	};*/
+ };
+ 
++/* exposed on J14: SDA(33), SCL(31) */
++&i2c3 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	clock-frequency = <100000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_i2c3>;
++	status = "okay";
++};
++
+ &iomuxc {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_hog>;
+@@ -129,10 +139,6 @@ pinctrl_hog: hoggrp {
+ 			fsl,pins = <
+ 				IMX8DXL_COMP_CTL_GPIO_1V8_3V3_GPIORHB_PAD	0x000514a0
+ 				IMX8DXL_COMP_CTL_GPIO_1V8_3V3_GPIORHK_PAD	0x000014a0
+-
+-				/* 32kHz for wifi */
+-				/* IMX8DXL_MCLK_OUT0_ADMA_ACM_MCLK_OUT0	0x0600004c */
+-				IMX8DXL_MCLK_OUT0_LSIO_GPIO0_IO20		0x0000061
+ 			>;
+ 		};
+ 
+@@ -144,6 +150,14 @@ IMX8DXL_SPI1_SDO_ADMA_I2C2_SCL		0x06000020
+ 			>;
+ 		};
+ 
++		pinctrl_i2c3: i2c3grp {
++			fsl,pins = <
++				/* io with pull-up and strong drive */
++				IMX8DXL_SPI1_CS0_ADMA_I2C3_SDA		0x06000020
++				IMX8DXL_SPI1_SDI_ADMA_I2C3_SCL		0x06000020
++			>;
++		};
++
+ 		pinctrl_lpspi2: lpspi2grp {
+ 			fsl,pins = <
+ 				IMX8DXL_USDHC1_RESET_B_ADMA_SPI2_SCK	0x600004c
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway-v11.dtsi b/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway-v11.dtsi
+new file mode 100644
+index 000000000000..61aba931b24e
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway-v11.dtsi
+@@ -0,0 +1,89 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright 2023 Josua Mayer <josua@solid-run.com>
++ */
++
++/ {
++	reg_usb1_vbus: reg-usb1-vbus {
++		compatible = "regulator-fixed";
++		regulator-name = "usb1-vbus";
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++		enable-active-high;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_reg_usb1_vbus>;
++		gpio = <&lsio_gpio0 16 GPIO_ACTIVE_HIGH>;
++	};
++};
++
++&i2c2 {
++	rtc@32 {
++		compatible = "epson,rx8111";
++		reg = <0x32>;
++		wakeup-source;
++	};
++};
++
++&i2c3 {
++	magnetometer@1e {
++		compatible = "st,iis2mdc";
++		reg = <0x1e>;
++		interrupt-parent = <&tca6408>;
++		interrupts = <7 IRQ_TYPE_EDGE_RISING>;
++		st,drdy-int-pin = <1>;
++	};
++
++	inertial-sensor@6b {
++		compatible = "st,ism330dhcx";
++		reg = <0x6b>;
++		interrupt-parent = <&tca6408>;
++		interrupts = <6 IRQ_TYPE_EDGE_RISING>;
++		st,drdy-int-pin = <1>;
++	};
++
++	pressure-sensor@5c {
++		compatible = "st,lps22qs";
++		reg = <0x5c>;
++	};
++};
++
++&iomuxc {
++	/delete-node/ pinctrl_i2c2_gpio_rst;
++	/delete-node/ pinctrl_wifi;
++
++	pinctrl_i2c2_gpio_int: i2c2gpiointgrp {
++		fsl,pins = <
++			/* gpio-expander interrupt: io without pull-up */
++			IMX8DXL_MCLK_OUT0_LSIO_GPIO0_IO20		0x0000061
++		>;
++	};
++
++	pinctrl_reg_usb1_vbus: regusb1vbusgrp {
++		fsl,pins = <
++			/* regulator enable: io without pull-up */
++			IMX8DXL_SPI3_CS0_LSIO_GPIO0_IO16		0x0000061
++		>;
++	};
++
++	pinctrl_wifi: wifigrp {
++		fsl,pins = <
++			/*
++			 * WL_REG_ON for Carrier revision 1.1 and later:
++			 * io without pull-up (WiFi module has internal pull-down)
++			 */
++			IMX8DXL_SPI3_SDI_LSIO_GPIO0_IO15		0x0000061
++		>;
++	};
++};
++
++&tca6408 {
++	/delete-property/ reset-gpios;
++
++	pinctrl-0 = <&pinctrl_i2c2_gpio_int>;
++	interrupt-parent = <&lsio_gpio0>;
++	interrupts = <20 IRQ_TYPE_EDGE_FALLING>;
++};
++
++&usbotg1 {
++	vbus-supply = <&reg_usb1_vbus>;
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-v2x-v11.dts b/arch/arm64/boot/dts/freescale/imx8dxl-v2x-v11.dts
+new file mode 100644
+index 000000000000..c506b2ff623b
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-v2x-v11.dts
+@@ -0,0 +1,17 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright 2019~2020 NXP
++ * Copyright 2022-2023 Josua Mayer <josua@solid-run.com>
++ */
++
++/dts-v1/;
++
++#include "imx8dxl.dtsi"
++#include "imx8dxl-sr-som.dtsi"
++#include "imx8dxl-sr-v2x-gateway.dtsi"
++#include "imx8dxl-sr-v2x-gateway-v11.dtsi"
++
++/ {
++	model = "SolidRun i.MX8DXL V2X Gateway";
++	compatible = "solidrun,v2x-gateway", "fsl,imx8dxl";
++};
+-- 
+2.43.0
+

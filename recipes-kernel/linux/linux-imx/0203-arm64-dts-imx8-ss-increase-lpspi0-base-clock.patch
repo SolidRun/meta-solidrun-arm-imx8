@@ -1,0 +1,32 @@
+From 6568235e0594b98e557d540cf7087d7043e96e1d Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Tue, 30 Aug 2022 10:11:46 +0300
+Subject: [PATCH 203/224] arm64: dts: imx8-ss: increase lpspi0 base clock
+
+Change the clock for first spi controller to 60MHz, same as used for all
+other SPIs.
+This resolves an error observed when using lpspi0:
+
+per-clk (0) should be at least two times of transfer speed (8666666)
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ arch/arm64/boot/dts/freescale/imx8-ss-dma.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8-ss-dma.dtsi b/arch/arm64/boot/dts/freescale/imx8-ss-dma.dtsi
+index d2a6bf233a33..908b50cf0b3c 100644
+--- a/arch/arm64/boot/dts/freescale/imx8-ss-dma.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8-ss-dma.dtsi
+@@ -530,7 +530,7 @@ lpspi0: spi@5a000000 {
+ 			 <&spi0_lpcg 1>;
+ 		clock-names = "per", "ipg";
+ 		assigned-clocks = <&clk IMX_SC_R_SPI_0 IMX_SC_PM_CLK_PER>;
+-		assigned-clock-rates = <20000000>;
++		assigned-clock-rates = <60000000>;
+ 		power-domains = <&pd IMX_SC_R_SPI_0>;
+ 		dma-names = "tx","rx";
+ 		dmas = <&edma2 1 0 0>, <&edma2 0 0 1>;
+-- 
+2.43.0
+

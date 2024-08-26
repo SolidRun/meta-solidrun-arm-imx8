@@ -1,0 +1,33 @@
+From 0b9fc30f6c04c0495f7a1a0a6d969530773a1798 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Tue, 27 Aug 2024 12:57:46 +0300
+Subject: [PATCH] arm64: dts: imx8dxl-v2x: add pull-up for lte module
+ open-drain pwrkey
+
+lte module power-key signal can be operated in either open-drain or
+open-collector. Enable pull-up on the pad to consistently select
+open-drain.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway.dtsi | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway.dtsi b/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway.dtsi
+index 82f4c8cfecca..204c2ab87462 100644
+--- a/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway.dtsi
+@@ -173,8 +173,8 @@ pinctrl_lte: ltegrp {
+ 				/* modem RESET_N: io open drain drive 2mA */
+ 				IMX8DXL_ADC_IN3_LSIO_GPIO1_IO11	0x2000061
+ 
+-				/* modem PWRKEY: io open drain drive 2mA */
+-				IMX8DXL_ADC_IN2_LSIO_GPIO1_IO12	0x2000061
++				/* modem PWRKEY: io open drain with pull-up, drive 2mA */
++				IMX8DXL_ADC_IN2_LSIO_GPIO1_IO12	0x2000021
+ 			>;
+ 		};
+ 
+-- 
+2.43.0
+

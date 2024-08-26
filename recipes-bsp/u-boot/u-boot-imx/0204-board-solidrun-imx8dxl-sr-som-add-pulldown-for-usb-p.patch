@@ -1,0 +1,47 @@
+From 2dd0b4f3ac798a8b352866d111fa4835dd826e44 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Sun, 19 Mar 2023 13:09:16 +0200
+Subject: [PATCH 204/204] board: solidrun: imx8dxl-sr-som: add pulldown for usb
+ power switch
+
+Carriers revision 1.1 and later have a power switch controlling the
+external USB-A port. Force it disabled by default to operate safely in
+device-mode.
+In the future a regulatore node should be added such that u-boot can
+automatically toggle power as needed e.g. to support usb flash drive.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ arch/arm/dts/fsl-imx8dxl-sr-som.dts | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/dts/fsl-imx8dxl-sr-som.dts b/arch/arm/dts/fsl-imx8dxl-sr-som.dts
+index fa12a77a35c..2868e39af8c 100644
+--- a/arch/arm/dts/fsl-imx8dxl-sr-som.dts
++++ b/arch/arm/dts/fsl-imx8dxl-sr-som.dts
+@@ -19,7 +19,7 @@
+ 
+ &iomuxc {
+ 	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_hog>;
++	pinctrl-0 = <&pinctrl_hog>, <&pinctrl_reg_usb1_vbus>;
+ 
+ 	imx8dxl-sr-som {
+ 		pinctrl_hog: hoggrp {
+@@ -72,6 +72,13 @@
+ 			>;
+ 		};
+ 
++		pinctrl_reg_usb1_vbus: regusb1vbusgrp {
++			fsl,pins = <
++				/* regulator enable: io with pull-down */
++				SC_P_SPI3_CS0_LSIO_GPIO0_IO16		0x00000040
++			>;
++		};
++
+ 		pinctrl_usdhc1: usdhc1grp {
+ 			fsl,pins = <
+ 				SC_P_EMMC0_CLK_CONN_EMMC0_CLK		0x06000041
+-- 
+2.43.0
+

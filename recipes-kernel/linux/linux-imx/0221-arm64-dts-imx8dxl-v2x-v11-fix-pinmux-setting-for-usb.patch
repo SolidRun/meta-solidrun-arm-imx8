@@ -1,0 +1,32 @@
+From c96e544289457f31526d2e053c0ac5bf054af21c Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Sun, 3 Sep 2023 15:03:57 +0200
+Subject: [PATCH 221/224] arm64: dts: imx8dxl-v2x-v11: fix pinmux setting for
+ usb pwr-enable gpio
+
+The USB power-switch expects open-drain to enable, and pull-down to
+disable. Update the pinmux accordingly.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway-v11.dtsi | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway-v11.dtsi b/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway-v11.dtsi
+index 715e51b62a99..ee678703bcf4 100644
+--- a/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway-v11.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway-v11.dtsi
+@@ -60,8 +60,8 @@ IMX8DXL_MCLK_OUT0_LSIO_GPIO0_IO20		0x0000021
+ 
+ 	pinctrl_reg_usb1_vbus: regusb1vbusgrp {
+ 		fsl,pins = <
+-			/* regulator enable: io without pull-up */
+-			IMX8DXL_SPI3_CS0_LSIO_GPIO0_IO16		0x0000061
++			/* regulator enable: open-drain with pull-up & low drive strength */
++			IMX8DXL_SPI3_CS0_LSIO_GPIO0_IO16		0x2000021
+ 		>;
+ 	};
+ 
+-- 
+2.43.0
+

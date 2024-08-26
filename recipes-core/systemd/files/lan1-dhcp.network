@@ -1,0 +1,7 @@
+[Match]
+Name=lan1
+
+[Network]
+LLMNR=no
+MulticastDNS=yes
+DHCP=ipv4

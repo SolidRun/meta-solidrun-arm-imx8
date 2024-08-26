@@ -1,0 +1,30 @@
+From 06cfdf1fae0cf5e4b4a9163e6c5ed47f1dc1bbe2 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Tue, 26 Jul 2022 13:06:56 +0300
+Subject: [PATCH 200/204] HACK: fastboot emmc_dev default to 0
+
+For some strange reason env_get does not actually return the value of
+currently (in memory) set value of emmc_dev.
+Change the default value to 0 to fix programming offset on SolidRun SoM.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ drivers/fastboot/fb_fsl/fb_fsl_partitions.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/fastboot/fb_fsl/fb_fsl_partitions.c b/drivers/fastboot/fb_fsl/fb_fsl_partitions.c
+index a43c70db939..38e54fe4230 100644
+--- a/drivers/fastboot/fb_fsl/fb_fsl_partitions.c
++++ b/drivers/fastboot/fb_fsl/fb_fsl_partitions.c
+@@ -64,7 +64,7 @@ static ulong bootloader_mmc_offset(void)
+ 			return 0x8000;
+ 	} else if (is_imx8mn() || is_imx8mp() || is_imx8dxl() || is_imx8ulp() || is_imx93()) {
+ 		/* target device is eMMC boot0 partition, bootloader offset is 0x0 */
+-		if (env_get_ulong("emmc_dev", 10, 2) == fastboot_devinfo.dev_id)
++		if (env_get_ulong("emmc_dev", 10, 0) == fastboot_devinfo.dev_id)
+ 			return 0;
+ 		else
+ 			return 0x8000;
+-- 
+2.43.0
+

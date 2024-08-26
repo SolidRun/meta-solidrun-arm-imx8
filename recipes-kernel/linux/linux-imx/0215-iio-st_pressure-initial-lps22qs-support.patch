@@ -1,0 +1,166 @@
+From 846ed2d9c6966f48ed9c802012022f563be40233 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Tue, 7 Mar 2023 12:11:36 +0200
+Subject: [PATCH 215/224] iio: st_pressure: initial lps22qs support
+
+Initial support for ST LPS22QS pressure sensor. Datasheet:
+https://www.st.com/resource/en/datasheet/ilps22qs.pdf
+
+Features:
+* pressure data and timestamping channels
+* sampling frequency selection
+* I2C only
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ drivers/iio/pressure/st_pressure.h      |  2 +
+ drivers/iio/pressure/st_pressure_core.c | 82 +++++++++++++++++++++++++
+ drivers/iio/pressure/st_pressure_i2c.c  |  5 ++
+ 3 files changed, 89 insertions(+)
+
+diff --git a/drivers/iio/pressure/st_pressure.h b/drivers/iio/pressure/st_pressure.h
+index 156e6a72dc5c..78aefd645e2e 100644
+--- a/drivers/iio/pressure/st_pressure.h
++++ b/drivers/iio/pressure/st_pressure.h
+@@ -22,6 +22,7 @@ enum st_press_type {
+ 	LPS33HW,
+ 	LPS35HW,
+ 	LPS22HH,
++	LPS22QS,
+ 	ST_PRESS_MAX,
+ };
+ 
+@@ -32,6 +33,7 @@ enum st_press_type {
+ #define LPS33HW_PRESS_DEV_NAME		"lps33hw"
+ #define LPS35HW_PRESS_DEV_NAME		"lps35hw"
+ #define LPS22HH_PRESS_DEV_NAME		"lps22hh"
++#define LPS22QS_PRESS_DEV_NAME		"lps22qs"
+ 
+ /**
+  * struct st_sensors_platform_data - default press platform data
+diff --git a/drivers/iio/pressure/st_pressure_core.c b/drivers/iio/pressure/st_pressure_core.c
+index ab1c17fac807..652b5e010a82 100644
+--- a/drivers/iio/pressure/st_pressure_core.c
++++ b/drivers/iio/pressure/st_pressure_core.c
+@@ -99,6 +99,7 @@
+ /* FULLSCALE */
+ #define ST_PRESS_FS_AVL_1100MB			1100
+ #define ST_PRESS_FS_AVL_1260MB			1260
++#define ST_PRESS_FS_AVL_4060MB			4060
+ 
+ #define ST_PRESS_1_OUT_XL_ADDR			0x28
+ #define ST_TEMP_1_OUT_L_ADDR			0x2b
+@@ -552,6 +553,87 @@ static const struct st_sensor_settings st_press_sensors_settings[] = {
+ 		.multi_read_bit = false,
+ 		.bootime = 2,
+ 	},
++	{
++		/*
++		 * CUSTOM VALUES FOR LPS22QS SENSOR
++		 * See LPS22QS datasheet:
++		 * https://www.st.com/resource/en/datasheet/ilps22qs.pdf
++		 */
++		.wai = 0xb4,
++		.wai_addr = ST_SENSORS_DEFAULT_WAI_ADDRESS,
++		.sensors_supported = {
++			[0] = LPS22QS_PRESS_DEV_NAME,
++		},
++		.ch = (struct iio_chan_spec *)st_press_lps22hb_channels,
++		.num_ch = ARRAY_SIZE(st_press_lps22hb_channels),
++		.odr = {
++			.addr = 0x10,
++			.mask = 0x78,
++			.odr_avl = {
++				/*
++				 * Output data rate values
++				 * as defined in table 20 of LPS22QS datasheet
++				 */
++				{ .hz = 1, .value = 0x01 },
++				{ .hz = 4, .value = 0x02 },
++				{ .hz = 10, .value = 0x03 },
++				{ .hz = 25, .value = 0x04 },
++				{ .hz = 50, .value = 0x05 },
++				{ .hz = 75, .value = 0x06 },
++				{ .hz = 100, .value = 0x07 },
++				{ .hz = 200, .value = 0x09 },
++				/*
++				 * TODO: Averaging selection values
++				 * as defined in table 21 of LPS22QS datasheet
++				 * default (0) = 4 samples
++				 */
++			},
++		},
++		.pw = {
++			.addr = 0x10,
++			.mask = 0x78,
++			.value_off = ST_SENSORS_DEFAULT_POWER_OFF_VALUE,
++		},
++		.fs = {
++			.addr = 0x11,
++			.mask = 0x40,
++			.fs_avl = {
++				/*
++				 * Pressure and temperature sensitivity values
++				 * as defined in table 2 of LPS22QS datasheet.
++				 */
++				[0] = {
++					.num = ST_PRESS_FS_AVL_1260MB,
++					.gain = ST_PRESS_KPASCAL_NANO_SCALE,
++					.gain2 = ST_PRESS_LPS22HB_LSB_PER_CELSIUS,
++				},
++				[1] = {
++					.num = ST_PRESS_FS_AVL_4060MB,
++					.gain = ST_PRESS_KPASCAL_NANO_SCALE,
++					.gain2 = ST_PRESS_LPS22HB_LSB_PER_CELSIUS,
++				},
++			},
++		},
++		.bdu = {
++			.addr = 0x11,
++			.mask = BIT(3),
++		},
++		.drdy_irq = {
++			/*
++			 * LPS22QS does not have interrupt pin.
++			 */
++			.stat_drdy = {
++				/*
++				 * Status register data available indicators
++				 * for temperature and pressure.
++				 */
++				.addr = ST_SENSORS_DEFAULT_STAT_ADDR,
++				.mask = 0x03,
++			},
++		},
++		.multi_read_bit = false,
++		.bootime = 2,
++	},
+ };
+ 
+ static int st_press_write_raw(struct iio_dev *indio_dev,
+diff --git a/drivers/iio/pressure/st_pressure_i2c.c b/drivers/iio/pressure/st_pressure_i2c.c
+index 6215de677017..0f9e9c5785a7 100644
+--- a/drivers/iio/pressure/st_pressure_i2c.c
++++ b/drivers/iio/pressure/st_pressure_i2c.c
+@@ -47,6 +47,10 @@ static const struct of_device_id st_press_of_match[] = {
+ 		.compatible = "st,lps22hh",
+ 		.data = LPS22HH_PRESS_DEV_NAME,
+ 	},
++	{
++		.compatible = "st,lps22qs",
++		.data = LPS22QS_PRESS_DEV_NAME,
++	},
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(of, st_press_of_match);
+@@ -67,6 +71,7 @@ static const struct i2c_device_id st_press_id_table[] = {
+ 	{ LPS33HW_PRESS_DEV_NAME, LPS33HW },
+ 	{ LPS35HW_PRESS_DEV_NAME, LPS35HW },
+ 	{ LPS22HH_PRESS_DEV_NAME, LPS22HH },
++	{ LPS22QS_PRESS_DEV_NAME, LPS22QS },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(i2c, st_press_id_table);
+-- 
+2.43.0
+

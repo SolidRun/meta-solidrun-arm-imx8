@@ -1,0 +1,12 @@
+[Unit]
+Description=SR V2X Power-on LTE Modem
+After=network.target
+Wants=network.target
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/bin/bash /usr/sbin/lte_power.sh 2>&1
+
+[Install]
+WantedBy=multi-user.target
