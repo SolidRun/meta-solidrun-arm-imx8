@@ -13,7 +13,7 @@ use with OpenEmbedded and Yocto Freescale's BSP layer.
 
 2. Get NXP Ycoto sources(require repo app):
 
-       repo init -u https://github.com/SolidRun/meta-solidrun-arm-imx8 -b kirkstone-imx8m -m sr-imx-5.15.71-2.2.0.xml
+       repo init -u https://github.com/SolidRun/meta-solidrun-arm-imx8 -b kirkstone-imx8m -m sr-imx-5.15.71-2.2.2.xml
        repo sync
 
 3. Add the meta-solidrun-arm-imx8 layer (curent git repository) into the sources directory, the directory layout should be like this:

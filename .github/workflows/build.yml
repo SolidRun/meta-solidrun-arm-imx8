@@ -67,7 +67,7 @@ jobs:
         run: |
           repo init -u https://github.com/SolidRun/meta-solidrun-arm-imx8 \
             -b ${{ github.head_ref || github.ref_name }} \
-            -m sr-imx-5.15.71-2.2.0.xml
+            -m sr-imx-5.15.71-2.2.2.xml
           repo sync
           rm -rf sources/meta-solidrun-arm-imx8
 
@@ -191,4 +191,4 @@ jobs:
           aws_bucket: ${{ secrets.IMAGES_S3_BUCKET }}
           endpoint: ${{ secrets.IMAGES_S3_HOST }}
           source_dir: s3
-          destination_dir: IMX8/imx8mp_yocto_kirkstone-5.15.71-2.2.0/${{ needs.build_images.outputs.build_tag }}
+          destination_dir: IMX8/imx8mp_yocto_kirkstone-5.15.71-2.2.2/${{ needs.build_images.outputs.build_tag }}
