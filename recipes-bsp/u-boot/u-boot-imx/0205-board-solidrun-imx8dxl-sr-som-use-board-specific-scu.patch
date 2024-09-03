@@ -1,0 +1,29 @@
+From aa48c4fc9987bbc8c66e36093d033701c2410f55 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Tue, 3 Sep 2024 16:35:27 +0300
+Subject: [PATCH] board: solidrun: imx8dxl-sr-som: use board-specific scu
+ firmware
+
+SolidRun i.mx8dxl SoM has a custom SCU firmware build, replace evk
+filename with "mx8dxl-sr-som-scfw-tcm.bin".
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ board/solidrun/imx8dxl_som/imximage.cfg | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/board/solidrun/imx8dxl_som/imximage.cfg b/board/solidrun/imx8dxl_som/imximage.cfg
+index e5f2a9e817f..df0a9951681 100644
+--- a/board/solidrun/imx8dxl_som/imximage.cfg
++++ b/board/solidrun/imx8dxl_som/imximage.cfg
+@@ -17,6 +17,6 @@ APPEND ahab-container.img
+ /* Create the 2nd container */
+ CONTAINER
+ /* Add scfw image with exec attribute */
+-IMAGE SCU mx8dxl-evk-scfw-tcm.bin
++IMAGE SCU mx8dxl-sr-som-scfw-tcm.bin
+ /* Add ATF image with exec attribute */
+ IMAGE A35 spl/u-boot-spl.bin 0x00100000
+-- 
+2.43.0
+

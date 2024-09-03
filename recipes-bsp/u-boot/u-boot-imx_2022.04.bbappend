@@ -42,6 +42,7 @@ SRC_URI += " \
 	file://0202-board-solidrun-add-imx8dxl-som.patch \
 	file://0203-board-solidrun-imx8dxl-sr-som-support-CONFIG_DEFAULT.patch \
 	file://0204-board-solidrun-imx8dxl-sr-som-add-pulldown-for-usb-p.patch \
+	file://0205-board-solidrun-imx8dxl-sr-som-use-board-specific-scu.patch \
 "
 
 LTO:class-target = ""
