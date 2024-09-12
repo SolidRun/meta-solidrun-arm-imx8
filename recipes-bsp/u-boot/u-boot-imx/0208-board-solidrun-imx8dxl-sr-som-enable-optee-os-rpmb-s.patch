@@ -1,0 +1,29 @@
+From 5ee2290f782a343bec63f4dcf69e326d876242c6 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Thu, 12 Sep 2024 15:31:47 +0300
+Subject: [PATCH] board: solidrun: imx8dxl-sr-som: enable optee-os rpmb support
+
+Enable configuration options for optee-os rpmb access.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ configs/imx8dxl_v2x_defconfig | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/configs/imx8dxl_v2x_defconfig b/configs/imx8dxl_v2x_defconfig
+index 1515b174813..e73cfc25db7 100644
+--- a/configs/imx8dxl_v2x_defconfig
++++ b/configs/imx8dxl_v2x_defconfig
+@@ -194,3 +194,9 @@ CONFIG_SUPPORT_RAW_INITRD=y
+ 
+ # default fdtfile name
+ CONFIG_DEFAULT_FDT_FILE="imx8dxl-v2x-v11-som-v21.dtb"
++
++# support optee-os rpmb secure storage
++CONFIG_SUPPORT_EMMC_RPMB=y
++CONFIG_TEE=y
++CONFIG_OPTEE=y
++CONFIG_CMD_OPTEE_RPMB=y
+-- 
+2.43.0
+

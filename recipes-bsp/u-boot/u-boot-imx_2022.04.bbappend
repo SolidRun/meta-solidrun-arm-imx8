@@ -43,6 +43,9 @@ SRC_URI += " \
 	file://0203-board-solidrun-imx8dxl-sr-som-support-CONFIG_DEFAULT.patch \
 	file://0204-board-solidrun-imx8dxl-sr-som-add-pulldown-for-usb-p.patch \
 	file://0205-board-solidrun-imx8dxl-sr-som-use-board-specific-scu.patch \
+	file://0206-board-solidrun-imx8dxl-sr-som-sync-dts-with-evk.patch \
+	file://0207-board-solidrun-imx8dxl-sr-som-update-default-fdtfile.patch \
+	file://0208-board-solidrun-imx8dxl-sr-som-enable-optee-os-rpmb-s.patch \
 "
 
 LTO:class-target = ""

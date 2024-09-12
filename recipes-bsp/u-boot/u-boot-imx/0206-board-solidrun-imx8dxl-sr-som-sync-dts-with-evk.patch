@@ -1,0 +1,76 @@
+From b95119c4da00885a83aa12e4d5bf808a5a2dc2b0 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Thu, 12 Sep 2024 11:56:17 +0300
+Subject: [PATCH] board: solidrun: imx8dxl-sr-som: sync dts with evk
+
+Synchronise device-tree and board files with nxp imx8dxl evk.
+Most notably this enables some usb and usdhc related nodes for SPL.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ arch/arm/dts/fsl-imx8dxl-sr-som-u-boot.dtsi | 20 ++++++++++++++++----
+ board/solidrun/imx8dxl_som/imx8dxl_evk.c    |  2 +-
+ 2 files changed, 17 insertions(+), 5 deletions(-)
+
+diff --git a/arch/arm/dts/fsl-imx8dxl-sr-som-u-boot.dtsi b/arch/arm/dts/fsl-imx8dxl-sr-som-u-boot.dtsi
+index ccf57a20986..5d42aebddbd 100644
+--- a/arch/arm/dts/fsl-imx8dxl-sr-som-u-boot.dtsi
++++ b/arch/arm/dts/fsl-imx8dxl-sr-som-u-boot.dtsi
+@@ -62,6 +62,10 @@
+ 	u-boot,dm-spl;
+ };
+ 
++&pd_conn_sdch0 {
++	u-boot,dm-spl;
++};
++
+ &pd_dma {
+ 	u-boot,dm-spl;
+ };
+@@ -99,18 +103,26 @@
+ 	u-boot,dm-spl;
+ };
+ 
++&usbmisc1 {
++	u-boot,dm-spl;
++};
++
+ &usbotg1 {
+ 	u-boot,dm-spl;
+ };
+ 
++&eqos {
++	compatible = "fsl,imx-eqos";
++};
++
+ &usbphy2 {
+         u-boot,dm-spl;
+ };
+ 
+-&usbotg2 {
+-        u-boot,dm-spl;
++&usbmisc2 {
++	u-boot,dm-spl;
+ };
+ 
+-&eqos {
+-	compatible = "fsl,imx-eqos";
++&usbotg2 {
++        u-boot,dm-spl;
+ };
+diff --git a/board/solidrun/imx8dxl_som/imx8dxl_evk.c b/board/solidrun/imx8dxl_som/imx8dxl_evk.c
+index 78d40c0dee7..06cd89fa0a6 100644
+--- a/board/solidrun/imx8dxl_som/imx8dxl_evk.c
++++ b/board/solidrun/imx8dxl_som/imx8dxl_evk.c
+@@ -158,7 +158,7 @@ int board_late_init(void)
+ }
+ 
+ #ifdef CONFIG_ANDROID_BOOT_IMAGE
+-__weak int mmc_map_to_kernel_blk(int dev_no)
++int mmc_map_to_kernel_blk(int dev_no)
+ {
+ 	return dev_no;
+ }
+-- 
+2.43.0
+
