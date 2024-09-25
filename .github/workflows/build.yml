@@ -108,8 +108,9 @@ jobs:
           export BB_ENV_PASSTHROUGH_ADDITIONS="$BB_ENV_PASSTHROUGH_ADDITIONS CACHE_DIR"
           echo "require conf/include/ci.conf" >> conf/local.conf
           cat conf/local.conf
-          bitbake core-image-minimal imx-image-full imx-hailo-demo-image --runall=fetch
+          bitbake core-image-minimal imx-image-full imx-hailo-demo-image --runall=fetch -k
           bitbake core-image-minimal imx-image-full imx-hailo-demo-image -k
+          bitbake core-image-minimal imx-image-full imx-hailo-demo-image
 
       - name: Update cache on the server
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
