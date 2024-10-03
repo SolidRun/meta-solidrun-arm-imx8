@@ -56,6 +56,7 @@ SRC_URI += " \
 	file://0226-arm64-dts-imx8dxl-sr-som-enable-edma3-for-lpi2c.patch \
 	file://0227-arm64-dts-imx8dxl-sr-som-set-i2c-gpios-open-drain.patch \
 	file://0228-arm64-dts-imx8dxl-v2x-add-pull-up-for-lte-module-ope.patch \
+	file://0229-arm64-dts-imx8dxl-v2x-limit-bluetooth-uart-to-3Mbaud.patch \
 "
 
 KERNEL_MODULE_AUTOLOAD += "imx-sdma"

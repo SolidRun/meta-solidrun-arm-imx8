@@ -1,0 +1,38 @@
+From 5c7d270bcb59ffc5b443c69fecdbb094f007fa49 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Thu, 3 Oct 2024 17:11:57 +0200
+Subject: [PATCH] arm64: dts: imx8dxl-v2x: limit bluetooth uart to 3Mbaud
+
+While conceivably the bluetooth module internal mcu supports a 4Mbaud
+UART, the combination of Linux driver and bluetooth firmware only allow
+3Mbaud maximum.
+
+Reduce the maximum speed accordingly to avoid error during boot:
+[    9.358411] Bluetooth: hci0: BCM: failed to write clock (-56)
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway.dtsi | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway.dtsi b/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway.dtsi
+index 204c2ab87462..6a05152fc9b7 100644
+--- a/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway.dtsi
+@@ -521,7 +521,12 @@ &lpuart1 {
+ 
+ 	bt: bluetooth {
+ 		compatible = "brcm,bcm4330-bt";
+-		max-speed = <4000000>;
++		/*
++		 * BT firmware does not support broadcom-specific command for
++		 * supporting baudrates >3M and will fail in bcm_set_baudrate.
++		 * Limit to 3M.
++		 */
++		max-speed = <3000000>;
+ 		shutdown-gpios = <&lsio_gpio0 13 GPIO_ACTIVE_HIGH>;
+ 	};
+ };
+-- 
+2.43.0
+
