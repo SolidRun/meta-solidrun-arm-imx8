@@ -1,7 +1,7 @@
-From 846ed2d9c6966f48ed9c802012022f563be40233 Mon Sep 17 00:00:00 2001
+From f2abb50f486fe04b5eeb1a19a9304da44837c6e9 Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Tue, 7 Mar 2023 12:11:36 +0200
-Subject: [PATCH 215/224] iio: st_pressure: initial lps22qs support
+Subject: [PATCH 216/229] iio: st_pressure: initial lps22qs support
 
 Initial support for ST LPS22QS pressure sensor. Datasheet:
 https://www.st.com/resource/en/datasheet/ilps22qs.pdf

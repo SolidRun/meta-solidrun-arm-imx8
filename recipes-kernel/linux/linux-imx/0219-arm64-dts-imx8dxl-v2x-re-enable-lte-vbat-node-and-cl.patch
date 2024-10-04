@@ -1,7 +1,7 @@
-From 5af5ff63ae5653be928047a01c20d31296ff7d89 Mon Sep 17 00:00:00 2001
+From 4d7782752c5d5a4e48e8e84ead215bd564f04320 Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Tue, 2 May 2023 12:03:32 +0300
-Subject: [PATCH 218/224] arm64: dts: imx8dxl-v2x: re-enable lte-vbat node and
+Subject: [PATCH 219/229] arm64: dts: imx8dxl-v2x: re-enable lte-vbat node and
  clarify modem boot
 
 LTE Modem has special behaviour depending on power-on sequence of VBUS

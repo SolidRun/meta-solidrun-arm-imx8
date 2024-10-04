@@ -1,7 +1,7 @@
-From 37ad75f73fe124949a9daae395de408ae4bee215 Mon Sep 17 00:00:00 2001
+From 0382db397be0e98731712062bd14070bdf109505 Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Sun, 3 Sep 2023 14:50:32 +0200
-Subject: [PATCH 223/224] arm64: dts: add solidrun v2x gateway with som
+Subject: [PATCH 224/229] arm64: dts: add solidrun v2x gateway with som
  revision 2.1
 
 SoM revision 2.1 moved sensors from the carrier to the SoM,

@@ -1,7 +1,7 @@
-From d3ce56aea7eb557d11cab579f5d7c220b037ccec Mon Sep 17 00:00:00 2001
+From 12cb9dfee1384515e8c8ec498fb9e804fc36b4e7 Mon Sep 17 00:00:00 2001
 From: Vladimir Oltean <vladimir.oltean@nxp.com>
 Date: Tue, 13 Sep 2022 18:12:51 +0300
-Subject: [PATCH 201/224] net: dsa: sja1105: disallow C45 transactions on the
+Subject: [PATCH 202/229] net: dsa: sja1105: disallow C45 transactions on the
  BASE-TX MDIO bus
 
 You'd think people know that the internal 100BASE-TX PHY on the SJA1110

@@ -1,7 +1,7 @@
-From 9e8dc7de65dd1facdf445f92b17fa5e798f131c1 Mon Sep 17 00:00:00 2001
+From bbf9fb71863665cd2cc4fdd079d012182b3c2114 Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Tue, 27 Aug 2024 11:50:14 +0300
-Subject: [PATCH 226/227] arm64: dts: imx8dxl-sr-som: enable edma3 for lpi2c
+Subject: [PATCH 226/229] arm64: dts: imx8dxl-sr-som: enable edma3 for lpi2c
 
 Enable edma3 node used by lpi2c nodes.
 

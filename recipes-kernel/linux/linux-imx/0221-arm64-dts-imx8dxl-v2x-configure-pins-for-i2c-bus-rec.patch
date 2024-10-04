@@ -1,7 +1,7 @@
-From b5037243127458b6a254ea689014870e3f9acd8a Mon Sep 17 00:00:00 2001
+From 81372dc465a5e302f051d91b3692081276e65fea Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Thu, 24 Aug 2023 18:08:58 +0200
-Subject: [PATCH 220/224] arm64: dts: imx8dxl-v2x: configure pins for i2c bus
+Subject: [PATCH 221/229] arm64: dts: imx8dxl-v2x: configure pins for i2c bus
  recovery
 
 i2c driver supports bus recovery by reconfiguring pinmux to GPIO and

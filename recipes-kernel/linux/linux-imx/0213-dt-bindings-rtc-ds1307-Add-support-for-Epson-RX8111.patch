@@ -1,7 +1,7 @@
-From 887d045ef64dc94e3f1c4419cd26541079f65629 Mon Sep 17 00:00:00 2001
+From b74cce35cb4fff3a9a7b2635f0e6e65f1216647b Mon Sep 17 00:00:00 2001
 From: Mike Looijmans <mike.looijmans@topic.nl>
 Date: Mon, 7 Nov 2022 09:54:07 +0100
-Subject: [PATCH 212/224] dt-bindings: rtc: ds1307: Add support for Epson
+Subject: [PATCH 213/229] dt-bindings: rtc: ds1307: Add support for Epson
  RX8111
 
 The rx_8111 is quite similar to the rx_8030. This adds support for this

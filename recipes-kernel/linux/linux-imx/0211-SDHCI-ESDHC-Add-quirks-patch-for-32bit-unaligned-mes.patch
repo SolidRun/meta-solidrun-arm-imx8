@@ -1,7 +1,7 @@
-From 88e7059c7f5a2dbe8b050885f050fd808ebaeebe Mon Sep 17 00:00:00 2001
+From dab6a17dea88229d529d4005ad0565e7a2356a3d Mon Sep 17 00:00:00 2001
 From: pferrao <pedro.ferrao@strypes.pt>
 Date: Fri, 13 Nov 2020 11:10:57 +0000
-Subject: [PATCH 210/224] SDHCI-ESDHC Add quirks patch for 32bit unaligned
+Subject: [PATCH 211/229] SDHCI-ESDHC Add quirks patch for 32bit unaligned
  messages
 
 ---

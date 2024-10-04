@@ -1,7 +1,7 @@
-From e196eb4ca815121e60b5bd0b391a96fabb19219a Mon Sep 17 00:00:00 2001
+From 4e4ea87dc4c76fcd54d88be7da14f2176ee8cd09 Mon Sep 17 00:00:00 2001
 From: Vladimir Oltean <vladimir.oltean@nxp.com>
 Date: Wed, 9 Nov 2022 17:25:50 +0200
-Subject: [PATCH 200/224] net: dsa: sja1105: read and save the silicon revision
+Subject: [PATCH 201/229] net: dsa: sja1105: read and save the silicon revision
 
 It might happen that different SJA1110 silicon revisions need different
 initialization steps. Be prepared for that, by printing the silicon

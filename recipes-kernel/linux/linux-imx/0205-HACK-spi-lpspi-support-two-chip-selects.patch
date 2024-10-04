@@ -1,7 +1,7 @@
-From 45e43726eb3e48f69085a911491e0801b74f5d03 Mon Sep 17 00:00:00 2001
+From e1debb48a93155801a520f99aaff76867e531e6d Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Tue, 30 Aug 2022 10:19:20 +0300
-Subject: [PATCH 204/224] HACK: spi: lpspi: support two chip-selects
+Subject: [PATCH 205/229] HACK: spi: lpspi: support two chip-selects
 
 At least on i.MX8MM, spi controllers have two native chip-selects.
 Initialise the controllers num_chipselect field with 2 accordingly.

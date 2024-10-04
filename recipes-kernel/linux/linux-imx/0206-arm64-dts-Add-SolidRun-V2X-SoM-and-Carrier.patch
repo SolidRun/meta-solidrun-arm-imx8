@@ -1,7 +1,7 @@
-From 54a62d5952ad7d6abbc36ccb371dcc7e8ac831e7 Mon Sep 17 00:00:00 2001
+From 06aa7820381a607310789ef638180bef61638597 Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Sun, 24 Jul 2022 14:02:18 +0300
-Subject: [PATCH 205/224] arm64: dts: Add SolidRun V2X SoM and Carrier
+Subject: [PATCH 206/229] arm64: dts: Add SolidRun V2X SoM and Carrier
 
 This is an incomplete version with TODO notes and mistakes.
 

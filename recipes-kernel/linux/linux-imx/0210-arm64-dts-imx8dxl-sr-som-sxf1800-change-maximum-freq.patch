@@ -1,7 +1,7 @@
-From 039677a242c8e3a4c1077f72f4fea7b7aaa7e296 Mon Sep 17 00:00:00 2001
+From 1c36c878f226ef24d449318e950fa850d463adfd Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Sun, 25 Dec 2022 11:05:52 +0200
-Subject: [PATCH 209/224] arm64: dts: imx8dxl-sr-som: sxf1800: change maximum
+Subject: [PATCH 210/229] arm64: dts: imx8dxl-sr-som: sxf1800: change maximum
  frequency to 5MHz
 
 Signed-off-by: Josua Mayer <josua@solid-run.com>

@@ -1,7 +1,7 @@
-From 011bb54a780264e1d33fb531c02661dc144e15a2 Mon Sep 17 00:00:00 2001
+From 33aae4d02a39a17c575497e9460afb8a0484d1bf Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Thu, 28 Dec 2023 18:33:15 +0100
-Subject: [PATCH 224/224] arm64: dts: imx8dxl-v2x: add pinmux for ethernet
+Subject: [PATCH 225/229] arm64: dts: imx8dxl-v2x: add pinmux for ethernet
  switch interrupt signal
 
 Note that there is currently no driver for the ethernet switch interrupt

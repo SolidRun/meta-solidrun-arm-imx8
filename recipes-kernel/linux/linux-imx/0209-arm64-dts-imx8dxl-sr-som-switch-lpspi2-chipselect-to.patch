@@ -1,7 +1,7 @@
-From 0923b33b9cc6064a1c5ddcc04d95779482c4c525 Mon Sep 17 00:00:00 2001
+From e77b225aabd60ff0442fafe7e4c8b671cb667691 Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Mon, 19 Dec 2022 12:36:21 +0200
-Subject: [PATCH 208/224] arm64: dts: imx8dxl-sr-som: switch lpspi2 chipselect
+Subject: [PATCH 209/229] arm64: dts: imx8dxl-sr-som: switch lpspi2 chipselect
  to gpio
 
 There is a strange issue with native chipselect and large (22 byte)

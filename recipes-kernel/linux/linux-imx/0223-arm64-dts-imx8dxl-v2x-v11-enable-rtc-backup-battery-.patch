@@ -1,7 +1,7 @@
-From f3f76b586108dbac6ab69910b7716a361d329d19 Mon Sep 17 00:00:00 2001
+From 0ad8c5020b341794db70a4ce84128e1c246df0db Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Sun, 3 Sep 2023 13:45:56 +0200
-Subject: [PATCH 222/224] arm64: dts: imx8dxl-v2x-v11: enable rtc backup
+Subject: [PATCH 223/229] arm64: dts: imx8dxl-v2x-v11: enable rtc backup
  battery charging
 
 Add "aux-voltage-chargeable" to indicate that a chargable battery is

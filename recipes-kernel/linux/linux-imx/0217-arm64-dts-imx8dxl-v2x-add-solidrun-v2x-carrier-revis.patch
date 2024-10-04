@@ -1,7 +1,7 @@
-From 493b23839e0239af2d99cf3ea89e62876135ddb2 Mon Sep 17 00:00:00 2001
+From 317e3511c25db7177b1508c16b0984013e006616 Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Sun, 5 Mar 2023 11:20:57 +0200
-Subject: [PATCH 216/224] arm64: dts: imx8dxl-v2x: add solidrun v2x carrier
+Subject: [PATCH 217/229] arm64: dts: imx8dxl-v2x: add solidrun v2x carrier
  revision 1.1
 
 Signed-off-by: Josua Mayer <josua@solid-run.com>

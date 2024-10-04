@@ -29,30 +29,30 @@ SRC_URI += " \
 	file://0104-arm64-dts-imx8mn-solidsense-n8-add-power-controls-fo.patch \
 	file://0105-arm64-dts-imx8mn-solidsense-n8-set-bluetooth-max-bau.patch \
 	file://0106-arm64-dts-imx8mn-solidsense-n8-set-bluetooth-max-bau.patch \
-	file://0200-net-dsa-sja1105-read-and-save-the-silicon-revision.patch \
-	file://0201-net-dsa-sja1105-disallow-C45-transactions-on-the-BAS.patch \
-	file://0202-net-phy-add-basic-driver-for-NXP-CBTX-PHY.patch \
-	file://0203-arm64-dts-imx8-ss-increase-lpspi0-base-clock.patch \
-	file://0204-HACK-spi-lpspi-support-two-chip-selects.patch \
-	file://0205-arm64-dts-Add-SolidRun-V2X-SoM-and-Carrier.patch \
-	file://0207-arm64-dts-imx8dxl-sr-som-add-userspace-consumer-node.patch \
-	file://0208-arm64-dts-imx8dxl-sr-som-switch-lpspi2-chipselect-to.patch \
-	file://0209-arm64-dts-imx8dxl-sr-som-sxf1800-change-maximum-freq.patch \
-	file://0210-SDHCI-ESDHC-Add-quirks-patch-for-32bit-unaligned-mes.patch \
-	file://0211-arm64-dts-imx8dxl-v2x-update-wifi-enable-gpio-for-ca.patch \
-	file://0212-dt-bindings-rtc-ds1307-Add-support-for-Epson-RX8111.patch \
-	file://0213-rtc-ds1307-Add-support-for-Epson-RX8111.patch \
-	file://0214-arm64-dts-imx8dxl-v2x-split-carrier-into-separate-dt.patch \
-	file://0215-iio-st_pressure-initial-lps22qs-support.patch \
-	file://0216-arm64-dts-imx8dxl-v2x-add-solidrun-v2x-carrier-revis.patch \
-	file://0217-arm64-dts-imx8dxl-v2x-v11-fix-interrupt-support-for-.patch \
-	file://0218-arm64-dts-imx8dxl-v2x-re-enable-lte-vbat-node-and-cl.patch \
-	file://0219-arm64-dts-imx8dxl-v2x-enable-power-for-lte-vbat-user.patch \
-	file://0220-arm64-dts-imx8dxl-v2x-configure-pins-for-i2c-bus-rec.patch \
-	file://0221-arm64-dts-imx8dxl-v2x-v11-fix-pinmux-setting-for-usb.patch \
-	file://0222-arm64-dts-imx8dxl-v2x-v11-enable-rtc-backup-battery-.patch \
-	file://0223-arm64-dts-add-solidrun-v2x-gateway-with-som-revision.patch \
-	file://0224-arm64-dts-imx8dxl-v2x-add-pinmux-for-ethernet-switch.patch \
+	file://0201-net-dsa-sja1105-read-and-save-the-silicon-revision.patch \
+	file://0202-net-dsa-sja1105-disallow-C45-transactions-on-the-BAS.patch \
+	file://0203-net-phy-add-basic-driver-for-NXP-CBTX-PHY.patch \
+	file://0204-arm64-dts-imx8-ss-increase-lpspi0-base-clock.patch \
+	file://0205-HACK-spi-lpspi-support-two-chip-selects.patch \
+	file://0206-arm64-dts-Add-SolidRun-V2X-SoM-and-Carrier.patch \
+	file://0208-arm64-dts-imx8dxl-sr-som-add-userspace-consumer-node.patch \
+	file://0209-arm64-dts-imx8dxl-sr-som-switch-lpspi2-chipselect-to.patch \
+	file://0210-arm64-dts-imx8dxl-sr-som-sxf1800-change-maximum-freq.patch \
+	file://0211-SDHCI-ESDHC-Add-quirks-patch-for-32bit-unaligned-mes.patch \
+	file://0212-arm64-dts-imx8dxl-v2x-update-wifi-enable-gpio-for-ca.patch \
+	file://0213-dt-bindings-rtc-ds1307-Add-support-for-Epson-RX8111.patch \
+	file://0214-rtc-ds1307-Add-support-for-Epson-RX8111.patch \
+	file://0215-arm64-dts-imx8dxl-v2x-split-carrier-into-separate-dt.patch \
+	file://0216-iio-st_pressure-initial-lps22qs-support.patch \
+	file://0217-arm64-dts-imx8dxl-v2x-add-solidrun-v2x-carrier-revis.patch \
+	file://0218-arm64-dts-imx8dxl-v2x-v11-fix-interrupt-support-for-.patch \
+	file://0219-arm64-dts-imx8dxl-v2x-re-enable-lte-vbat-node-and-cl.patch \
+	file://0220-arm64-dts-imx8dxl-v2x-enable-power-for-lte-vbat-user.patch \
+	file://0221-arm64-dts-imx8dxl-v2x-configure-pins-for-i2c-bus-rec.patch \
+	file://0222-arm64-dts-imx8dxl-v2x-v11-fix-pinmux-setting-for-usb.patch \
+	file://0223-arm64-dts-imx8dxl-v2x-v11-enable-rtc-backup-battery-.patch \
+	file://0224-arm64-dts-add-solidrun-v2x-gateway-with-som-revision.patch \
+	file://0225-arm64-dts-imx8dxl-v2x-add-pinmux-for-ethernet-switch.patch \
 	file://0226-arm64-dts-imx8dxl-sr-som-enable-edma3-for-lpi2c.patch \
 	file://0227-arm64-dts-imx8dxl-sr-som-set-i2c-gpios-open-drain.patch \
 	file://0228-arm64-dts-imx8dxl-v2x-add-pull-up-for-lte-module-ope.patch \

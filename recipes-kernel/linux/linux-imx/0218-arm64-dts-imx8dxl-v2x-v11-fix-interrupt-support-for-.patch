@@ -1,7 +1,7 @@
-From 7bde5fbd0ffe0cd60c6df2e2ee3e8c2a3c1a6696 Mon Sep 17 00:00:00 2001
+From bfaf0a6ad9f1effa408788d1ac554777171af3cb Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Wed, 22 Mar 2023 10:57:59 +0200
-Subject: [PATCH 217/224] arm64: dts: imx8dxl-v2x-v11: fix interrupt support
+Subject: [PATCH 218/229] arm64: dts: imx8dxl-v2x-v11: fix interrupt support
  for gpio expander
 
 Signed-off-by: Josua Mayer <josua@solid-run.com>
