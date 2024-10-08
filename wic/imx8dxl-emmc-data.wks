@@ -1,0 +1,5 @@
+# short-description: Bootable dual-partition layout aligned to 4MB
+part /boot --source bootimg-partition --sourceparams="loader=u-boot" --ondisk mmcblk0 --fstype=vfat --label boot --active --align 4096 --size 64
+part / --source rootfs --ondisk mmcblk0 --fstype=ext4 --label root --align 4096
+
+bootloader --ptable msdos

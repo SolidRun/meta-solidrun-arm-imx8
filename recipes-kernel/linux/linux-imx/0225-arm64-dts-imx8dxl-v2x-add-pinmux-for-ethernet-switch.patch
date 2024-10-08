@@ -1,0 +1,32 @@
+From 33aae4d02a39a17c575497e9460afb8a0484d1bf Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Thu, 28 Dec 2023 18:33:15 +0100
+Subject: [PATCH 225/229] arm64: dts: imx8dxl-v2x: add pinmux for ethernet
+ switch interrupt signal
+
+Note that there is currently no driver for the ethernet switch interrupt
+controller, to distinguish between multiple switch-internal interrupts
+such es from specific port's phys.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway.dtsi | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway.dtsi b/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway.dtsi
+index 3923a535c11f..82f4c8cfecca 100644
+--- a/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway.dtsi
+@@ -211,6 +211,9 @@ IMX8DXL_USB_SS3_TC0_LSIO_GPIO4_IO03				0x0000021
+ 
+ 				/* SW_CORE_RSTn: io without pull-up */
+ 				IMX8DXL_USB_SS3_TC1_LSIO_GPIO4_IO04				0x0000021
++
++				/* INT_N: io without pull-up */
++				IMX8DXL_USB_SS3_TC3_LSIO_GPIO4_IO06				0x0000021
+ 			>;
+ 		};
+ 
+-- 
+2.43.0
+

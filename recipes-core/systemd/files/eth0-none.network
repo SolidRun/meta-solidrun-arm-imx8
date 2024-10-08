@@ -1,0 +1,8 @@
+[Match]
+Name=eth0
+
+[Network]
+Description=DSA Switch CPU Port
+
+[Link]
+Unmanaged=yes

@@ -1,0 +1,1034 @@
+From 06aa7820381a607310789ef638180bef61638597 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Sun, 24 Jul 2022 14:02:18 +0300
+Subject: [PATCH 206/229] arm64: dts: Add SolidRun V2X SoM and Carrier
+
+This is an incomplete version with TODO notes and mistakes.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ arch/arm64/boot/dts/freescale/Makefile        |   1 +
+ .../boot/dts/freescale/imx8dxl-sr-som.dtsi    | 443 ++++++++++++++
+ arch/arm64/boot/dts/freescale/imx8dxl-v2x.dts | 551 ++++++++++++++++++
+ 3 files changed, 995 insertions(+)
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8dxl-v2x.dts
+
+diff --git a/arch/arm64/boot/dts/freescale/Makefile b/arch/arm64/boot/dts/freescale/Makefile
+index 9a7319c6b4e3..aa13a00b9e4f 100644
+--- a/arch/arm64/boot/dts/freescale/Makefile
++++ b/arch/arm64/boot/dts/freescale/Makefile
+@@ -238,3 +238,4 @@ dtb-$(CONFIG_ARCH_MXC) += imx93-9x9-qsb.dtb \
+ 			  imx93-9x9-qsb-mt9m114.dtb
+ dtb-$(CONFIG_ARCH_S32) += s32v234-evb.dtb \
+ 			  s32v234-sbc.dtb
++dtb-$(CONFIG_ARCH_MXC) += imx8dxl-v2x.dtb
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi b/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
+new file mode 100644
+index 000000000000..f4b9c6353abe
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
+@@ -0,0 +1,443 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright 2022 Josua Mayer <josua@solid-run.com>
++ */
++
++/ {
++	chosen {
++		stdout-path = &lpuart0;
++	};
++
++	/* 1GB LPDDR4 */
++	/* TODO: is this required? */
++	memory@80000000 {
++		device_type = "memory";
++		reg = <0x00000000 0x80000000 0 0x40000000>;
++	};
++
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		/*
++		 * 0x8800_0000 ~ 0x8FFF_FFFF is reserved for M4
++		 * Shouldn't be used at A core and Linux side.
++		 *
++		 */
++		m4_reserved: m4@0x88000000 {
++			no-map;
++			reg = <0 0x88000000 0 0x8000000>;
++		};
++
++		/* TODO: why? is this required? */
++		rpmsg_reserved: rpmsg@0x90200000 {
++			no-map;
++			reg = <0 0x90200000 0 0x200000>;
++		};
++
++		/* 64MB CMA region */
++		/* TODO: is this required? What size? */
++		linux,cma {
++			compatible = "shared-dma-pool";
++			reusable;
++			size = <0 0x04000000>;
++			alloc-ranges = <0 0x98000000 0 0x04000000>;
++			linux,cma-default;
++		};
++
++		/* TODO: EVK reserves memory for vdevs here ... */
++	};
++
++	pps {
++		compatible = "pps-gpio";
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_lpuart2_gps_pps>;
++		gpios = <&lsio_gpio2 6 GPIO_ACTIVE_HIGH>;
++	};
++
++	v2x_reg_1v2: regulator-v2x-1v2 {
++		compatible = "regulator-fixed";
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_v2x_reg_1v2>;
++		regulator-name = "v2x-1v2";
++		regulator-min-microvolt = <1200000>;
++		regulator-max-microvolt = <1200000>;
++		gpio = <&lsio_gpio1 13 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		regulator-always-on;
++	};
++
++	v2x_reg_1v6: regulator-v2x-1v6 {
++		compatible = "regulator-fixed";
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_v2x_reg_1v6>;
++		regulator-name = "v2x-1v6";
++		regulator-min-microvolt = <1600000>;
++		regulator-max-microvolt = <1600000>;
++		gpio = <&lsio_gpio1 14 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		regulator-always-on;
++	};
++
++	v2x_secure_reg_1v8: regulator-v2x-secure-1v8 {
++		compatible = "regulator-fixed";
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_v2x_secure_reg_1v8>;
++		regulator-name = "v2x-secure-1v8";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++		gpio = <&lsio_gpio3 18 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++	};
++};
++
++&edma2 {
++	status = "okay";
++};
++
++/* exposed on J14: SDA(51), SCL(53) */
++&i2c2 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	clock-frequency = <100000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_i2c2>;
++	status = "okay";
++
++	/* MIA-M10Q (400kHz max.)*/
++	/*gnss_ddc: mia-m10q@42 {
++		reg = <0x42>;
++		compatible = "u-blox,mia-m10";
++	};*/
++};
++
++&iomuxc {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_hog>;
++
++		/* TODO: check */
++		pinctrl_hog: hoggrp {
++			fsl,pins = <
++				IMX8DXL_COMP_CTL_GPIO_1V8_3V3_GPIORHB_PAD	0x000514a0
++				IMX8DXL_COMP_CTL_GPIO_1V8_3V3_GPIORHK_PAD	0x000014a0
++
++				/* 32kHz for wifi */
++				/* IMX8DXL_MCLK_OUT0_ADMA_ACM_MCLK_OUT0	0x0600004c */
++				IMX8DXL_MCLK_OUT0_LSIO_GPIO0_IO20		0x0000061
++			>;
++		};
++
++		pinctrl_i2c2: i2c2grp {
++			fsl,pins = <
++				/* io with pull-up and strong drive */
++				IMX8DXL_SPI1_SCK_ADMA_I2C2_SDA		0x06000020
++				IMX8DXL_SPI1_SDO_ADMA_I2C2_SCL		0x06000020
++			>;
++		};
++
++		pinctrl_lpspi2: lpspi2grp {
++			fsl,pins = <
++				IMX8DXL_USDHC1_RESET_B_ADMA_SPI2_SCK	0x600004c
++				IMX8DXL_USDHC1_VSELECT_ADMA_SPI2_SDO	0x600004c
++				IMX8DXL_USDHC1_WP_ADMA_SPI2_SDI			0x600004c
++				IMX8DXL_USDHC1_CD_B_ADMA_SPI2_CS0		0x600004c
++			>;
++		};
++
++		pinctrl_lpuart0: lpuart0grp {
++			fsl,pins = <
++				IMX8DXL_UART0_RX_ADMA_UART0_RX		0x06000020
++				IMX8DXL_UART0_TX_ADMA_UART0_TX		0x06000020
++			>;
++		};
++
++		pinctrl_lpuart2: lpuart2grp {
++			fsl,pins = <
++				IMX8DXL_UART2_TX_ADMA_UART2_TX		0x06000020
++				IMX8DXL_UART2_RX_ADMA_UART2_RX		0x06000020
++			>;
++		};
++
++		pinctrl_lpuart2_gps: lpuart2gpsgrp {
++			fsl,pins = <
++				/* gps reset: input with pull-up */
++				/* TODO: change board layout for output-capable gpio */
++				IMX8DXL_SNVS_TAMPER_OUT4_LSIO_GPIO2_IO08_IN		0x0000021
++				/* IMX8DXL_SNVS_TAMPER_OUT4_LSIO_GPIO6_IO22_IN */
++
++				/* gps interrupt: io without pull-up */
++				IMX8DXL_SNVS_TAMPER_IN0_LSIO_GPIO2_IO09_IN		0x0000061
++				/* IMX8DXL_SNVS_TAMPER_IN0_LSIO_GPIO6_IO23_IN */
++			>;
++		};
++
++		pinctrl_lpuart2_gps_pps: lpuart2gpsppsgrp {
++			fsl,pins = <
++				/* gps timepulse: input without pull-up */
++				IMX8DXL_SNVS_TAMPER_OUT2_LSIO_GPIO2_IO06_IN		0x0000061
++			>;
++		};
++
++		pinctrl_usdhc1: usdhc1grp {
++			fsl,pins = <
++				IMX8DXL_EMMC0_CLK_CONN_EMMC0_CLK			0x06000041
++				IMX8DXL_EMMC0_CMD_CONN_EMMC0_CMD			0x00000021
++				IMX8DXL_EMMC0_DATA0_CONN_EMMC0_DATA0		0x00000021
++				IMX8DXL_EMMC0_DATA1_CONN_EMMC0_DATA1		0x00000021
++				IMX8DXL_EMMC0_DATA2_CONN_EMMC0_DATA2		0x00000021
++				IMX8DXL_EMMC0_DATA3_CONN_EMMC0_DATA3		0x00000021
++				IMX8DXL_EMMC0_DATA4_CONN_EMMC0_DATA4		0x00000021
++				IMX8DXL_EMMC0_DATA5_CONN_EMMC0_DATA5		0x00000021
++				IMX8DXL_EMMC0_DATA6_CONN_EMMC0_DATA6		0x00000021
++				IMX8DXL_EMMC0_DATA7_CONN_EMMC0_DATA7		0x00000021
++				IMX8DXL_EMMC0_STROBE_CONN_EMMC0_STROBE		0x00000041
++				IMX8DXL_EMMC0_RESET_B_CONN_EMMC0_RESET_B	0x00000021
++			>;
++		};
++
++		pinctrl_usdhc1_100mhz: usdhc1grp100mhz {
++			fsl,pins = <
++				IMX8DXL_EMMC0_CLK_CONN_EMMC0_CLK			0x06000041
++				IMX8DXL_EMMC0_CMD_CONN_EMMC0_CMD			0x00000021
++				IMX8DXL_EMMC0_DATA0_CONN_EMMC0_DATA0		0x00000021
++				IMX8DXL_EMMC0_DATA1_CONN_EMMC0_DATA1		0x00000021
++				IMX8DXL_EMMC0_DATA2_CONN_EMMC0_DATA2		0x00000021
++				IMX8DXL_EMMC0_DATA3_CONN_EMMC0_DATA3		0x00000021
++				IMX8DXL_EMMC0_DATA4_CONN_EMMC0_DATA4		0x00000021
++				IMX8DXL_EMMC0_DATA5_CONN_EMMC0_DATA5		0x00000021
++				IMX8DXL_EMMC0_DATA6_CONN_EMMC0_DATA6		0x00000021
++				IMX8DXL_EMMC0_DATA7_CONN_EMMC0_DATA7		0x00000021
++				IMX8DXL_EMMC0_STROBE_CONN_EMMC0_STROBE		0x00000041
++				IMX8DXL_EMMC0_RESET_B_CONN_EMMC0_RESET_B	0x00000021
++			>;
++		};
++
++		pinctrl_usdhc1_200mhz: usdhc1grp200mhz {
++			fsl,pins = <
++				IMX8DXL_EMMC0_CLK_CONN_EMMC0_CLK			0x06000041
++				IMX8DXL_EMMC0_CMD_CONN_EMMC0_CMD			0x00000021
++				IMX8DXL_EMMC0_DATA0_CONN_EMMC0_DATA0		0x00000021
++				IMX8DXL_EMMC0_DATA1_CONN_EMMC0_DATA1		0x00000021
++				IMX8DXL_EMMC0_DATA2_CONN_EMMC0_DATA2		0x00000021
++				IMX8DXL_EMMC0_DATA3_CONN_EMMC0_DATA3		0x00000021
++				IMX8DXL_EMMC0_DATA4_CONN_EMMC0_DATA4		0x00000021
++				IMX8DXL_EMMC0_DATA5_CONN_EMMC0_DATA5		0x00000021
++				IMX8DXL_EMMC0_DATA6_CONN_EMMC0_DATA6		0x00000021
++				IMX8DXL_EMMC0_DATA7_CONN_EMMC0_DATA7		0x00000021
++				IMX8DXL_EMMC0_STROBE_CONN_EMMC0_STROBE		0x00000041
++				IMX8DXL_EMMC0_RESET_B_CONN_EMMC0_RESET_B	0x00000021
++			>;
++		};
++
++		pinctrl_usdhc2: usdhc2grp {
++			fsl,pins = <
++				IMX8DXL_ENET0_RGMII_RXC_CONN_USDHC1_CLK			0x06000040 /* roadlink evk sources set strength to high */
++				IMX8DXL_ENET0_RGMII_RX_CTL_CONN_USDHC1_CMD		0x00000021
++				IMX8DXL_ENET0_RGMII_RXD0_CONN_USDHC1_DATA0		0x00000021
++				IMX8DXL_ENET0_RGMII_RXD1_CONN_USDHC1_DATA1		0x00000021
++				IMX8DXL_ENET0_RGMII_RXD2_CONN_USDHC1_DATA2		0x00000021
++				IMX8DXL_ENET0_RGMII_RXD3_CONN_USDHC1_DATA3		0x00000021
++			>;
++		};
++
++		/* do we need all 3 modes? */
++		pinctrl_usdhc2_100mhz: usdhc2grp100mhz {
++			fsl,pins = <
++				IMX8DXL_ENET0_RGMII_RXC_CONN_USDHC1_CLK			0x06000040 /* roadlink evk sources set strength to high */
++				IMX8DXL_ENET0_RGMII_RX_CTL_CONN_USDHC1_CMD		0x00000021
++				IMX8DXL_ENET0_RGMII_RXD0_CONN_USDHC1_DATA0		0x00000021
++				IMX8DXL_ENET0_RGMII_RXD1_CONN_USDHC1_DATA1		0x00000021
++				IMX8DXL_ENET0_RGMII_RXD2_CONN_USDHC1_DATA2		0x00000021
++				IMX8DXL_ENET0_RGMII_RXD3_CONN_USDHC1_DATA3		0x00000021
++			>;
++		};
++
++		/* do we need all 3 modes? */
++		pinctrl_usdhc2_200mhz: usdhc2grp200mhz {
++			fsl,pins = <
++				IMX8DXL_ENET0_RGMII_RXC_CONN_USDHC1_CLK			0x06000040 /* roadlink evk sources set strength to high */
++				IMX8DXL_ENET0_RGMII_RX_CTL_CONN_USDHC1_CMD		0x00000021
++				IMX8DXL_ENET0_RGMII_RXD0_CONN_USDHC1_DATA0		0x00000021
++				IMX8DXL_ENET0_RGMII_RXD1_CONN_USDHC1_DATA1		0x00000021
++				IMX8DXL_ENET0_RGMII_RXD2_CONN_USDHC1_DATA2		0x00000021
++				IMX8DXL_ENET0_RGMII_RXD3_CONN_USDHC1_DATA3		0x00000021
++			>;
++		};
++
++		pinctrl_v2x: v2xgrp {
++			fsl,pins = <
++				/* v2x reset: io without pull */
++				IMX8DXL_ADC_IN0_LSIO_GPIO1_IO10		0x0000060
++
++				/*
++				 * v2x boot0: io without pull
++				 * After reset, this pin selects modem boot media:
++				 * - 0: flash spi
++				 * - 1: slave sdio
++				 * Once the firmware boots however, the modem controls
++				 * this pin for flow-control to signal readiness.
++				 */
++				IMX8DXL_ADC_IN1_LSIO_GPIO1_IO09		0x0000060 /* io without pull */
++				/* TODO: check whether this pin should have SoC pull-down, or external resistor, or neither */
++			>;
++		};
++
++		pinctrl_v2x_reg_1v2: v2xreg1v2grp {
++			fsl,pins = <
++				/* io without pull-up */
++				/* has etxernal pull-down */
++				IMX8DXL_ADC_IN5_LSIO_GPIO1_IO13		0x0000061
++			>;
++		};
++
++		pinctrl_v2x_reg_1v6: v2xreg1v6grp {
++			fsl,pins = <
++				/* io without pull-up */
++				/* has etxernal pull-down */
++				IMX8DXL_ADC_IN4_LSIO_GPIO1_IO14		0x0000061
++			>;
++		};
++
++		pinctrl_v2x_secure: v2xsecuregrp {
++			fsl,pins = <
++				/* v2x-secure-element reset: io with pull-up */
++				IMX8DXL_QSPI0B_DATA1_LSIO_GPIO3_IO19	0x0000021
++
++				/*
++				 * v2x-secure-element gpio0: io with pull-up
++				 * pulled low by sxf after boot indicating ready for commands
++				 */
++				IMX8DXL_QSPI0B_DATA2_LSIO_GPIO3_IO20	0x0000021
++
++				/* v2x-secure-element gpio1: io without pull-up */
++				IMX8DXL_QSPI0B_DATA3_LSIO_GPIO3_IO21	0x0000061
++			>;
++		};
++
++		pinctrl_v2x_secure_reg_1v8: v2xsecurereg1v8grp {
++			fsl,pins = <
++				/*
++				 * v2x-secure-element power switch: io with pull-down
++				 * - keep SE powered off by default until SW is ready
++				 * - TODO: may be configured floating if external pull-down is valid
++				 */
++				IMX8DXL_QSPI0B_DATA0_LSIO_GPIO3_IO18	0x0000041
++			>;
++		};
++
++		pinctrl_wifi: wifigrp {
++			fsl,pins = <
++				/* wl_reg_on: io without pull-up */
++				/* IMX8DXL_SPI3_CS1 not a GPIO :( */
++				IMX8DXL_SPI3_CS1_ADMA_SPI3_CS1		0x0000061
++				/* measure if this is high */
++			>;
++		};
++
++		pinctrl_bluetooth: bluetoothgrp {
++			fsl,pins = <
++				/* bt_reg_on: io without pull-up TODO: pull-up */
++				IMX8DXL_SPI3_SCK_LSIO_GPIO0_IO13	0x0000061
++			>;
++		};
++};
++
++&lpspi2 {
++	fsl,spi-num-chipselects = <1>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_lpspi2>;
++	status = "okay";
++
++	/* SXF1800 (SoM) */
++	v2x_secure_element: sxf1800@0 {
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_v2x_secure>;
++		reg = <0>;
++		compatible = "rohm,dh2228fv";
++		spi-max-frequency = <30000000>;
++		power-supply = <&v2x_secure_reg_1v8>;
++	};
++};
++
++/* console */
++&lpuart0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_lpuart0>;
++	status = "okay";
++};
++
++/* gps */
++&lpuart2 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_lpuart2>;
++	status = "okay";
++
++	/* MIA-M10Q */
++	gnss {
++		compatible = "u-blox,mia-m10", "u-blox,neo-m8";
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_lpuart2_gps>;
++		// enable-gpios = <&lsio_gpio2 8 GPIO_ACTIVE_HIGH>;
++		timepulse-gpios = <&lsio_gpio2 6 GPIO_ACTIVE_HIGH>;
++		current-speed = <38400>;
++		u-blox,extint-gpios = <&lsio_gpio2 9 GPIO_ACTIVE_HIGH>;
++	};
++};
++
++&lsio_gpio1 {
++	status = "okay";
++};
++
++&lsio_gpio2 {
++	status = "okay";
++};
++
++&lsio_gpio3 {
++	status = "okay";
++};
++
++/* OTG port for boot */
++&usbotg1 {
++	srp-disable;
++	hnp-disable;
++	adp-disable;
++	power-active-high;
++	disable-over-current;
++	dr_mode = "peripheral";
++	status = "okay";
++};
++
++&usbphy1 {
++	status = "okay";
++};
++
++&usdhc1 {
++		pinctrl-names = "default", "state_100mhz", "state_200mhz";
++		pinctrl-0 = <&pinctrl_usdhc1>;
++		pinctrl-1 = <&pinctrl_usdhc1_100mhz>;
++		pinctrl-2 = <&pinctrl_usdhc1_200mhz>;
++		bus-width = <8>;
++		no-sd;
++		no-sdio;
++		non-removable;
++		status = "okay";
++};
++
++&usdhc2 {
++		pinctrl-names = "default", "state_100mhz", "state_200mhz";
++		pinctrl-0 = <&pinctrl_usdhc2>, <&pinctrl_v2x>;
++		pinctrl-1 = <&pinctrl_usdhc2_100mhz>, <&pinctrl_v2x>;
++		pinctrl-2 = <&pinctrl_usdhc2_200mhz>, <&pinctrl_v2x>;
++		bus-width = <4>;
++		no-sd;
++		non-removable;
++		status = "okay";
++		max-frequency = <40000000>;
++		fsl,delay-line = <12>;
++		keep-power-in-suspend;
++		enable-sdio-wakeup;
++		//mmc-pwrseq = <&v2x_pwrseq>;
++		//vmmc-supply = <&v2x_reg_1v2>;
++		//vmmc_aux-supply = <&v2x_reg_1v6>;
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-v2x.dts b/arch/arm64/boot/dts/freescale/imx8dxl-v2x.dts
+new file mode 100644
+index 000000000000..e6248af885e0
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-v2x.dts
+@@ -0,0 +1,551 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright 2019~2020 NXP
++ * Copyright 2022 Josua Mayer <josua@solid-run.com>
++ */
++
++/dts-v1/;
++
++#include "imx8dxl.dtsi"
++#include "imx8dxl-sr-som.dtsi"
++
++/ {
++	model = "SolidRun i.MX8DXL V2X Carrier";
++	compatible = "fsl,imx8dxl-sr-som", "fsl,imx8dxl";
++
++	/*lte_vbat_reg: regulator-lte-vbat {
++		compatible = "regulator-fixed";
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_lte_vbat>;
++		regulator-name = "lte-vbat";
++		regulator-min-microvolt = <3600000>;
++		regulator-max-microvolt = <3600000>;
++		gpio = <&lsio_gpio0 14 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		regulator-always-on;
++	};*/
++
++	regulator_1v1: regulator-1v1 {
++		compatible = "regulator-fixed";
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_reg_1v1>;
++		regulator-name = "1v1";
++		regulator-min-microvolt = <1100000>;
++		regulator-max-microvolt = <1100000>;
++		gpio = <&lsio_gpio4 5 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		regulator-always-on;
++	};
++
++	regulator_flexcan1_standby: regulator-flexcan1-standby {
++		compatible = "regulator-fixed";
++		regulator-name = "flexcan1-standby";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		gpio = <&tca6408 2 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++	};
++
++	regulator_flexcan2_standby: regulator-flexcan2-standby {
++		compatible = "regulator-fixed";
++		regulator-name = "flexcan2-standby";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		gpio = <&tca6408 3 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++	};
++};
++
++&eqos {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_eqos>;
++	phy-connection-type = "rgmii-id";
++	status = "okay";
++
++	fixed-link {
++		speed = <1000>;
++		full-duplex;
++	};
++};
++
++&flexcan1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_flexcan1>;
++	xceiver-supply = <&regulator_flexcan1_standby>;
++	status = "okay";
++
++	can-transceiver {
++		/* TJA1048 */
++		max-bitrate = <5000000>;
++	};
++};
++
++&flexcan2 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_flexcan2>;
++	xceiver-supply = <&regulator_flexcan2_standby>;
++	status = "okay";
++
++	can-transceiver {
++		/* TJA1048 */
++		max-bitrate = <5000000>;
++	};
++};
++
++&iomuxc {
++		pinctrl_eqos: eqosgrp {
++			fsl,pins = <
++				/* MDIO to Switch */
++				/* enet0 mdio pads supplied with 3.3v */
++				/* IMX8DXL_COMP_CTL_GPIO_1V8_3V3_GPIOCT */
++				IMX8DXL_ENET0_MDC_CONN_EQOS_MDC				0x06000020
++				IMX8DXL_ENET0_MDIO_CONN_EQOS_MDIO			0x06000020
++				/* RGMII to Switch */
++				/* ENET1 pad supplied with 3.3V */
++				/*IMX8DXL_COMP_CTL_GPIO_1V8_3V3_GPIORHB		0x000514a0*/
++				IMX8DXL_ENET1_RGMII_TX_CTL_CONN_EQOS_RGMII_TX_CTL	0x06000020
++				IMX8DXL_ENET1_RGMII_TXC_CONN_EQOS_RGMII_TXC		0x06000020
++				IMX8DXL_ENET1_RGMII_TXD0_CONN_EQOS_RGMII_TXD0		0x06000020
++				IMX8DXL_ENET1_RGMII_TXD1_CONN_EQOS_RGMII_TXD1		0x06000020
++				IMX8DXL_ENET1_RGMII_TXD2_CONN_EQOS_RGMII_TXD2		0x06000020
++				IMX8DXL_ENET1_RGMII_TXD3_CONN_EQOS_RGMII_TXD3		0x06000020
++				IMX8DXL_ENET1_RGMII_RXC_CONN_EQOS_RGMII_RXC		0x06000020
++				IMX8DXL_ENET1_RGMII_RX_CTL_CONN_EQOS_RGMII_RX_CTL	0x06000020
++				IMX8DXL_ENET1_RGMII_RXD0_CONN_EQOS_RGMII_RXD0		0x06000020
++				IMX8DXL_ENET1_RGMII_RXD1_CONN_EQOS_RGMII_RXD1		0x06000020
++				IMX8DXL_ENET1_RGMII_RXD2_CONN_EQOS_RGMII_RXD2		0x06000020
++				IMX8DXL_ENET1_RGMII_RXD3_CONN_EQOS_RGMII_RXD3		0x06000020
++			>;
++		};
++
++		pinctrl_flexcan1: flexcan1grp {
++			fsl,pins = <
++				IMX8DXL_FLEXCAN0_TX_ADMA_FLEXCAN0_TX	0x00000021
++				IMX8DXL_FLEXCAN0_RX_ADMA_FLEXCAN0_RX	0x00000021
++			>;
++		};
++
++		pinctrl_flexcan2: flexcan2grp {
++			fsl,pins = <
++				IMX8DXL_FLEXCAN1_TX_ADMA_FLEXCAN1_TX	0x00000021
++				IMX8DXL_FLEXCAN1_RX_ADMA_FLEXCAN1_RX	0x00000021
++			>;
++		};
++
++		pinctrl_i2c2_gpio: i2c2gpiogrp {
++			fsl,pins = <
++				/* gpio-expander reset: io without pull-up */
++				IMX8DXL_SCU_GPIO0_00_LSIO_GPIO2_IO03		0x0000061
++
++				/* gpio-expander interrupt: io without pull-up */
++				/* not usable, because this pin does not support lsio gpio mode :( */
++				IMX8DXL_SCU_GPIO0_01_SCU_GPIO0_IO01		0x0000061
++			>;
++		};
++
++		pinctrl_i2c3: i2c3grp {
++			fsl,pins = <
++				IMX8DXL_SPI1_CS0_ADMA_I2C3_SDA		0x06000021
++				IMX8DXL_SPI1_SDI_ADMA_I2C3_SCL		0x06000021
++			>;
++		};
++
++		pinctrl_lpuart1: lpuart1grp {
++			fsl,pins = <
++				IMX8DXL_UART1_RX_ADMA_UART1_RX			0x06000020
++				IMX8DXL_UART1_TX_ADMA_UART1_TX			0x06000020
++				IMX8DXL_UART1_CTS_B_ADMA_UART1_CTS_B	0x06000020
++				IMX8DXL_UART1_RTS_B_ADMA_UART1_RTS_B	0x06000020
++			>;
++		};
++
++		pinctrl_lte: ltegrp {
++			fsl,pins = <
++				/* modem RESET_N: io open drain drive 2mA */
++				IMX8DXL_ADC_IN3_LSIO_GPIO1_IO11	0x2000061
++
++				/* modem PWRKEY: io open drain drive 2mA */
++				IMX8DXL_ADC_IN2_LSIO_GPIO1_IO12	0x2000061
++			>;
++		};
++
++		pinctrl_lte_vbat: ltevbatgrp {
++			fsl,pins = <
++				/* RF_PWR: io without pull-up */
++				IMX8DXL_SPI3_SDO_LSIO_GPIO0_IO14	0x0000061
++			>;
++		};
++
++		pinctrl_lpspi0: lpspi0grp {
++			fsl,pins = <
++				IMX8DXL_SPI0_SCK_ADMA_SPI0_SCK					0x600004c
++				IMX8DXL_SPI0_SDO_ADMA_SPI0_SDO					0x600004c
++				IMX8DXL_SPI0_SDI_ADMA_SPI0_SDI					0x600004c
++				/* IMX8DXL_SPI0_CS0_ADMA_SPI0_CS0					0x600004c */
++				/* IMX8DXL_SPI0_CS1_ADMA_SPI0_CS1					0x600004c */
++				IMX8DXL_SPI0_CS0_LSIO_GPIO1_IO08				0x0000021
++				IMX8DXL_SPI0_CS1_LSIO_GPIO1_IO07				0x0000021
++			>;
++		};
++
++		pinctrl_lpspi0_switch: lpspi0switchgrp {
++			fsl,pins = <
++				/* SW_RSTn: io without pull-up */
++				IMX8DXL_USB_SS3_TC0_LSIO_GPIO4_IO03				0x0000021
++
++				/* SW_CORE_RSTn: io without pull-up */
++				IMX8DXL_USB_SS3_TC1_LSIO_GPIO4_IO04				0x0000021
++			>;
++		};
++
++		pinctrl_usdhc3: usdhc3grp {
++			fsl,pins = <
++				IMX8DXL_ENET0_RGMII_TXC_CONN_USDHC2_CLK			0x06000040
++				IMX8DXL_ENET0_RGMII_TX_CTL_CONN_USDHC2_CMD		0x00000021
++				IMX8DXL_ENET0_RGMII_TXD0_CONN_USDHC2_DATA0		0x00000021
++				IMX8DXL_ENET0_RGMII_TXD1_CONN_USDHC2_DATA1		0x00000021
++				IMX8DXL_ENET0_RGMII_TXD2_CONN_USDHC2_DATA2		0x00000021
++				IMX8DXL_ENET0_RGMII_TXD3_CONN_USDHC2_DATA3		0x00000021
++			>;
++		};
++
++		pinctrl_usdhc3_100mhz: usdhc3grp100mhz {
++			fsl,pins = <
++				IMX8DXL_ENET0_RGMII_TXC_CONN_USDHC2_CLK			0x06000040
++				IMX8DXL_ENET0_RGMII_TX_CTL_CONN_USDHC2_CMD		0x00000021
++				IMX8DXL_ENET0_RGMII_TXD0_CONN_USDHC2_DATA0		0x00000021
++				IMX8DXL_ENET0_RGMII_TXD1_CONN_USDHC2_DATA1		0x00000021
++				IMX8DXL_ENET0_RGMII_TXD2_CONN_USDHC2_DATA2		0x00000021
++				IMX8DXL_ENET0_RGMII_TXD3_CONN_USDHC2_DATA3		0x00000021
++			>;
++		};
++
++		pinctrl_usdhc3_200mhz: usdhc3grp200mhz {
++			fsl,pins = <
++				IMX8DXL_ENET0_RGMII_TXC_CONN_USDHC2_CLK			0x06000040
++				IMX8DXL_ENET0_RGMII_TX_CTL_CONN_USDHC2_CMD		0x00000021
++				IMX8DXL_ENET0_RGMII_TXD0_CONN_USDHC2_DATA0		0x00000021
++				IMX8DXL_ENET0_RGMII_TXD1_CONN_USDHC2_DATA1		0x00000021
++				IMX8DXL_ENET0_RGMII_TXD2_CONN_USDHC2_DATA2		0x00000021
++				IMX8DXL_ENET0_RGMII_TXD3_CONN_USDHC2_DATA3		0x00000021
++			>;
++		};
++
++		pinctrl_wifi: wifigrp {
++			fsl,pins = <
++				/* wl_reg_on: SPI CS with pull-up, to force high */
++				/* should be: io without pull-up (WiFi module has internal pull-down) */
++				IMX8DXL_SPI3_CS1_ADMA_SPI3_CS1		0x0000021
++			>;
++		};
++
++		pinctrl_bluetooth: bluetoothgrp {
++			fsl,pins = <
++				/* bt_reg_on: io without pull-up (BT module has internal pull-down) */
++				IMX8DXL_SPI3_SCK_LSIO_GPIO0_IO13	0x0000061
++			>;
++		};
++
++		pinctrl_reg_1v1: 1v1grp {
++			fsl,pins = <
++				/* SW_PE USB_OTG1_OC: io without pull-up */
++				IMX8DXL_USB_SS3_TC2_LSIO_GPIO4_IO05	0x0000061
++			>;
++		};
++};
++
++/* exposed on J14: SDA(51), SCL(53) */
++&i2c2 {
++	/* MFS5600AMMA7ES @ 18 */
++
++	/* TCA6408ARGTR */
++	tca6408: gpio@20 {
++		compatible = "ti,tca6408";
++		reg = <0x20>;
++		gpio-controller;
++		#gpio-cells = <2>;
++		reset-gpios = <&lsio_gpio2 3 GPIO_ACTIVE_LOW>;
++		//interrupt-parent = <&lsio_gpio0>;
++        //interrupts = <1 IRQ_TYPE_EDGE_FALLING>; /* re-enable after changing layout */
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_i2c2_gpio>;
++		gpio-line-names = "DIG_IN1", "DIG_IN2", "CAN_STNB1", "CAN_STNB2", "DIG_OUT1", "DIG_OUT2", "", "";
++		/* max 100kHz bus speed */
++	};
++};
++
++/* exposed on J14: SDA(33), SCL(31) */
++&i2c3 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	clock-frequency = <100000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_i2c3>;
++	status = "okay";
++
++	/* nothing connected */
++};
++
++&lpspi0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_lpspi0>, <&pinctrl_lpspi0_switch>;
++	status = "okay";
++	cs-gpios = <&lsio_gpio1 8 GPIO_ACTIVE_LOW>, <&lsio_gpio1 7 GPIO_ACTIVE_LOW>;
++/*
++	spidev@0 {
++		compatible = "rohm,dh2228fv";
++		reg = <0>;
++		spi-max-frequency = <4000000>;
++	};
++
++	spidev@1 {
++		compatible = "rohm,dh2228fv";
++		reg = <1>;
++		spi-max-frequency = <4000000>;
++*/
++
++	ethernet-switch@0 {
++		compatible = "nxp,sja1110a";
++		reg = <0>;
++		//spi-max-frequency = <25000000>;
++		spi-max-frequency = <4000000>;
++		reset-gpios = <&lsio_gpio4 3 GPIO_ACTIVE_LOW>, <&lsio_gpio4 4 GPIO_ACTIVE_LOW>;
++
++		ethernet-ports {
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			/* to Switch uC */
++			port@0 {
++				reg = <0x0>;
++				status = "disabled";
++				label = "uc";
++			};
++
++			/* to RJ45 connector on V2X Adapter, 100BASE-TX */
++			port@1 {
++				reg = <0x1>;
++				status = "okay";
++				label = "lan1";
++				phy-mode = "internal";
++				phy-handle = <&switch_port1_base_tx_phy>;
++			};
++
++			/* to CPU */
++			port@2 {
++				reg = <0x2>;
++				status = "okay";
++				label = "cpu";
++				phy-mode = "rgmii-id";
++				rx-internal-delay-ps = <2000>;
++				tx-internal-delay-ps = <2000>;
++				ethernet = <&eqos>;
++
++				fixed-link {
++					speed = <1000>;
++					full-duplex;
++				};
++			};
++
++			port@3 {
++				reg = <0x3>;
++				status = "disabled";
++				label = "lan3";
++			};
++
++			port@4 {
++				reg = <0x4>;
++				status = "disabled";
++				label = "lan4";
++			};
++
++			port@5 {
++				reg = <0x5>;
++				status = "disabled";
++				label = "trx1";
++				phy-mode = "internal";
++				phy-handle = <&switch_port5_base_t1_phy>;
++			};
++
++			port@6 {
++				reg = <0x6>;
++				status = "disabled";
++				label = "trx2";
++				phy-mode = "internal";
++				phy-handle = <&switch_port6_base_t1_phy>;
++			};
++
++			port@7 {
++				reg = <0x7>;
++				status = "disabled";
++				label = "trx3";
++				phy-mode = "internal";
++				phy-handle = <&switch_port7_base_t1_phy>;
++			};
++
++			port@8 {
++				reg = <0x8>;
++				status = "disabled";
++				label = "trx4";
++				phy-mode = "internal";
++				phy-handle = <&switch_port8_base_t1_phy>;
++			};
++
++			port@9 {
++				reg = <0x9>;
++				status = "disabled";
++				label = "trx5";
++				phy-mode = "internal";
++				phy-handle = <&switch_port9_base_t1_phy>;
++			};
++
++			port@a {
++				reg = <0xa>;
++				status = "okay";
++				label = "trx6";
++				phy-mode = "internal";
++				phy-handle = <&switch_port10_base_t1_phy>;
++			};
++		};
++
++		mdios {
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			mdio@0 {
++				compatible = "nxp,sja1110-base-t1-mdio";
++				#address-cells = <1>;
++				#size-cells = <0>;
++				reg = <0>;
++				status = "okay";
++
++				switch_port5_base_t1_phy: ethernet-phy@1 {
++					compatible = "ethernet-phy-ieee802.3-c45";
++					reg = <0x1>;
++					status = "disabled";
++				};
++
++				switch_port6_base_t1_phy: ethernet-phy@2 {
++					compatible = "ethernet-phy-ieee802.3-c45";
++					reg = <0x2>;
++					status = "disabled";
++				};
++
++				switch_port7_base_t1_phy: ethernet-phy@3 {
++					compatible = "ethernet-phy-ieee802.3-c45";
++					reg = <0x3>;
++					status = "disabled";
++				};
++
++				switch_port8_base_t1_phy: ethernet-phy@4 {
++					compatible = "ethernet-phy-ieee802.3-c45";
++					reg = <0x4>;
++					status = "disabled";
++				};
++
++				switch_port9_base_t1_phy: ethernet-phy@5 {
++					compatible = "ethernet-phy-ieee802.3-c45";
++					reg = <0x5>;
++					status = "disabled";
++				};
++
++				switch_port10_base_t1_phy: ethernet-phy@6 {
++					compatible = "ethernet-phy-ieee802.3-c45";
++					reg = <0x6>;
++					status = "okay";
++				};
++			};
++
++			mdio@1 {
++				compatible = "nxp,sja1110-base-tx-mdio";
++				#address-cells = <1>;
++				#size-cells = <0>;
++				reg = <1>;
++				status = "okay";
++
++				switch_port1_base_tx_phy: ethernet-phy@1 {
++					reg = <0x1>;
++					status = "okay";
++				};
++
++				switch_port2_base_tx_phy: ethernet-phy@2 {
++					reg = <0x2>;
++					status = "disabled";
++				};
++
++				switch_port3_base_tx_phy: ethernet-phy@3 {
++					reg = <0x3>;
++					status = "disabled";
++				};
++
++				switch_port4_base_tx_phy: ethernet-phy@4 {
++					reg = <0x4>;
++					status = "disabled";
++				};
++			};
++		};
++	};
++};
++
++/* bluetooth */
++&lpuart1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_lpuart1>, <&pinctrl_bluetooth>;
++	status = "okay";
++	uart-has-rtscts;
++
++	bt: bluetooth {
++		compatible = "brcm,bcm4330-bt";
++		max-speed = <4000000>;
++		shutdown-gpios = <&lsio_gpio0 13 GPIO_ACTIVE_HIGH>;
++	};
++};
++
++&lsio_gpio0 {
++	status = "okay";
++};
++
++&lsio_gpio4 {
++	status = "okay";
++};
++
++&usbotg2 {
++	srp-disable;
++	hnp-disable;
++	adp-disable;
++	power-active-high;
++	disable-over-current;
++	status = "okay";
++	dr_mode = "host";
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_lte>;
++};
++
++&usbphy2 {
++	status = "okay";
++};
++
++/* WiFI (Carrier) */
++&usdhc3 {
++	// verify that REF_CLK_32K is enabled */
++    #address-cells = <1>;
++    #size-cells = <0>;
++	pinctrl-names = "default", "state_100mhz", "state_200mhz";
++	pinctrl-0 = <&pinctrl_usdhc3>, <&pinctrl_wifi>;
++	pinctrl-1 = <&pinctrl_usdhc3_100mhz>, <&pinctrl_wifi>;
++	pinctrl-2 = <&pinctrl_usdhc3_200mhz>, <&pinctrl_wifi>;
++	bus-width = <4>;
++	no-sd;
++	non-removable;
++	status = "okay";
++	max-frequency = <40000000>;
++	fsl,delay-line = <12>;
++	keep-power-in-suspend;
++	enable-sdio-wakeup;
++
++	/* CYW43455 */
++    wifi: cyw43455@1 {
++		reg = <1>;
++		compatible = "brcm,bcm4329-fmac";
++    };
++};
+-- 
+2.43.0
+

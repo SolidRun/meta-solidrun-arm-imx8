@@ -1,0 +1,52 @@
+From 0ad8c5020b341794db70a4ce84128e1c246df0db Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Sun, 3 Sep 2023 13:45:56 +0200
+Subject: [PATCH 223/229] arm64: dts: imx8dxl-v2x-v11: enable rtc backup
+ battery charging
+
+Add "aux-voltage-chargeable" to indicate that a chargable battery is
+connected to VBAT.
+Remove wrong "wakeup-source" property: There is no interrupt signal to
+the SoC, maximum rtc can toggle soc reset if R1166 is assembled.
+
+Also add aliases to select battery-backed rtc as rtc0 so kernel reads
+valid time during cold start.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ .../boot/dts/freescale/imx8dxl-sr-v2x-gateway-v11.dtsi | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway-v11.dtsi b/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway-v11.dtsi
+index ee678703bcf4..b5fb8fb9a72d 100644
+--- a/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway-v11.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway-v11.dtsi
+@@ -4,6 +4,12 @@
+  */
+ 
+ / {
++	aliases {
++		/* prioritise battery-backed rtc on carrier */
++		rtc0 = &carrier_rtc;
++		rtc1 = &rtc;
++	};
++
+ 	reg_usb1_vbus: reg-usb1-vbus {
+ 		compatible = "regulator-fixed";
+ 		regulator-name = "usb1-vbus";
+@@ -17,10 +23,10 @@ reg_usb1_vbus: reg-usb1-vbus {
+ };
+ 
+ &i2c2 {
+-	rtc@32 {
++	carrier_rtc: rtc@32 {
+ 		compatible = "epson,rx8111";
+ 		reg = <0x32>;
+-		wakeup-source;
++		aux-voltage-chargeable = <1>;
+ 	};
+ };
+ 
+-- 
+2.43.0
+

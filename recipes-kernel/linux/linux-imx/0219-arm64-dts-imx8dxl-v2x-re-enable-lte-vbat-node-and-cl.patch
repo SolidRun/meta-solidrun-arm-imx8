@@ -1,0 +1,74 @@
+From 4d7782752c5d5a4e48e8e84ead215bd564f04320 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Tue, 2 May 2023 12:03:32 +0300
+Subject: [PATCH 219/229] arm64: dts: imx8dxl-v2x: re-enable lte-vbat node and
+ clarify modem boot
+
+LTE Modem has special behaviour depending on power-on sequence of VBUS
+vs. VBAT. Clarify, add userspace-consumer and regulator nodes to enable
+vbat and allow userspace control.
+
+Carrier should be assembled with R1117 and without R1118 by default.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ .../dts/freescale/imx8dxl-sr-v2x-gateway.dtsi | 22 +++++++++++++++----
+ 1 file changed, 18 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway.dtsi b/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway.dtsi
+index 6c7c013e86a2..9a78f9a37de3 100644
+--- a/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway.dtsi
+@@ -5,7 +5,7 @@
+  */
+ 
+ / {
+-	/*lte_vbat_reg: regulator-lte-vbat {
++	lte_vbat_reg: regulator-lte-vbat {
+ 		compatible = "regulator-fixed";
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&pinctrl_lte_vbat>;
+@@ -14,8 +14,8 @@ / {
+ 		regulator-max-microvolt = <3600000>;
+ 		gpio = <&lsio_gpio0 14 GPIO_ACTIVE_HIGH>;
+ 		enable-active-high;
+-		regulator-always-on;
+-	};*/
++		regulator-boot-on;
++	};
+ 
+ 	regulator_1v1: regulator-1v1 {
+ 		compatible = "regulator-fixed";
+@@ -51,6 +51,13 @@ usdhc3_pwrseq: usdhc3-pwrseq {
+ 		compatible = "mmc-pwrseq-simple";
+ 		reset-gpios = <&lsio_gpio0 15 GPIO_ACTIVE_LOW>;
+ 	};
++
++	userspace-consumer-lte-vbat {
++		compatible = "reg-userspace-consumer";
++		regulator-name = "userspace-consumer-lte-vbat";
++		regulator-supplies = "lte_vbat_reg";
++		lte_vbat_reg-supply = <&lte_vbat_reg>;
++    };
+ };
+ 
+ &eqos {
+@@ -172,7 +179,14 @@ IMX8DXL_ADC_IN2_LSIO_GPIO1_IO12	0x2000061
+ 
+ 		pinctrl_lte_vbat: ltevbatgrp {
+ 			fsl,pins = <
+-				/* RF_PWR: io without pull-up */
++				/*
++				 * RF_PWR: io without pull-up,
++				 * has either external pull-up (R1117) or pull-down (R1118).
++				 * With pull-up Modem will boot at system power-up,
++				 * with pull-down modem will enter power-down mode once
++				 * vbat is enabled -> toggle pwrkey to boot modem.
++				 * Hence pull-up (R1117) is preferred.
++				 */
+ 				IMX8DXL_SPI3_SDO_LSIO_GPIO0_IO14	0x0000061
+ 			>;
+ 		};
+-- 
+2.43.0
+

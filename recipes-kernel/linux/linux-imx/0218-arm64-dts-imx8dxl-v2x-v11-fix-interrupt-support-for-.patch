@@ -1,0 +1,39 @@
+From bfaf0a6ad9f1effa408788d1ac554777171af3cb Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Wed, 22 Mar 2023 10:57:59 +0200
+Subject: [PATCH 218/229] arm64: dts: imx8dxl-v2x-v11: fix interrupt support
+ for gpio expander
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ .../boot/dts/freescale/imx8dxl-sr-v2x-gateway-v11.dtsi     | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway-v11.dtsi b/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway-v11.dtsi
+index 61aba931b24e..715e51b62a99 100644
+--- a/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway-v11.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-sr-v2x-gateway-v11.dtsi
+@@ -53,8 +53,8 @@ &iomuxc {
+ 
+ 	pinctrl_i2c2_gpio_int: i2c2gpiointgrp {
+ 		fsl,pins = <
+-			/* gpio-expander interrupt: io without pull-up */
+-			IMX8DXL_MCLK_OUT0_LSIO_GPIO0_IO20		0x0000061
++			/* gpio-expander interrupt: io with pull-up */
++			IMX8DXL_MCLK_OUT0_LSIO_GPIO0_IO20		0x0000021
+ 		>;
+ 	};
+ 
+@@ -79,6 +79,9 @@ IMX8DXL_SPI3_SDI_LSIO_GPIO0_IO15		0x0000061
+ &tca6408 {
+ 	/delete-property/ reset-gpios;
+ 
++	interrupt-controller;
++	#interrupt-cells = <2>;
++
+ 	pinctrl-0 = <&pinctrl_i2c2_gpio_int>;
+ 	interrupt-parent = <&lsio_gpio0>;
+ 	interrupts = <20 IRQ_TYPE_EDGE_FALLING>;
+-- 
+2.43.0
+

@@ -1,0 +1,45 @@
+From c70a6c7abaa4f52125f0c4e35409854ed4667092 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Tue, 27 Aug 2024 11:52:08 +0300
+Subject: [PATCH 227/229] arm64: dts: imx8dxl-sr-som: set i2c-gpios open-drain
+
+i2c (recovry) gpios should operate in open-drain.
+Linux already enforces this when skipped, but prints a warning message:
+
+[   14.239198] imx-lpi2c 5a820000.i2c: using scl,sda for recovery
+[   14.249539] gpio-98 (scl): enforced open drain please flag it properly in DT/ACPI DSDT/board file
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi b/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
+index 9ee4c8d23a6d..b34884f494f7 100644
+--- a/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
+@@ -118,8 +118,8 @@ &i2c2 {
+ 	pinctrl-names = "default", "gpio";
+ 	pinctrl-0 = <&pinctrl_i2c2>;
+ 	pinctrl-1 = <&pinctrl_i2c2_gpio>;
+-	sda-gpios = <&lsio_gpio3 0 GPIO_ACTIVE_HIGH>;
+-	scl-gpios = <&lsio_gpio3 1 GPIO_ACTIVE_HIGH>;
++	sda-gpios = <&lsio_gpio3 0 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
++	scl-gpios = <&lsio_gpio3 1 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
+ 	status = "okay";
+ 
+ 	/* MIA-M10Q (400kHz max.)*/
+@@ -137,8 +137,8 @@ &i2c3 {
+ 	pinctrl-names = "default", "gpio";
+ 	pinctrl-0 = <&pinctrl_i2c3>;
+ 	pinctrl-1 = <&pinctrl_i2c3_gpio>;
+-	sda-gpios = <&lsio_gpio3 3 GPIO_ACTIVE_HIGH>;
+-	scl-gpios = <&lsio_gpio3 2 GPIO_ACTIVE_HIGH>;
++	sda-gpios = <&lsio_gpio3 3 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
++	scl-gpios = <&lsio_gpio3 2 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
+ 	status = "okay";
+ };
+ 
+-- 
+2.43.0
+

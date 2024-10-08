@@ -32,9 +32,11 @@ do_install:append () {
     # Install Murata CYW43455 firmware
     install -m 0644 ${WORKDIR}/imx-firmware/cyw-wifi-bt/1MW_CYW43455/brcmfmac43455-sdio.bin ${D}${nonarch_base_libdir}/firmware/brcm/brcmfmac43455-sdio.fsl,imx8mp-sr-som.bin
     install -m 0644 ${WORKDIR}/imx-firmware/cyw-wifi-bt/1MW_CYW43455/brcmfmac43455-sdio.bin ${D}${nonarch_base_libdir}/firmware/brcm/brcmfmac43455-sdio.solidrun,solidsense-n8-compact.bin
+    install -m 0644 ${WORKDIR}/imx-firmware/cyw-wifi-bt/1MW_CYW43455/brcmfmac43455-sdio.bin ${D}${nonarch_base_libdir}/firmware/brcm/brcmfmac43455-sdio.solidrun,v2x-gateway.bin
     install -m 0644 ${WORKDIR}/imx-firmware/cyw-wifi-bt/1MW_CYW43455/brcmfmac43455-sdio.clm_blob ${D}${nonarch_base_libdir}/firmware/brcm
     install -m 0644 ${WORKDIR}/imx-firmware/cyw-wifi-bt/1MW_CYW43455/brcmfmac43455-sdio.txt ${D}${nonarch_base_libdir}/firmware/brcm/brcmfmac43455-sdio.fsl,imx8mp-sr-som.txt
     install -m 0644 ${WORKDIR}/imx-firmware/cyw-wifi-bt/1MW_CYW43455/brcmfmac43455-sdio.txt ${D}${nonarch_base_libdir}/firmware/brcm/brcmfmac43455-sdio.solidrun,solidsense-n8-compact.txt
+    install -m 0644 ${WORKDIR}/imx-firmware/cyw-wifi-bt/1MW_CYW43455/brcmfmac43455-sdio.txt ${D}${nonarch_base_libdir}/firmware/brcm/brcmfmac43455-sdio.solidrun,v2x-gateway.txt
     install -m 0644 ${WORKDIR}/imx-firmware/cyw-wifi-bt/1MW_CYW43455/BCM4345C0.1MW.hcd ${D}${nonarch_base_libdir}/firmware/brcm/BCM4345C0.hcd
 }
 
@@ -44,18 +46,22 @@ RDEPENDS:${PN}-bcm43455-sr += "${PN}-broadcom-license"
 FILES:${PN}-bcm43455:append = " \
        ${nonarch_base_libdir}/firmware/brcm/brcmfmac43455-sdio.fsl,imx8mp-sr-som.bin \
        ${nonarch_base_libdir}/firmware/brcm/brcmfmac43455-sdio.solidrun,solidsense-n8-compact.bin \
+       ${nonarch_base_libdir}/firmware/brcm/brcmfmac43455-sdio.solidrun,v2x-gateway.bin \
        ${nonarch_base_libdir}/firmware/brcm/brcmfmac43455-sdio.clm_blob \
        ${nonarch_base_libdir}/firmware/brcm/brcmfmac43455-sdio.fsl,imx8mp-sr-som.txt \
        ${nonarch_base_libdir}/firmware/brcm/brcmfmac43455-sdio.solidrun,solidsense-n8-compact.txt \
+       ${nonarch_base_libdir}/firmware/brcm/brcmfmac43455-sdio.solidrun,v2x-gateway.txt \
        ${nonarch_base_libdir}/firmware/brcm/BCM4345C0.hcd \
 "
 
 FILES:${PN}-bcm43455-sr = " \
        ${nonarch_base_libdir}/firmware/brcm/brcmfmac43455-sdio.fsl,imx8mp-sr-som.bin \
        ${nonarch_base_libdir}/firmware/brcm/brcmfmac43455-sdio.solidrun,solidsense-n8-compact.bin \
+       ${nonarch_base_libdir}/firmware/brcm/brcmfmac43455-sdio.solidrun,v2x-gateway.bin \
        ${nonarch_base_libdir}/firmware/brcm/brcmfmac43455-sdio.clm_blob \
        ${nonarch_base_libdir}/firmware/brcm/brcmfmac43455-sdio.fsl,imx8mp-sr-som.txt \
        ${nonarch_base_libdir}/firmware/brcm/brcmfmac43455-sdio.solidrun,solidsense-n8-compact.txt \
+       ${nonarch_base_libdir}/firmware/brcm/brcmfmac43455-sdio.solidrun,v2x-gateway.txt \
        ${nonarch_base_libdir}/firmware/brcm/BCM4345C0.hcd \
 "
 

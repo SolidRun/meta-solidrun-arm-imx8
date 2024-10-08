@@ -1,0 +1,1078 @@
+From 6797aaf0e630e1072a922dcc8cef15b7b01ef12d Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Tue, 26 Jul 2022 11:27:12 +0300
+Subject: [PATCH 202/204] board: solidrun: add imx8dxl som
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ arch/arm/dts/Makefile                         |   1 +
+ arch/arm/dts/fsl-imx8dxl-sr-som-u-boot.dtsi   | 116 +++++++++++
+ arch/arm/dts/fsl-imx8dxl-sr-som.dts           | 195 ++++++++++++++++++
+ arch/arm/mach-imx/imx8/Kconfig                |  10 +
+ board/solidrun/imx8dxl_som/Kconfig            |  17 ++
+ board/solidrun/imx8dxl_som/Makefile           |   8 +
+ board/solidrun/imx8dxl_som/imx8dxl_evk.c      | 165 +++++++++++++++
+ board/solidrun/imx8dxl_som/imximage.cfg       |  22 ++
+ board/solidrun/imx8dxl_som/spl.c              |  87 ++++++++
+ .../solidrun/imx8dxl_som/uboot-container.cfg  |  13 ++
+ configs/imx8dxl_v2x_defconfig                 | 193 +++++++++++++++++
+ include/configs/imx8dxl_sr_som.h              | 128 ++++++++++++
+ 12 files changed, 955 insertions(+)
+ create mode 100644 arch/arm/dts/fsl-imx8dxl-sr-som-u-boot.dtsi
+ create mode 100644 arch/arm/dts/fsl-imx8dxl-sr-som.dts
+ create mode 100644 board/solidrun/imx8dxl_som/Kconfig
+ create mode 100644 board/solidrun/imx8dxl_som/Makefile
+ create mode 100644 board/solidrun/imx8dxl_som/imx8dxl_evk.c
+ create mode 100644 board/solidrun/imx8dxl_som/imximage.cfg
+ create mode 100644 board/solidrun/imx8dxl_som/spl.c
+ create mode 100644 board/solidrun/imx8dxl_som/uboot-container.cfg
+ create mode 100644 configs/imx8dxl_v2x_defconfig
+ create mode 100644 include/configs/imx8dxl_sr_som.h
+
+diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
+index 709fdaecd7d..f5c35043276 100644
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -953,6 +953,7 @@ dtb-$(CONFIG_ARCH_IMX8) += \
+ 	fsl-imx8dxl-evk.dtb \
+ 	fsl-imx8dxl-evk-lcdif.dtb \
+ 	fsl-imx8dxl-ddr3l-evk.dtb \
++	fsl-imx8dxl-sr-som.dtb \
+ 	imx8-deneb.dtb \
+ 	imx8-giedi.dtb
+ 
+diff --git a/arch/arm/dts/fsl-imx8dxl-sr-som-u-boot.dtsi b/arch/arm/dts/fsl-imx8dxl-sr-som-u-boot.dtsi
+new file mode 100644
+index 00000000000..ccf57a20986
+--- /dev/null
++++ b/arch/arm/dts/fsl-imx8dxl-sr-som-u-boot.dtsi
+@@ -0,0 +1,116 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright 2020 NXP
++ */
++
++/ {
++	aliases {
++		usbgadget0 = &usbg1;
++	};
++
++	usbg1: usbg1 {
++		compatible = "fsl,imx27-usb-gadget";
++		dr_mode = "peripheral";
++		chipidea,usb = <&usbotg1>;
++		status = "okay";
++		u-boot,dm-spl;
++	};
++};
++
++&{/imx8dxl-pm} {
++
++	u-boot,dm-spl;
++};
++
++&mu {
++	u-boot,dm-spl;
++};
++
++&clk {
++	u-boot,dm-spl;
++};
++
++&iomuxc {
++	u-boot,dm-spl;
++};
++
++&{/mu@5d1c0000/iomuxc/imx8dxl-sr-som} {
++	u-boot,dm-spl;
++};
++
++&pinctrl_lpuart0 {
++	u-boot,dm-spl;
++};
++
++&pinctrl_usdhc1 {
++	u-boot,dm-spl;
++};
++
++&pinctrl_usdhc1_100mhz {
++	u-boot,dm-spl;
++};
++
++&pinctrl_usdhc1_200mhz {
++	u-boot,dm-spl;
++};
++
++&pd_lsio {
++	u-boot,dm-spl;
++};
++
++&pd_conn {
++	u-boot,dm-spl;
++};
++
++&pd_dma {
++	u-boot,dm-spl;
++};
++
++&pd_dma_lpuart0 {
++	u-boot,dm-spl;
++};
++
++&pd_conn_usbotg0 {
++	u-boot,dm-spl;
++};
++
++&pd_conn_usbotg0_phy {
++	u-boot,dm-spl;
++};
++
++&pd_conn_usbotg1 {
++        u-boot,dm-spl;
++};
++
++&pd_conn_usbotg1_phy {
++        u-boot,dm-spl;
++};
++
++&lpuart0 {
++	u-boot,dm-spl;
++};
++
++&usdhc1 {
++	u-boot,dm-spl;
++	mmc-hs400-1_8v;
++};
++
++&usbphy1 {
++	u-boot,dm-spl;
++};
++
++&usbotg1 {
++	u-boot,dm-spl;
++};
++
++&usbphy2 {
++        u-boot,dm-spl;
++};
++
++&usbotg2 {
++        u-boot,dm-spl;
++};
++
++&eqos {
++	compatible = "fsl,imx-eqos";
++};
+diff --git a/arch/arm/dts/fsl-imx8dxl-sr-som.dts b/arch/arm/dts/fsl-imx8dxl-sr-som.dts
+new file mode 100644
+index 00000000000..fa12a77a35c
+--- /dev/null
++++ b/arch/arm/dts/fsl-imx8dxl-sr-som.dts
+@@ -0,0 +1,195 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright 2020 NXP
++ */
++
++/dts-v1/;
++
++#include "fsl-imx8dxl.dtsi"
++
++/ {
++	model = "SolidRun i.MX8DXL SoM";
++	compatible = "solidrun,imx8dxl-som", "fsl,imx8dxl";
++
++	chosen {
++		bootargs = "console=ttyLP0,115200 earlycon";
++		stdout-path = &lpuart0;
++	};
++};
++
++&iomuxc {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_hog>;
++
++	imx8dxl-sr-som {
++		pinctrl_hog: hoggrp {
++			fsl,pins = <
++				SC_P_COMP_CTL_GPIO_1V8_3V3_GPIORHB_PAD	0x000514a0
++			>;
++		};
++
++		pinctrl_eqos: eqosgrp {
++			fsl,pins = <
++				/* enet0 mdio pads supplied with 3.3v */
++				/* TODO: IMX8DXL_COMP_CTL_GPIO_1V8_3V3_GPIOCT */
++				SC_P_ENET0_MDC_CONN_EQOS_MDC				0x06000020
++				SC_P_ENET0_MDIO_CONN_EQOS_MDIO			0x06000020
++				/* enet1 pads supplied with 3.3v */
++				SC_P_COMP_CTL_GPIO_1V8_3V3_GPIORHB_PAD		0x000514a0
++				SC_P_ENET1_RGMII_TX_CTL_CONN_EQOS_RGMII_TX_CTL		0x00000060
++				SC_P_ENET1_RGMII_TXC_CONN_EQOS_RGMII_TXC		0x00000060
++				SC_P_ENET1_RGMII_TXD0_CONN_EQOS_RGMII_TXD0	0x00000060
++				SC_P_ENET1_RGMII_TXD1_CONN_EQOS_RGMII_TXD1	0x00000060
++				SC_P_ENET1_RGMII_TXD2_CONN_EQOS_RGMII_TXD2	0x00000060
++				SC_P_ENET1_RGMII_TXD3_CONN_EQOS_RGMII_TXD3	0x00000060
++				SC_P_ENET1_RGMII_RXC_CONN_EQOS_RGMII_RXC		0x00000060
++				SC_P_ENET1_RGMII_RX_CTL_CONN_EQOS_RGMII_RX_CTL	0x00000060
++				SC_P_ENET1_RGMII_RXD0_CONN_EQOS_RGMII_RXD0	0x00000060
++				SC_P_ENET1_RGMII_RXD1_CONN_EQOS_RGMII_RXD1	0x00000060
++				SC_P_ENET1_RGMII_RXD2_CONN_EQOS_RGMII_RXD2	0x00000060
++				SC_P_ENET1_RGMII_RXD3_CONN_EQOS_RGMII_RXD3	0x00000060
++			>;
++		};
++
++		pinctrl_lpuart0: lpuart0grp {
++			fsl,pins = <
++				SC_P_UART0_RX_ADMA_UART0_RX	0x06000020
++				SC_P_UART0_TX_ADMA_UART0_TX	0x06000020
++			>;
++		};
++
++		pinctrl_lpi2c2: lpi2c2grp {
++			fsl,pins = <
++				SC_P_SPI1_SDO_ADMA_I2C2_SCL	0x06000021
++				SC_P_SPI1_SCK_ADMA_I2C2_SDA	0x06000021
++			>;
++		};
++
++		pinctrl_lpi2c3: lpi2c3grp {
++			fsl,pins = <
++				SC_P_SPI1_SDI_ADMA_I2C3_SCL	0x06000021
++				SC_P_SPI1_CS0_ADMA_I2C3_SDA	0x06000021
++			>;
++		};
++
++		pinctrl_usdhc1: usdhc1grp {
++			fsl,pins = <
++				SC_P_EMMC0_CLK_CONN_EMMC0_CLK		0x06000041
++				SC_P_EMMC0_CMD_CONN_EMMC0_CMD		0x00000021
++				SC_P_EMMC0_DATA0_CONN_EMMC0_DATA0	0x00000021
++				SC_P_EMMC0_DATA1_CONN_EMMC0_DATA1	0x00000021
++				SC_P_EMMC0_DATA2_CONN_EMMC0_DATA2	0x00000021
++				SC_P_EMMC0_DATA3_CONN_EMMC0_DATA3	0x00000021
++				SC_P_EMMC0_DATA4_CONN_EMMC0_DATA4	0x00000021
++				SC_P_EMMC0_DATA5_CONN_EMMC0_DATA5	0x00000021
++				SC_P_EMMC0_DATA6_CONN_EMMC0_DATA6	0x00000021
++				SC_P_EMMC0_DATA7_CONN_EMMC0_DATA7	0x00000021
++				SC_P_EMMC0_STROBE_CONN_EMMC0_STROBE	0x00000041
++			>;
++		};
++
++		pinctrl_usdhc1_100mhz: usdhc1grp100mhz {
++			fsl,pins = <
++				SC_P_EMMC0_CLK_CONN_EMMC0_CLK		0x06000041
++				SC_P_EMMC0_CMD_CONN_EMMC0_CMD		0x00000021
++				SC_P_EMMC0_DATA0_CONN_EMMC0_DATA0	0x00000021
++				SC_P_EMMC0_DATA1_CONN_EMMC0_DATA1	0x00000021
++				SC_P_EMMC0_DATA2_CONN_EMMC0_DATA2	0x00000021
++				SC_P_EMMC0_DATA3_CONN_EMMC0_DATA3	0x00000021
++				SC_P_EMMC0_DATA4_CONN_EMMC0_DATA4	0x00000021
++				SC_P_EMMC0_DATA5_CONN_EMMC0_DATA5	0x00000021
++				SC_P_EMMC0_DATA6_CONN_EMMC0_DATA6	0x00000021
++				SC_P_EMMC0_DATA7_CONN_EMMC0_DATA7	0x00000021
++				SC_P_EMMC0_STROBE_CONN_EMMC0_STROBE	0x00000041
++			>;
++		};
++
++		pinctrl_usdhc1_200mhz: usdhc1grp200mhz {
++			fsl,pins = <
++				SC_P_EMMC0_CLK_CONN_EMMC0_CLK		0x06000041
++				SC_P_EMMC0_CMD_CONN_EMMC0_CMD		0x00000021
++				SC_P_EMMC0_DATA0_CONN_EMMC0_DATA0	0x00000021
++				SC_P_EMMC0_DATA1_CONN_EMMC0_DATA1	0x00000021
++				SC_P_EMMC0_DATA2_CONN_EMMC0_DATA2	0x00000021
++				SC_P_EMMC0_DATA3_CONN_EMMC0_DATA3	0x00000021
++				SC_P_EMMC0_DATA4_CONN_EMMC0_DATA4	0x00000021
++				SC_P_EMMC0_DATA5_CONN_EMMC0_DATA5	0x00000021
++				SC_P_EMMC0_DATA6_CONN_EMMC0_DATA6	0x00000021
++				SC_P_EMMC0_DATA7_CONN_EMMC0_DATA7	0x00000021
++				SC_P_EMMC0_STROBE_CONN_EMMC0_STROBE	0x00000041
++			>;
++		};
++	};
++};
++
++&A35_0 {
++	u-boot,dm-pre-reloc;
++};
++
++&eqos {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_eqos>;
++	phy-mode = "rgmii"; // "-id"?
++	fsl,magic-packet;
++	status = "okay";
++
++	fixed-link {
++		speed = <1000>;
++		full-duplex;
++	};
++
++	mdio {
++		#address-cells = <1>;
++		#size-cells = <0>;
++	};
++};
++
++&lpuart0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_lpuart0>;
++	status = "okay";
++};
++
++&i2c2 {
++	clock-frequency = <100000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_lpi2c2>;
++	status = "okay";
++};
++
++&i2c3 {
++	clock-frequency = <100000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_lpi2c3>;
++	status = "okay";
++};
++
++&usdhc1 {
++	pinctrl-names = "default", "state_100mhz", "state_200mhz";
++	pinctrl-0 = <&pinctrl_usdhc1>;
++	pinctrl-1 = <&pinctrl_usdhc1_100mhz>;
++	pinctrl-2 = <&pinctrl_usdhc1_200mhz>;
++	bus-width = <8>;
++	non-removable;
++	status = "okay";
++};
++
++&usbotg1 {
++	dr_mode = "otg";
++	srp-disable;
++	hnp-disable;
++	adp-disable;
++	power-polarity-active-high;
++	disable-over-current;
++	status = "okay";
++};
++
++&usbotg2 {
++	dr_mode = "host";
++	srp-disable;
++	hnp-disable;
++	adp-disable;
++	power-polarity-active-high;
++	disable-over-current;
++	status = "okay";
++};
+diff --git a/arch/arm/mach-imx/imx8/Kconfig b/arch/arm/mach-imx/imx8/Kconfig
+index df383fe9b99..c5d6fd9f9c6 100644
+--- a/arch/arm/mach-imx/imx8/Kconfig
++++ b/arch/arm/mach-imx/imx8/Kconfig
+@@ -196,6 +196,15 @@ config TARGET_IMX8DXL_DDR3_EVK
+ 	select ARCH_MISC_INIT
+ 	select SPL_CRYPTO if SPL
+ 
++config TARGET_IMX8DXL_SRSOM
++	bool "Support i.MX8DXL SolidRun SoM"
++	select BOARD_LATE_INIT
++	select IMX8DXL
++	select FSL_CAAM
++	select FSL_BLOB
++	select ARCH_MISC_INIT
++	select SPL_CRYPTO_SUPPORT if SPL
++
+ endchoice
+ 
+ source "board/freescale/imx8qm_mek/Kconfig"
+@@ -210,6 +219,7 @@ source "board/toradex/apalis-imx8/Kconfig"
+ source "board/toradex/colibri-imx8x/Kconfig"
+ source "board/toradex/apalis-imx8x/Kconfig"
+ source "board/siemens/capricorn/Kconfig"
++source "board/solidrun/imx8dxl_som/Kconfig"
+ 
+ config IMX_SNVS_SEC_SC
+ 	bool "Support SNVS configuration"
+diff --git a/board/solidrun/imx8dxl_som/Kconfig b/board/solidrun/imx8dxl_som/Kconfig
+new file mode 100644
+index 00000000000..9d310658042
+--- /dev/null
++++ b/board/solidrun/imx8dxl_som/Kconfig
+@@ -0,0 +1,17 @@
++if  TARGET_IMX8DXL_SRSOM
++
++config SYS_BOARD
++	default "imx8dxl_som"
++
++config SYS_VENDOR
++	default "solidrun"
++
++config SYS_CONFIG_NAME
++	default "imx8dxl_sr_som"
++
++config IMX_CONFIG
++	default "board/solidrun/imx8dxl_som/imximage.cfg"
++
++source "board/freescale/common/Kconfig"
++
++endif
+diff --git a/board/solidrun/imx8dxl_som/Makefile b/board/solidrun/imx8dxl_som/Makefile
+new file mode 100644
+index 00000000000..f031c5fb500
+--- /dev/null
++++ b/board/solidrun/imx8dxl_som/Makefile
+@@ -0,0 +1,8 @@
++#
++# Copyright 2020 NXP
++#
++# SPDX-License-Identifier:	GPL-2.0+
++#
++
++obj-y += imx8dxl_evk.o
++obj-$(CONFIG_SPL_BUILD) += spl.o
+diff --git a/board/solidrun/imx8dxl_som/imx8dxl_evk.c b/board/solidrun/imx8dxl_som/imx8dxl_evk.c
+new file mode 100644
+index 00000000000..78d40c0dee7
+--- /dev/null
++++ b/board/solidrun/imx8dxl_som/imx8dxl_evk.c
+@@ -0,0 +1,165 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright 2020 NXP
++ */
++
++#include <common.h>
++#include <cpu_func.h>
++#include <env.h>
++#include <errno.h>
++#include <init.h>
++#include <asm/global_data.h>
++#include <linux/delay.h>
++#include <linux/libfdt.h>
++#include <fsl_esdhc_imx.h>
++#include <fdt_support.h>
++#include <asm/io.h>
++#include <asm/gpio.h>
++#include <asm/arch/clock.h>
++#include <asm/arch/sci/sci.h>
++#include <asm/arch/imx8-pins.h>
++#include <asm/arch/snvs_security_sc.h>
++#include <asm/arch/iomux.h>
++#include <asm/arch/sys_proto.h>
++#include <usb.h>
++
++DECLARE_GLOBAL_DATA_PTR;
++
++#define ENET_INPUT_PAD_CTRL	((SC_PAD_CONFIG_OD_IN << PADRING_CONFIG_SHIFT) | (SC_PAD_ISO_OFF << PADRING_LPCONFIG_SHIFT) \
++						| (SC_PAD_28FDSOI_DSE_18V_10MA << PADRING_DSE_SHIFT) | (SC_PAD_28FDSOI_PS_PU << PADRING_PULL_SHIFT))
++
++#define ENET_NORMAL_PAD_CTRL	((SC_PAD_CONFIG_NORMAL << PADRING_CONFIG_SHIFT) | (SC_PAD_ISO_OFF << PADRING_LPCONFIG_SHIFT) \
++						| (SC_PAD_28FDSOI_DSE_18V_10MA << PADRING_DSE_SHIFT) | (SC_PAD_28FDSOI_PS_PU << PADRING_PULL_SHIFT))
++
++#define GPMI_NAND_PAD_CTRL	 ((SC_PAD_CONFIG_OUT_IN << PADRING_CONFIG_SHIFT) | (SC_PAD_28FDSOI_DSE_DV_HIGH << PADRING_DSE_SHIFT) \
++				  | (SC_PAD_28FDSOI_PS_PU << PADRING_PULL_SHIFT))
++
++#define GPIO_PAD_CTRL	((SC_PAD_CONFIG_NORMAL << PADRING_CONFIG_SHIFT) | \
++			 (SC_PAD_ISO_OFF << PADRING_LPCONFIG_SHIFT) | \
++			 (SC_PAD_28FDSOI_DSE_DV_HIGH << PADRING_DSE_SHIFT) | \
++			 (SC_PAD_28FDSOI_PS_PU << PADRING_PULL_SHIFT))
++
++#define UART_PAD_CTRL	((SC_PAD_CONFIG_OUT_IN << PADRING_CONFIG_SHIFT) | \
++			 (SC_PAD_ISO_OFF << PADRING_LPCONFIG_SHIFT) | \
++			 (SC_PAD_28FDSOI_DSE_DV_HIGH << PADRING_DSE_SHIFT) | \
++			 (SC_PAD_28FDSOI_PS_PU << PADRING_PULL_SHIFT))
++
++static iomux_cfg_t uart0_pads[] = {
++	SC_P_UART0_RX | MUX_PAD_CTRL(UART_PAD_CTRL),
++	SC_P_UART0_TX | MUX_PAD_CTRL(UART_PAD_CTRL),
++};
++
++static void setup_iomux_uart(void)
++{
++	imx8_iomux_setup_multiple_pads(uart0_pads, ARRAY_SIZE(uart0_pads));
++}
++
++int board_early_init_f(void)
++{
++	sc_pm_clock_rate_t rate = SC_80MHZ;
++	int ret;
++
++	/* Set UART0 clock root to 80 MHz */
++	ret = sc_pm_setup_uart(SC_R_UART_0, rate);
++	if (ret)
++		return ret;
++
++	setup_iomux_uart();
++
++	return 0;
++}
++
++#if CONFIG_IS_ENABLED(DM_GPIO)
++static void board_gpio_init(void)
++{
++
++}
++#else
++static inline void board_gpio_init(void) {}
++#endif
++
++int checkboard(void)
++{
++	puts("Board: SolidRun i.MX8DXL SoM\n");
++
++	print_bootinfo();
++
++	return 0;
++}
++
++#ifdef CONFIG_DWC_ETH_QOS
++static int setup_eqos(void)
++{
++	int err;
++
++	/* set GPR14:12 to b'001: RGMII mode */
++	err = sc_misc_set_control(-1, SC_R_ENET_1, SC_C_INTF_SEL, 0x1);
++	if (err)
++		printf("SC_R_ENET_1 INTF_SEL failed! (error = %d)\n", err);
++
++	/* enable GPR11: CLK_GEN_EN */
++	err = sc_misc_set_control(-1, SC_R_ENET_1, SC_C_CLK_GEN_EN, 1);
++	if (err)
++		printf("SC_R_ENET_1 CLK_GEN_EN failed! (error = %d)\n", err);
++
++	return 0;
++}
++#endif
++
++int board_init(void)
++{
++	board_gpio_init();
++#ifdef CONFIG_DWC_ETH_QOS
++	/* clock, phy interface mode */
++	setup_eqos();
++#endif
++
++#ifdef CONFIG_IMX_SNVS_SEC_SC_AUTO
++	{
++		int ret = snvs_security_sc_init();
++
++		if (ret)
++			return ret;
++	}
++#endif
++
++	return 0;
++}
++
++void board_quiesce_devices(void)
++{
++	const char *power_on_devices[] = {
++		"dma_lpuart0",
++	};
++
++	imx8_power_off_pd_devices(power_on_devices, ARRAY_SIZE(power_on_devices));
++}
++
++/*
++ * Board specific reset that is system reset.
++ */
++void reset_cpu(void)
++{
++	/* TODO */
++}
++
++#ifdef CONFIG_OF_BOARD_SETUP
++int ft_board_setup(void *blob, struct bd_info *bd)
++{
++	return 0;
++}
++#endif
++
++int board_late_init(void)
++{
++	build_info();
++
++	return 0;
++}
++
++#ifdef CONFIG_ANDROID_BOOT_IMAGE
++__weak int mmc_map_to_kernel_blk(int dev_no)
++{
++	return dev_no;
++}
++#endif
+diff --git a/board/solidrun/imx8dxl_som/imximage.cfg b/board/solidrun/imx8dxl_som/imximage.cfg
+new file mode 100644
+index 00000000000..e5f2a9e817f
+--- /dev/null
++++ b/board/solidrun/imx8dxl_som/imximage.cfg
+@@ -0,0 +1,22 @@
++/* SPDX-License-Identifier: GPL-2.0+ */
++/*
++ * Copyright 2020 NXP
++ *
++ * Refer doc/README.imx8image for more details about how-to configure
++ * and create imx8image boot image
++ */
++
++#define __ASSEMBLY__
++
++/* Boot from SD, sector size 0x400 */
++BOOT_FROM SD 0x400
++/* SoC type IMX8DXL */
++SOC_TYPE IMX8DXL
++/* Append seco container image */
++APPEND ahab-container.img
++/* Create the 2nd container */
++CONTAINER
++/* Add scfw image with exec attribute */
++IMAGE SCU mx8dxl-evk-scfw-tcm.bin
++/* Add ATF image with exec attribute */
++IMAGE A35 spl/u-boot-spl.bin 0x00100000
+diff --git a/board/solidrun/imx8dxl_som/spl.c b/board/solidrun/imx8dxl_som/spl.c
+new file mode 100644
+index 00000000000..d23abd89879
+--- /dev/null
++++ b/board/solidrun/imx8dxl_som/spl.c
+@@ -0,0 +1,87 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright 2020 NXP
++ *
++ */
++
++#include <common.h>
++#include <dm.h>
++#include <image.h>
++#include <init.h>
++#include <log.h>
++#include <spl.h>
++#include <asm/global_data.h>
++#include <dm/uclass.h>
++#include <dm/device.h>
++#include <dm/uclass-internal.h>
++#include <dm/device-internal.h>
++#include <dm/lists.h>
++#include <bootm.h>
++#include <asm/mach-imx/boot_mode.h>
++
++DECLARE_GLOBAL_DATA_PTR;
++
++int spl_board_boot_device(enum boot_device boot_dev_spl)
++{
++	switch (boot_dev_spl) {
++	case MMC1_BOOT:
++		return BOOT_DEVICE_MMC1;
++	case SD2_BOOT:
++		return BOOT_DEVICE_MMC2_2;
++	case FLEXSPI_BOOT:
++		return BOOT_DEVICE_SPI;
++	case NAND_BOOT:
++		return BOOT_DEVICE_NAND;
++	case USB_BOOT:
++		return BOOT_DEVICE_BOARD;
++	default:
++		return BOOT_DEVICE_NONE;
++	}
++}
++
++void spl_board_init(void)
++{
++	struct udevice *dev;
++
++	uclass_get_device_by_driver(UCLASS_MISC, DM_DRIVER_GET(imx8_scu), &dev);
++
++	uclass_find_first_device(UCLASS_MISC, &dev);
++
++	for (; dev; uclass_find_next_device(&dev)) {
++		if (device_probe(dev))
++			continue;
++	}
++
++	board_early_init_f();
++
++	timer_init();
++
++	preloader_console_init();
++
++	puts("Normal Boot\n");
++}
++
++void spl_board_prepare_for_boot(void)
++{
++	board_quiesce_devices();
++}
++
++#ifdef CONFIG_SPL_LOAD_FIT
++int board_fit_config_name_match(const char *name)
++{
++	/* Just empty function now - can't decide what to choose */
++	debug("%s: %s\n", __func__, name);
++
++	return 0;
++}
++#endif
++
++void board_init_f(ulong dummy)
++{
++	/* Clear the BSS. */
++	memset(__bss_start, 0, __bss_end - __bss_start);
++
++	arch_cpu_init();
++
++	board_init_r(NULL, 0);
++}
+diff --git a/board/solidrun/imx8dxl_som/uboot-container.cfg b/board/solidrun/imx8dxl_som/uboot-container.cfg
+new file mode 100644
+index 00000000000..9ef26331c13
+--- /dev/null
++++ b/board/solidrun/imx8dxl_som/uboot-container.cfg
+@@ -0,0 +1,13 @@
++/* SPDX-License-Identifier: GPL-2.0+ */
++/*
++ * Copyright 2019 NXP
++ */
++
++#define __ASSEMBLY__
++
++/* This file is to create a container image could be loaded by SPL */
++BOOT_FROM SD 0x400
++SOC_TYPE IMX8DXL
++CONTAINER
++IMAGE A35 bl31.bin	0x80000000
++IMAGE A35 u-boot.bin	CONFIG_SYS_TEXT_BASE
+diff --git a/configs/imx8dxl_v2x_defconfig b/configs/imx8dxl_v2x_defconfig
+new file mode 100644
+index 00000000000..804daa68100
+--- /dev/null
++++ b/configs/imx8dxl_v2x_defconfig
+@@ -0,0 +1,193 @@
++CONFIG_ARM=y
++CONFIG_ARCH_IMX8=y
++CONFIG_SYS_TEXT_BASE=0x80020000
++CONFIG_SYS_MALLOC_LEN=0x2400000
++CONFIG_SYS_MALLOC_F_LEN=0x8000
++CONFIG_SYS_MEMTEST_START=0xA0000000
++CONFIG_SYS_MEMTEST_END=0xB0000000
++CONFIG_SPL_GPIO=y
++CONFIG_SPL_LIBCOMMON_SUPPORT=y
++CONFIG_SPL_LIBGENERIC_SUPPORT=y
++CONFIG_NR_DRAM_BANKS=4
++CONFIG_ENV_SIZE=0x2000
++CONFIG_ENV_OFFSET=0x3f0000
++CONFIG_DM_GPIO=y
++CONFIG_DEFAULT_DEVICE_TREE="fsl-imx8dxl-sr-som"
++CONFIG_SPL_TEXT_BASE=0x100000
++CONFIG_TARGET_IMX8DXL_SRSOM=y
++CONFIG_SPL_MMC=y
++CONFIG_SPL_EFI_PARTITION=n
++CONFIG_SPL_DOS_PARTITION=n
++CONFIG_SPL_DM_SEQ_ALIAS=y
++CONFIG_SPL_SERIAL=y
++CONFIG_SPL_DRIVERS_MISC=y
++CONFIG_SPL=y
++CONFIG_SPL_LOAD_IMX_CONTAINER=y
++CONFIG_USE_TINY_PRINTF=y
++CONFIG_PANIC_HANG=y
++CONFIG_IMX_CONTAINER_CFG="board/solidrun/imx8dxl_som/uboot-container.cfg"
++CONFIG_SYS_LOAD_ADDR=0x80200000
++CONFIG_OF_BOARD_SETUP=y
++CONFIG_OF_SYSTEM_SETUP=y
++CONFIG_BOOTDELAY=3
++CONFIG_LOG=y
++CONFIG_BOARD_EARLY_INIT_F=y
++CONFIG_SPL_BOARD_INIT=y
++# CONFIG_SPL_SYS_MALLOC_SIMPLE is not set
++CONFIG_SPL_SEPARATE_BSS=y
++CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_USE_SECTOR=y
++CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR=0x1040
++CONFIG_SPL_POWER_DOMAIN=y
++CONFIG_HUSH_PARSER=y
++CONFIG_CMD_CPU=y
++# CONFIG_BOOTM_NETBSD is not set
++# CONFIG_CMD_EXPORTENV is not set
++# CONFIG_CMD_IMPORTENV is not set
++# CONFIG_CMD_CRC32 is not set
++CONFIG_CMD_CLK=y
++CONFIG_CMD_DM=y
++CONFIG_CMD_GPIO=y
++CONFIG_CMD_I2C=y
++CONFIG_CMD_MMC=y
++CONFIG_CMD_DHCP=y
++CONFIG_CMD_MII=y
++CONFIG_CMD_PING=y
++CONFIG_CMD_CACHE=y
++CONFIG_CMD_EXT2=y
++CONFIG_CMD_EXT4=y
++CONFIG_CMD_EXT4_WRITE=y
++CONFIG_CMD_FAT=y
++CONFIG_CMD_USB=y
++CONFIG_CMD_USB_MASS_STORAGE=y
++CONFIG_SPL_OF_CONTROL=y
++CONFIG_ENV_OVERWRITE=y
++CONFIG_ENV_IS_IN_MMC=y
++CONFIG_SYS_RELOC_GD_ENV_ADDR=y
++CONFIG_SYS_MMC_ENV_DEV=1
++CONFIG_NET_RANDOM_ETHADDR=y
++CONFIG_SPL_DM=y
++CONFIG_SPL_CLK=y
++CONFIG_CLK_IMX8=y
++CONFIG_CPU=y
++CONFIG_MXC_GPIO=y
++CONFIG_DM_PCA953X=y
++CONFIG_DM_I2C=y
++CONFIG_SYS_I2C_IMX_LPI2C=y
++CONFIG_I2C_MUX=y
++CONFIG_I2C_MUX_PCA954x=y
++CONFIG_MISC=y
++CONFIG_SUPPORT_EMMC_BOOT=y
++CONFIG_FSL_USDHC=y
++CONFIG_MMC_IO_VOLTAGE=y
++CONFIG_MMC_UHS_SUPPORT=y
++CONFIG_MMC_HS400_SUPPORT=y
++CONFIG_EFI_PARTITION=y
++CONFIG_PHYLIB=y
++CONFIG_PHY_ADDR_ENABLE=y
++CONFIG_PHY_ATHEROS=y
++CONFIG_DM_ETH=y
++CONFIG_DM_ETH_PHY=y
++CONFIG_PHY_GIGE=y
++CONFIG_FEC_MXC=y
++CONFIG_DWC_ETH_QOS=y
++CONFIG_DWC_ETH_QOS_IMX=y
++CONFIG_MII=y
++
++CONFIG_PINCTRL=y
++CONFIG_SPL_PINCTRL=y
++CONFIG_PINCTRL_IMX8=y
++CONFIG_POWER_DOMAIN=y
++CONFIG_IMX8_POWER_DOMAIN=y
++CONFIG_DM_REGULATOR=y
++CONFIG_SPL_DM_REGULATOR=y
++CONFIG_DM_REGULATOR_FIXED=y
++CONFIG_DM_REGULATOR_GPIO=y
++CONFIG_SPL_DM_REGULATOR_FIXED=y
++CONFIG_DM_SERIAL=y
++CONFIG_FSL_LPUART=y
++CONFIG_SPL_TINY_MEMSET=y
++# CONFIG_EFI_LOADER is not set
++
++CONFIG_CMD_FUSE=y
++CONFIG_CMD_MEMTEST=y
++
++CONFIG_IMX_BOOTAUX=y
++
++CONFIG_DM_THERMAL=y
++CONFIG_IMX_SCU_THERMAL=y
++
++CONFIG_SPI=y
++CONFIG_NXP_FSPI=y
++CONFIG_DM_SPI=y
++CONFIG_DM_SPI_FLASH=y
++CONFIG_SPI_FLASH=y
++CONFIG_SPI_FLASH_STMICRO=y
++CONFIG_SPI_FLASH_MT35XU=y
++CONFIG_SPI_FLASH_SOFT_RESET=y
++CONFIG_SPI_FLASH_SOFT_RESET_ON_BOOT=y
++CONFIG_FSL_LPSPI=y
++CONFIG_CMD_SF=y
++CONFIG_SF_DEFAULT_BUS=0
++CONFIG_SF_DEFAULT_CS=0
++CONFIG_SF_DEFAULT_SPEED=40000000
++CONFIG_SF_DEFAULT_MODE=0
++
++CONFIG_USB_EHCI_HCD=y
++CONFIG_DM_USB=y
++CONFIG_DM_USB_GADGET=y
++CONFIG_SPL_DM_USB_GADGET=y
++CONFIG_USB=y
++CONFIG_USB_STORAGE=y
++CONFIG_USB_GADGET=y
++CONFIG_CI_UDC=y
++CONFIG_USB_GADGET_DOWNLOAD=y
++CONFIG_USB_GADGET_MANUFACTURER="FSL"
++CONFIG_USB_GADGET_VENDOR_NUM=0x01fc9
++CONFIG_USB_GADGET_PRODUCT_NUM=0x0152
++
++CONFIG_FASTBOOT=y
++CONFIG_USB_FUNCTION_FASTBOOT=y
++CONFIG_CMD_FASTBOOT=y
++# CONFIG_ANDROID_BOOT_IMAGE is not set
++CONFIG_FASTBOOT_UUU_SUPPORT=y
++CONFIG_FASTBOOT_BUF_ADDR=0x82800000
++CONFIG_FASTBOOT_BUF_SIZE=0x40000000
++CONFIG_FASTBOOT_FLASH=y
++CONFIG_FASTBOOT_USB_DEV=0
++
++CONFIG_REGMAP=y
++CONFIG_SYSCON=y
++CONFIG_PCI=y
++
++CONFIG_SPL_USB_GADGET=y
++CONFIG_SPL_USB_SDP_SUPPORT=y
++CONFIG_SPL_DM_USB=y
++CONFIG_SPL_SDP_USB_DEV=0
++CONFIG_SDP_LOADADDR=0x80400000
++CONFIG_USB_PORT_AUTO=y
++
++CONFIG_BOOTAUX_RESERVED_MEM_BASE=0x88000000
++CONFIG_BOOTAUX_RESERVED_MEM_SIZE=0x08000000
++
++CONFIG_OF_LIBFDT_OVERLAY=y
++CONFIG_IMX_SNVS_SEC_SC=y
++CONFIG_CMD_RNG=y
++CONFIG_DM_RNG=y
++CONFIG_FSL_CAAM_RNG=y
++
++CONFIG_CMD_PART=y
++CONFIG_CMD_FS_GENERIC=y
++CONFIG_CMD_DHCP=y
++CONFIG_CMD_PXE=y
++CONFIG_CMD_SYSBOOT=y
++
++# eMMC boot0
++CONFIG_SYS_MMC_ENV_PART=1
++CONFIG_SYS_MMC_ENV_DEV=0
++
++# force distro-boot as default
++CONFIG_USE_BOOTCOMMAND=y
++CONFIG_BOOTCOMMAND="run distro_bootcmd"
++
++# support initrd without u-boot header
++CONFIG_SUPPORT_RAW_INITRD=y
+diff --git a/include/configs/imx8dxl_sr_som.h b/include/configs/imx8dxl_sr_som.h
+new file mode 100644
+index 00000000000..3eb3e4d9137
+--- /dev/null
++++ b/include/configs/imx8dxl_sr_som.h
+@@ -0,0 +1,128 @@
++/* SPDX-License-Identifier: GPL-2.0+ */
++/*
++ * Copyright 2020 NXP
++ * Copyright 2022 Josua Mayer <josua@solid-run.com>
++ */
++
++#ifndef _CONFIG_IMX8DXL_SR_SOM_H
++#define _CONFIG_IMX8DXL_SR_SOM_H
++
++#include <linux/sizes.h>
++#include <asm/arch/imx-regs.h>
++
++/* Settings from EVK */
++#ifdef CONFIG_SPL_BUILD
++#define CONFIG_SPL_MAX_SIZE				(128 * 1024)
++#define CONFIG_SYS_MONITOR_LEN				(1024 * 1024)
++
++/*
++ * 0x08081000 - 0x08180FFF is for m4_0 xip image,
++  * So 3rd container image may start from 0x8181000
++ */
++#define CONFIG_SYS_UBOOT_BASE 0x08181000
++
++#define CONFIG_SYS_NAND_U_BOOT_OFFS     (0x8000000)  /*Put the FIT out of first 128MB boot area */
++#define CONFIG_SPL_NAND_BASE
++#define CONFIG_SPL_NAND_IDENT
++
++#define CONFIG_SPL_STACK		0x822ffff0
++#define CONFIG_SPL_BSS_START_ADDR      0x82280000
++#define CONFIG_SPL_BSS_MAX_SIZE		0x1000	/* 4 KB */
++#define CONFIG_SYS_SPL_MALLOC_START	0x82200000
++#define CONFIG_SYS_SPL_MALLOC_SIZE     0x80000	/* 512 KB */
++#define CONFIG_SERIAL_LPUART_BASE	0x5a060000
++#define CONFIG_MALLOC_F_ADDR		0x82200000
++
++#define CONFIG_SPL_RAW_IMAGE_ARM_TRUSTED_FIRMWARE
++
++#define CONFIG_SPL_ABORT_ON_RAW_IMAGE
++
++#endif
++
++#define CONFIG_REMAKE_ELF
++
++#define CONFIG_CMD_READ
++
++#define CONFIG_SYS_FSL_ESDHC_ADDR       0
++#define USDHC1_BASE_ADDR                0x5B010000
++
++#define CONFIG_SYS_INIT_SP_ADDR         0x80200000
++
++#define CONFIG_SYS_SDRAM_BASE		0x80000000
++#define PHYS_SDRAM_1			0x80000000
++#define PHYS_SDRAM_2			0x880000000
++
++/* total DDR is 1GB */
++#define PHYS_SDRAM_1_SIZE		0x3FE00000	/* 1 GB - ECC region 2MB */
++
++#define PHYS_SDRAM_2_SIZE		0x00000000
++
++/* Serial */
++#define CONFIG_BAUDRATE			115200
++
++/* Monitor Command Prompt */
++#define CONFIG_SYS_PROMPT_HUSH_PS2     "> "
++#define CONFIG_SYS_CBSIZE              2048
++#define CONFIG_SYS_MAXARGS             64
++#define CONFIG_SYS_BARGSIZE CONFIG_SYS_CBSIZE
++#define CONFIG_SYS_PBSIZE		(CONFIG_SYS_CBSIZE + \
++					sizeof(CONFIG_SYS_PROMPT) + 16)
++
++/* Generic Timer Definitions */
++#define COUNTER_FREQUENCY		8000000	/* 8MHz */
++
++#define CONFIG_SERIAL_TAG
++
++/* USB Config */
++#ifndef CONFIG_SPL_BUILD
++#define CONFIG_USBD_HS
++
++#endif
++
++#define CONFIG_USB_MAX_CONTROLLER_COUNT 2
++
++/* USB OTG controller configs */
++#ifdef CONFIG_USB_EHCI_HCD
++#define CONFIG_USB_HOST_ETHER
++#define CONFIG_USB_ETHER_ASIX
++#define CONFIG_MXC_USB_PORTSC		(PORT_PTS_UTMI | PORT_PTS_PTW)
++#endif
++
++/* Networking */
++#define CONFIG_FEC_XCV_TYPE		RGMII
++#define FEC_QUIRK_ENET_MAC
++#define CONFIG_FEC_MXC_PHYADDR          0x1
++
++#define DWC_NET_PHYADDR			0
++
++#define CONFIG_ETHPRIME                 "eth1"
++#define PHY_ANEG_TIMEOUT 20000
++
++#ifndef CONFIG_SPL_BUILD
++
++/* Distro-Boot */
++
++#define BOOT_TARGET_DEVICES(func) \
++	func(MMC, mmc, 0) \
++	func(USB, usb, 0) \
++	func(USB, usb, 1) \
++	func(PXE, pxe, na) \
++	func(DHCP, dhcp, na)
++
++#include <config_distro_bootcmd.h>
++
++#define CONFIG_EXTRA_ENV_SETTINGS \
++	"scriptaddr="      "0x0000000080280000\0" \
++	"pxefile_addr_r="  "0x0000000080300000\0" \
++	"fdt_addr_r="      "0x0000000080700000\0" \
++	"kernel_addr_r="   "0x0000000080800000\0" \
++	"ramdisk_addr_r="  "0x0000000084800000\0" \
++	"fdt_high="        "0xffffffffffffffff\0" \
++	"initrd_high="     "0xffffffffffffffff\0" \
++	"console=ttyLP0,115200\0" \
++	"fdtfile=imx8dxl-v2x.dtb\0" \
++	BOOTENV
++
++#endif /* CONFIG_SPL_BUILD */
++
++#endif /* _CONFIG_IMX8DXL_SR_SOM_H */
+-- 
+2.43.0
+

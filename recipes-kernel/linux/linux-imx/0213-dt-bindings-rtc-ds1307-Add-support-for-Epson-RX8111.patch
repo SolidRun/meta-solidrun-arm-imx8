@@ -1,0 +1,32 @@
+From b74cce35cb4fff3a9a7b2635f0e6e65f1216647b Mon Sep 17 00:00:00 2001
+From: Mike Looijmans <mike.looijmans@topic.nl>
+Date: Mon, 7 Nov 2022 09:54:07 +0100
+Subject: [PATCH 213/229] dt-bindings: rtc: ds1307: Add support for Epson
+ RX8111
+
+The rx_8111 is quite similar to the rx_8030. This adds support for this
+chip to the ds1307 driver.
+
+This adds the entry to the devicetree bindings.
+
+Signed-off-by: Mike Looijmans <mike.looijmans@topic.nl>
+Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+---
+ Documentation/devicetree/bindings/rtc/rtc-ds1307.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Documentation/devicetree/bindings/rtc/rtc-ds1307.txt b/Documentation/devicetree/bindings/rtc/rtc-ds1307.txt
+index 36f610bb051e..43dab4e239b6 100644
+--- a/Documentation/devicetree/bindings/rtc/rtc-ds1307.txt
++++ b/Documentation/devicetree/bindings/rtc/rtc-ds1307.txt
+@@ -19,6 +19,7 @@ Required properties:
+ 	"pericom,pt7c4338",
+ 	"epson,rx8025",
+ 	"isil,isl12057"
++	"epson,rx8111"
+ 	"epson,rx8130"
+ - reg: I2C bus address of the device
+ 
+-- 
+2.43.0
+

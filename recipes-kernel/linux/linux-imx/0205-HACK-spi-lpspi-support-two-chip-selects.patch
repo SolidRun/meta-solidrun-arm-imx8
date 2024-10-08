@@ -1,0 +1,33 @@
+From e1debb48a93155801a520f99aaff76867e531e6d Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Tue, 30 Aug 2022 10:19:20 +0300
+Subject: [PATCH 205/229] HACK: spi: lpspi: support two chip-selects
+
+At least on i.MX8MM, spi controllers have two native chip-selects.
+Initialise the controllers num_chipselect field with 2 accordingly.
+
+This is a hack in that the author is not quite sure if this field should
+be set to two for all lpspi controllers, or specific to certain SoCs.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ drivers/spi/spi-fsl-lpspi.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/spi/spi-fsl-lpspi.c b/drivers/spi/spi-fsl-lpspi.c
+index 4ebfd4433590..1d6bedecc002 100644
+--- a/drivers/spi/spi-fsl-lpspi.c
++++ b/drivers/spi/spi-fsl-lpspi.c
+@@ -923,6 +923,9 @@ static int fsl_lpspi_probe(struct platform_device *pdev)
+ 		 * to prevent the unexpected LPSPI module IRQ events*/
+ 		disable_irq(irq);
+ 
++	// i.MX8DXL has 2 chip-select ... ... ...
++	controller->num_chipselect = 2;
++
+ 	ret = devm_spi_register_controller(&pdev->dev, controller);
+ 	if (ret < 0) {
+ 		dev_err(&pdev->dev, "spi_register_controller error.\n");
+-- 
+2.43.0
+

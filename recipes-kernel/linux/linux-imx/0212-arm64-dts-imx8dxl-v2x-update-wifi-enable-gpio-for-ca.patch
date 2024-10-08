@@ -1,0 +1,64 @@
+From 7c0f6e334695095a35b22f4d34c654633a178688 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Wed, 15 Feb 2023 15:29:42 +0200
+Subject: [PATCH 212/229] arm64: dts: imx8dxl-v2x: update wifi-enable gpio for
+ carrier v1.1
+
+Revision 1.1 updated the pad connected to wifi module wl_reg_on signal.
+Add mmc power-sequence so that the module can be enabled automatically.
+
+Revision 1.0 was using a pad without gpio function. Keep the workaround
+in place so that new software can work on all revisions.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ arch/arm64/boot/dts/freescale/imx8dxl-v2x.dts | 18 ++++++++++++++++--
+ 1 file changed, 16 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-v2x.dts b/arch/arm64/boot/dts/freescale/imx8dxl-v2x.dts
+index e6248af885e0..d3cb9dd497d3 100644
+--- a/arch/arm64/boot/dts/freescale/imx8dxl-v2x.dts
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-v2x.dts
+@@ -54,6 +54,11 @@ regulator_flexcan2_standby: regulator-flexcan2-standby {
+ 		gpio = <&tca6408 3 GPIO_ACTIVE_HIGH>;
+ 		enable-active-high;
+ 	};
++
++	usdhc3_pwrseq: usdhc3-pwrseq {
++		compatible = "mmc-pwrseq-simple";
++		reset-gpios = <&lsio_gpio0 15 GPIO_ACTIVE_LOW>;
++	};
+ };
+ 
+ &eqos {
+@@ -233,9 +238,17 @@ IMX8DXL_ENET0_RGMII_TXD3_CONN_USDHC2_DATA3		0x00000021
+ 
+ 		pinctrl_wifi: wifigrp {
+ 			fsl,pins = <
+-				/* wl_reg_on: SPI CS with pull-up, to force high */
+-				/* should be: io without pull-up (WiFi module has internal pull-down) */
++				/*
++				 * WL_REG_ON for Carrier revision 1.0:
++				 * SPI chipselect with pull-up, to force always high
++				 */
+ 				IMX8DXL_SPI3_CS1_ADMA_SPI3_CS1		0x0000021
++
++				/*
++				 * WL_REG_ON for Carrier revision 1.1 and later:
++				 * io without pull-up (WiFi module has internal pull-down)
++				 */
++				IMX8DXL_SPI3_SDI_LSIO_GPIO0_IO15		0x0000061
+ 			>;
+ 		};
+ 
+@@ -542,6 +555,7 @@ &usdhc3 {
+ 	fsl,delay-line = <12>;
+ 	keep-power-in-suspend;
+ 	enable-sdio-wakeup;
++	mmc-pwrseq = <&usdhc3_pwrseq>;
+ 
+ 	/* CYW43455 */
+     wifi: cyw43455@1 {
+-- 
+2.43.0
+

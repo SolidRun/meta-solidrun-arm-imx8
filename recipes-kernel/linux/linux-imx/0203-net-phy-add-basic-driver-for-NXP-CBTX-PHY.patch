@@ -1,0 +1,274 @@
+From 78c7c36c3643f7ff52afd59501d43c8efe1f775d Mon Sep 17 00:00:00 2001
+From: Vladimir Oltean <vladimir.oltean@nxp.com>
+Date: Tue, 8 Nov 2022 19:09:25 +0200
+Subject: [PATCH 203/229] net: phy: add basic driver for NXP CBTX PHY
+
+The CBTX PHY is a Fast Ethernet PHY integrated into the SJA1110 A/B/C
+automotive Ethernet switches.
+
+It was hoped it would work with the Generic PHY driver, but alas, it
+doesn't. The most important reason why is that the PHY is powered down
+by default, and it needs a vendor register to power it on.
+
+It has a linear memory map that is accessed over SPI by the SJA1110
+switch driver, which exposes a fake MDIO controller. It has the
+following (and only the following) standard clause 22 registers:
+
+0x0: MII_BMCR
+0x1: MII_BMSR
+0x2: MII_PHYSID1
+0x3: MII_PHYSID2
+0x4: MII_ADVERTISE
+0x5: MII_LPA
+0x6: MII_EXPANSION
+0x7: the missing MII_NPAGE for Next Page Transmit Register
+
+Every other register is vendor-defined.
+
+The register map expands the standard clause 22 5-bit address space of
+0x20 registers, however the driver does not need to access the extra
+registers for now (and hopefully never). If it ever needs to do that, it
+is possible to implement a fake (software) page switching mechanism
+between the PHY driver and the SJA1110 MDIO controller driver.
+
+Also, Auto-MDIX is turned off by default in hardware, the driver turns
+it on by default and reports the current status. I've tested this with a
+VSC8514 link partner and a crossover cable, by forcing the mode on the
+link partner, and seeing that the CBTX PHY always sees the reverse of
+the mode forced on the VSC8514 (and that traffic works). The link
+doesn't come up (as expected) if MDI modes are forced on both ends in
+the same way (with the cross-over cable, that is).
+
+No IRQ support yet, that will come when there is support in the SJA1110
+DSA driver for IRQ domains. The PHY status will be polled by phylib.
+
+Signed-off-by: Vladimir Oltean <vladimir.oltean@nxp.com>
+---
+ drivers/net/phy/Kconfig    |   6 ++
+ drivers/net/phy/Makefile   |   1 +
+ drivers/net/phy/nxp-cbtx.c | 184 +++++++++++++++++++++++++++++++++++++
+ 3 files changed, 191 insertions(+)
+ create mode 100644 drivers/net/phy/nxp-cbtx.c
+
+diff --git a/drivers/net/phy/Kconfig b/drivers/net/phy/Kconfig
+index fae7ddb545e8..563afdc59ee0 100644
+--- a/drivers/net/phy/Kconfig
++++ b/drivers/net/phy/Kconfig
+@@ -257,6 +257,12 @@ config NATIONAL_PHY
+ 	help
+ 	  Currently supports the DP83865 PHY.
+ 
++config NXP_CBTX_PHY
++	tristate "NXP 100BASE-TX PHYs"
++	help
++	  Support the 100BASE-TX PHY integrated on the SJA1110 automotive
++	  switch family.
++
+ config NXP_C45_TJA11XX_PHY
+ 	tristate "NXP C45 TJA11XX PHYs"
+ 	depends on PTP_1588_CLOCK_OPTIONAL
+diff --git a/drivers/net/phy/Makefile b/drivers/net/phy/Makefile
+index 57c557873d38..ecf580965b6c 100644
+--- a/drivers/net/phy/Makefile
++++ b/drivers/net/phy/Makefile
+@@ -76,6 +76,7 @@ obj-$(CONFIG_MICROSEMI_PHY)	+= mscc/
+ obj-$(CONFIG_MOTORCOMM_PHY)	+= motorcomm.o
+ obj-$(CONFIG_NATIONAL_PHY)	+= national.o
+ obj-$(CONFIG_NXP_C45_TJA11XX_PHY)	+= nxp-c45-tja11xx.o
++obj-$(CONFIG_NXP_CBTX_PHY)	+= nxp-cbtx.o
+ obj-$(CONFIG_NXP_TJA11XX_PHY)	+= nxp-tja11xx.o
+ obj-$(CONFIG_QSEMI_PHY)		+= qsemi.o
+ obj-$(CONFIG_REALTEK_PHY)	+= realtek.o
+diff --git a/drivers/net/phy/nxp-cbtx.c b/drivers/net/phy/nxp-cbtx.c
+new file mode 100644
+index 000000000000..37fb85564a1b
+--- /dev/null
++++ b/drivers/net/phy/nxp-cbtx.c
+@@ -0,0 +1,184 @@
++// SPDX-License-Identifier: GPL-2.0
++/* Driver for 100BASE-TX PHY embedded into NXP SJA1110 switch
++ *
++ * Copyright 2022 NXP
++ */
++
++#include <linux/kernel.h>
++#include <linux/mii.h>
++#include <linux/module.h>
++#include <linux/phy.h>
++
++#define PHY_ID_CBTX_SJA1110			0x001bb020
++
++/* Registers */
++#define  CBTX_MODE_CTRL_STAT			0x11
++#define  CBTX_PDOWN_CTRL			0x18
++#define  CBTX_RX_ERR_COUNTER			0x1a
++
++/* Fields */
++#define CBTX_MODE_CTRL_STAT_AUTO_MDIX_EN	BIT(7)
++#define CBTX_MODE_CTRL_STAT_MDIX_MODE		BIT(6)
++
++#define CBTX_PDOWN_CTL_TRUE_PDOWN		BIT(0)
++
++static int cbtx_soft_reset(struct phy_device *phydev)
++{
++	int ret;
++
++	/* Can't soft reset unless we remove PHY from true power down mode */
++	ret = phy_clear_bits(phydev, CBTX_PDOWN_CTRL,
++			     CBTX_PDOWN_CTL_TRUE_PDOWN);
++	if (ret)
++		return ret;
++
++	return genphy_soft_reset(phydev);
++}
++
++static int cbtx_config_init(struct phy_device *phydev)
++{
++	/* Wait for cbtx_config_aneg() to kick in and apply this */
++	phydev->mdix_ctrl = ETH_TP_MDI_AUTO;
++
++	return 0;
++}
++
++static int cbtx_suspend(struct phy_device *phydev)
++{
++	int ret;
++
++	ret = genphy_suspend(phydev);
++	if (ret)
++		return ret;
++
++	return phy_set_bits(phydev, CBTX_PDOWN_CTRL,
++			    CBTX_PDOWN_CTL_TRUE_PDOWN);
++}
++
++static int cbtx_resume(struct phy_device *phydev)
++{
++	int ret;
++
++	ret = phy_clear_bits(phydev, CBTX_PDOWN_CTRL,
++			     CBTX_PDOWN_CTL_TRUE_PDOWN);
++	if (ret)
++		return ret;
++
++	return genphy_resume(phydev);
++}
++
++static int cbtx_mdix_status(struct phy_device *phydev)
++{
++	int ret;
++
++	ret = phy_read(phydev, CBTX_MODE_CTRL_STAT);
++	if (ret < 0)
++		return ret;
++
++	if (ret & CBTX_MODE_CTRL_STAT_MDIX_MODE)
++		phydev->mdix = ETH_TP_MDI_X;
++	else
++		phydev->mdix = ETH_TP_MDI;
++
++	return 0;
++}
++
++static int cbtx_read_status(struct phy_device *phydev)
++{
++	int ret;
++
++	ret = cbtx_mdix_status(phydev);
++	if (ret)
++		return ret;
++
++	return genphy_read_status(phydev);
++}
++
++static int cbtx_mdix_config(struct phy_device *phydev)
++{
++	int ret;
++
++	switch (phydev->mdix_ctrl) {
++	case ETH_TP_MDI_AUTO:
++		return phy_set_bits(phydev, CBTX_MODE_CTRL_STAT,
++				    CBTX_MODE_CTRL_STAT_AUTO_MDIX_EN);
++	case ETH_TP_MDI:
++		ret = phy_clear_bits(phydev, CBTX_MODE_CTRL_STAT,
++				     CBTX_MODE_CTRL_STAT_AUTO_MDIX_EN);
++		if (ret)
++			return ret;
++
++		return phy_clear_bits(phydev, CBTX_MODE_CTRL_STAT,
++				      CBTX_MODE_CTRL_STAT_MDIX_MODE);
++	case ETH_TP_MDI_X:
++		ret = phy_clear_bits(phydev, CBTX_MODE_CTRL_STAT,
++				     CBTX_MODE_CTRL_STAT_AUTO_MDIX_EN);
++		if (ret)
++			return ret;
++
++		return phy_set_bits(phydev, CBTX_MODE_CTRL_STAT,
++				    CBTX_MODE_CTRL_STAT_MDIX_MODE);
++	}
++
++	return 0;
++}
++
++static int cbtx_config_aneg(struct phy_device *phydev)
++{
++	int ret;
++
++	ret = cbtx_mdix_config(phydev);
++	if (ret)
++		return ret;
++
++	return genphy_config_aneg(phydev);
++}
++
++static int cbtx_get_sset_count(struct phy_device *phydev)
++{
++	return 1;
++}
++
++static void cbtx_get_strings(struct phy_device *phydev, u8 *data)
++{
++	strncpy(data, "100btx_rx_err", ETH_GSTRING_LEN);
++}
++
++static void cbtx_get_stats(struct phy_device *phydev,
++			   struct ethtool_stats *stats, u64 *data)
++{
++	int ret;
++
++	ret = phy_read(phydev, CBTX_RX_ERR_COUNTER);
++	data[0] = (ret < 0) ? U64_MAX : ret;
++}
++
++static struct phy_driver cbtx_driver[] = {
++	{
++		PHY_ID_MATCH_MODEL(PHY_ID_CBTX_SJA1110),
++		.name			= "NXP CBTX (SJA1110)",
++		/* PHY_BASIC_FEATURES */
++		.soft_reset		= cbtx_soft_reset,
++		.config_init		= cbtx_config_init,
++		.suspend		= cbtx_suspend,
++		.resume			= cbtx_resume,
++		.read_status		= cbtx_read_status,
++		.config_aneg		= cbtx_config_aneg,
++		.get_sset_count		= cbtx_get_sset_count,
++		.get_strings		= cbtx_get_strings,
++		.get_stats		= cbtx_get_stats,
++	},
++};
++
++module_phy_driver(cbtx_driver);
++
++static struct mdio_device_id __maybe_unused cbtx_tbl[] = {
++	{ PHY_ID_MATCH_MODEL(PHY_ID_CBTX_SJA1110) },
++	{ /* sentinel */ },
++};
++
++MODULE_DEVICE_TABLE(mdio, cbtx_tbl);
++
++MODULE_AUTHOR("Vladimir Oltean <vladimir.oltean@nxp.com>");
++MODULE_DESCRIPTION("NXP CBTX PHY driver");
++MODULE_LICENSE("GPL v2");
+-- 
+2.43.0
+

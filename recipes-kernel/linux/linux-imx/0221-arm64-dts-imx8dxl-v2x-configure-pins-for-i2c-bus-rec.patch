@@ -1,0 +1,109 @@
+From 81372dc465a5e302f051d91b3692081276e65fea Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Thu, 24 Aug 2023 18:08:58 +0200
+Subject: [PATCH 221/229] arm64: dts: imx8dxl-v2x: configure pins for i2c bus
+ recovery
+
+i2c driver supports bus recovery by reconfiguring pinmux to GPIO and
+sending 9 cycles of 0.
+Then the driver reconfigures pinmux for integrated i2c controller.
+
+Add the required pinctrl and gpio definitions to i2c2 and i2c3.
+
+Note that there is a bug causing pinctrl_lookup_state to return -ENODEV
+for i2c3:
+Apparently when parsing device-tree, for i2c3 pinctrl states, Linux
+assignes the names "default", "1" - even though in device-tree exists
+"default", "gpio".
+
+Add workaround to the i2c driver fetching state "1" when "gpio" fails.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ .../boot/dts/freescale/imx8dxl-sr-som.dtsi    | 27 +++++++++++++++++--
+ drivers/i2c/busses/i2c-imx-lpi2c.c            |  8 ++++++
+ 2 files changed, 33 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi b/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
+index da76dc05489f..36689c6d64dc 100644
+--- a/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
+@@ -109,8 +109,11 @@ &i2c2 {
+ 	#address-cells = <1>;
+ 	#size-cells = <0>;
+ 	clock-frequency = <100000>;
+-	pinctrl-names = "default";
++	pinctrl-names = "default", "gpio";
+ 	pinctrl-0 = <&pinctrl_i2c2>;
++	pinctrl-1 = <&pinctrl_i2c2_gpio>;
++	sda-gpios = <&lsio_gpio3 0 GPIO_ACTIVE_HIGH>;
++	scl-gpios = <&lsio_gpio3 1 GPIO_ACTIVE_HIGH>;
+ 	status = "okay";
+ 
+ 	/* MIA-M10Q (400kHz max.)*/
+@@ -125,8 +128,11 @@ &i2c3 {
+ 	#address-cells = <1>;
+ 	#size-cells = <0>;
+ 	clock-frequency = <100000>;
+-	pinctrl-names = "default";
++	pinctrl-names = "default", "gpio";
+ 	pinctrl-0 = <&pinctrl_i2c3>;
++	pinctrl-1 = <&pinctrl_i2c3_gpio>;
++	sda-gpios = <&lsio_gpio3 3 GPIO_ACTIVE_HIGH>;
++	scl-gpios = <&lsio_gpio3 2 GPIO_ACTIVE_HIGH>;
+ 	status = "okay";
+ };
+ 
+@@ -149,6 +155,14 @@ IMX8DXL_SPI1_SCK_ADMA_I2C2_SDA		0x06000020
+ 				IMX8DXL_SPI1_SDO_ADMA_I2C2_SCL		0x06000020
+ 			>;
+ 		};
++		pinctrl_i2c2_gpio: i2c2gpiogrp {
++			fsl,pins = <
++				/* io with pull-up and strong drive */
++				IMX8DXL_SPI1_SCK_LSIO_GPIO3_IO00		0x00000021
++				/* io with pull-up, strong drive, open-drain */
++				IMX8DXL_SPI1_SDO_LSIO_GPIO3_IO01		0x02000021
++			>;
++		};
+ 
+ 		pinctrl_i2c3: i2c3grp {
+ 			fsl,pins = <
+@@ -158,6 +172,15 @@ IMX8DXL_SPI1_SDI_ADMA_I2C3_SCL		0x06000020
+ 			>;
+ 		};
+ 
++		pinctrl_i2c3_gpio: i2c3gpiogrp {
++			fsl,pins = <
++				/* io with pull-up and strong drive */
++				IMX8DXL_SPI1_CS0_LSIO_GPIO3_IO03		0x00000021
++				/* io with pull-up, strong drive, open-drain */
++				IMX8DXL_SPI1_SDI_LSIO_GPIO3_IO02		0x02000021
++			>;
++		};
++
+ 		pinctrl_lpspi2: lpspi2grp {
+ 			fsl,pins = <
+ 				IMX8DXL_USDHC1_RESET_B_ADMA_SPI2_SCK	0x600004c
+diff --git a/drivers/i2c/busses/i2c-imx-lpi2c.c b/drivers/i2c/busses/i2c-imx-lpi2c.c
+index 7820c36b0ae5..e4ce10831df7 100644
+--- a/drivers/i2c/busses/i2c-imx-lpi2c.c
++++ b/drivers/i2c/busses/i2c-imx-lpi2c.c
+@@ -819,6 +819,14 @@ static int lpi2c_imx_init_recovery_info(struct lpi2c_imx_struct *lpi2c_imx,
+ 			PINCTRL_STATE_DEFAULT);
+ 	lpi2c_imx->pinctrl_pins_gpio = pinctrl_lookup_state(lpi2c_imx->pinctrl,
+ 			"gpio");
++	if (PTR_ERR(lpi2c_imx->pinctrl_pins_gpio) == -ENODEV) {
++		/*
++		 * workaround for strange bug where i2c3 pinctrl has name "1",
++		 * even though gpio-names contains "gpio".
++		 */
++		lpi2c_imx->pinctrl_pins_gpio = pinctrl_lookup_state(lpi2c_imx->pinctrl,
++				"1");
++	}
+ 	rinfo->sda_gpiod = devm_gpiod_get(&pdev->dev, "sda", GPIOD_IN);
+ 	rinfo->scl_gpiod = devm_gpiod_get(&pdev->dev, "scl", GPIOD_OUT_HIGH_OPEN_DRAIN);
+ 
+-- 
+2.43.0
+
