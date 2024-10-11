@@ -1,7 +1,7 @@
 From 6797aaf0e630e1072a922dcc8cef15b7b01ef12d Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Tue, 26 Jul 2022 11:27:12 +0300
-Subject: [PATCH 202/204] board: solidrun: add imx8dxl som
+Subject: [PATCH 3/5] board: solidrun: add imx8dxl som
 
 Signed-off-by: Josua Mayer <josua@solid-run.com>
 ---

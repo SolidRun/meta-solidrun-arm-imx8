@@ -1,7 +1,7 @@
 From 2dd0b4f3ac798a8b352866d111fa4835dd826e44 Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Sun, 19 Mar 2023 13:09:16 +0200
-Subject: [PATCH 204/204] board: solidrun: imx8dxl-sr-som: add pulldown for usb
+Subject: [PATCH 5/5] board: solidrun: imx8dxl-sr-som: add pulldown for usb
  power switch
 
 Carriers revision 1.1 and later have a power switch controlling the

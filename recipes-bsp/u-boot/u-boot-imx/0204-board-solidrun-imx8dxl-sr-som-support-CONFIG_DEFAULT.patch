@@ -1,7 +1,7 @@
 From e0a2e1535389c57076b10b83667a0e57cf2b8af5 Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Tue, 7 Mar 2023 14:12:51 +0200
-Subject: [PATCH 203/204] board: solidrun: imx8dxl-sr-som: support
+Subject: [PATCH 4/5] board: solidrun: imx8dxl-sr-som: support
  CONFIG_DEFAULT_FDT_FILE
 
 Signed-off-by: Josua Mayer <josua@solid-run.com>

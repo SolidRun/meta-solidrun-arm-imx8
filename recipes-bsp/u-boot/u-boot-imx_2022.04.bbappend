@@ -37,15 +37,15 @@ SRC_URI += " \
 		file://0034-board-solidrun-imx8mp-enable-second-on-soc-ethernet.patch \
 		file://0036-configs-imx8mp-solidrun-move-environment-to-fit-with.patch \
 		file://0037-net-fec_mxc-add-weak-implementation-of-board_get_mac.patch \
-	file://0200-HACK-fastboot-emmc_dev-default-to-0.patch \
-	file://0201-HACK-usb-ci_udc-ignore-ID-pin-value.patch \
-	file://0202-board-solidrun-add-imx8dxl-som.patch \
-	file://0203-board-solidrun-imx8dxl-sr-som-support-CONFIG_DEFAULT.patch \
-	file://0204-board-solidrun-imx8dxl-sr-som-add-pulldown-for-usb-p.patch \
-	file://0205-board-solidrun-imx8dxl-sr-som-use-board-specific-scu.patch \
-	file://0206-board-solidrun-imx8dxl-sr-som-sync-dts-with-evk.patch \
-	file://0207-board-solidrun-imx8dxl-sr-som-update-default-fdtfile.patch \
-	file://0208-board-solidrun-imx8dxl-sr-som-enable-optee-os-rpmb-s.patch \
+	file://0201-HACK-fastboot-emmc_dev-default-to-0.patch \
+	file://0202-HACK-usb-ci_udc-ignore-ID-pin-value.patch \
+	file://0203-board-solidrun-add-imx8dxl-som.patch \
+	file://0204-board-solidrun-imx8dxl-sr-som-support-CONFIG_DEFAULT.patch \
+	file://0205-board-solidrun-imx8dxl-sr-som-add-pulldown-for-usb-p.patch \
+	file://0206-board-solidrun-imx8dxl-sr-som-use-board-specific-scu.patch \
+	file://0207-board-solidrun-imx8dxl-sr-som-sync-dts-with-evk.patch \
+	file://0208-board-solidrun-imx8dxl-sr-som-update-default-fdtfile.patch \
+	file://0209-board-solidrun-imx8dxl-sr-som-enable-optee-os-rpmb-s.patch \
 "
 
 LTO:class-target = ""
