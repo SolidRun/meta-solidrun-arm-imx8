@@ -8,6 +8,16 @@ Specific releases are organised in branches below:
    Supported Platforms:
 
    - [i.MX8M Plus SoM](https://www.solid-run.com/embedded-industrial-iot/nxp-i-mx8-family/imx8m-plus-som/)
+
+     - [i.MX8 HummingBoard Mate](https://www.solid-run.com/embedded-industrial-iot/nxp-i-mx8-family/hummingboard-m/#mate)
+     - [i.MX8 HummingBoard Pro](https://www.solid-run.com/embedded-industrial-iot/nxp-i-mx8-family/hummingboard-m/#pro)
+     - [i.MX8 HummingBoard Pulse](https://www.solid-run.com/embedded-industrial-iot/nxp-i-mx8-family/hummingboard-m/#pulse)
+     - [i.MX8 HummingBoard Ripple](https://www.solid-run.com/embedded-industrial-iot/nxp-i-mx8-family/hummingboard-m/#ripple)
+
+   - [i.MX8X Lite SoM](https://www.solid-run.com/embedded-industrial-iot/nxp-i-mx8-family/i-mx-8xlite-som/)
+
+     - [i.MX8X Lite HummingBoard](https://www.solid-run.com/embedded-industrial-iot/nxp-i-mx8-family/hummingboard-imx8-xlite-sbc/)
+
    - [SolidSense N8 Compact](https://www.solid-run.com/edge-gateway-solidsense/#iot-compact)
 
 - [hardknott-imx8mp](https://github.com/SolidRun/meta-solidrun-arm-imx8/tree/hardknott-imx8mp): Yocto 3.3 Hardknott - NXP Embedded Linux 5.10.72-2.2.0
