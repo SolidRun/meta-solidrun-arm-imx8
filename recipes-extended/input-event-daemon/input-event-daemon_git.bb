@@ -14,6 +14,8 @@ SRCREV = "8b0c8f117e093b89927cf966c008954a11717e10"
 
 S = "${WORKDIR}/git"
 
+DEPENDS = "asciidoc-native"
+
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 inherit systemd update-rc.d
