@@ -1,0 +1,37 @@
+From fe45745d148dcee3e180c372811759275ed22ad1 Mon Sep 17 00:00:00 2001
+From: Yazan Shhady <yazan.shhady@solid-run.com>
+Date: Tue, 6 Aug 2024 19:08:13 +0300
+Subject: [PATCH] board: solidrun: imx8mp: Add HummingBoard IIOT tlv-based
+ support
+
+---
+ board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
+index 4c17eea5e4..23317294c5 100644
+--- a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
++++ b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
+@@ -487,6 +487,9 @@ static void board_id_from_tlv_info(void) {
+ 				if (hb_tlv_data.tlv_part_number[i][7] == 'X')
+ 					tmp = "extended";
+ 				break;
++				case 'I': // IIOT
++				tmp = "iiot-main";
++				break;
+ 			    default:
+ 				pr_err("%s: did not recognise board variant '%c' in sku \"%s\"!\n", __func__, hb_tlv_data.tlv_part_number[i][5], hb_tlv_data.tlv_part_number[i]);
+ 				tmp = 0;
+@@ -554,6 +557,9 @@ static void board_id_from_tlv_info(void) {
+ 		    case 'R': // Ripple
+ 			tmp = "hummingboard-ripple";
+ 			break;
++		    case 'I': // IIOT
++			tmp = "hummingboard-iiot-main";
++			break;
+ 		    case 'X': // CuBox
+ 			tmp = "cubox-m";
+ 			break;
+-- 
+2.25.1
+

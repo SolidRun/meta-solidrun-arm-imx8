@@ -22,6 +22,7 @@ SRC_URI += " \
 	file://0018-net-rfkill-gpio-prevent-value-glitch-during-probe.patch \
 	file://0019-net-rfkill-gpio-set-GPIO-direction.patch \
 	file://0020-arm64-dts-imx8mp-hummingboard-pulse-use-upstream-rfk.patch \
+	file://0021-arm64-dts-imx8mp-sr-som-add-ethernet-phy-interrupt-s.patch \
 	file://0100-dt-bindings-net-adin-document-phy-clock-output-prope.patch \
 	file://0101-dt-bindings-net-adin-add-pin-polarity-properties-for.patch \
 	file://0102-net-phy-adin-add-support-for-setting-led-link-status.patch \

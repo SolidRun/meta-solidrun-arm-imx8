@@ -37,6 +37,9 @@ SRC_URI += " \
 		file://0034-board-solidrun-imx8mp-enable-second-on-soc-ethernet.patch \
 		file://0036-configs-imx8mp-solidrun-move-environment-to-fit-with.patch \
 		file://0037-net-fec_mxc-add-weak-implementation-of-board_get_mac.patch \
+	file://0038-board-solidrun-imx8mp-Add-HummingBoard-IIOT-tlv-base.patch \
+	file://0039-imx8mp_solidrun-update-SKU-parsing-for-HummingBoard-.patch \
+	file://0040-board-solidrun-imx8mp-configure-phy-reset-lines-open.patch \
 	file://0201-HACK-fastboot-emmc_dev-default-to-0.patch \
 	file://0202-HACK-usb-ci_udc-ignore-ID-pin-value.patch \
 	file://0203-board-solidrun-add-imx8dxl-som.patch \

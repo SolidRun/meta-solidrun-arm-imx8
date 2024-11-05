@@ -1,0 +1,70 @@
+From 2bb700a5c5af06e930f76a2a6d7eebdd776cdbc2 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Wed, 23 Oct 2024 14:11:16 +0200
+Subject: [PATCH] board: solidrun: imx8mp: configure phy reset lines open drain
+
+Update pinmux for ethernet phy reset lines to weak io with open drain.
+The SoM has external pull-up on each reset.
+
+Also split off reset signals into their own pinctrl nodes.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ arch/arm/dts/imx8mp-solidrun.dts | 20 ++++++++++++++++----
+ 1 file changed, 16 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/dts/imx8mp-solidrun.dts b/arch/arm/dts/imx8mp-solidrun.dts
+index fdcf112c7..9404bc48d 100644
+--- a/arch/arm/dts/imx8mp-solidrun.dts
++++ b/arch/arm/dts/imx8mp-solidrun.dts
+@@ -78,7 +78,7 @@
+ 
+ &fec {
+ 	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_fec>;
++	pinctrl-0 = <&pinctrl_fec>, <&pinctrl_phy1>;
+ 	phy-mode = "rgmii-id";
+ 	phy-handle = <&ethphy1>;
+ 	fsl,magic-packet;
+@@ -97,7 +97,7 @@
+ 
+ &eqos {
+ 	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_eqos>;
++	pinctrl-0 = <&pinctrl_eqos>, <&pinctrl_phy0>;
+ 	phy-mode = "rgmii-id";
+ 	phy-handle = <&ethphy0>;
+ 	status = "okay";
+@@ -387,7 +387,13 @@
+ 			MX8MP_IOMUXC_ENET_TD3__ENET_QOS_RGMII_TD3	0x1f
+ 			MX8MP_IOMUXC_ENET_TX_CTL__ENET_QOS_RGMII_TX_CTL	0x1f
+ 			MX8MP_IOMUXC_ENET_TXC__CCM_ENET_QOS_CLOCK_GENERATE_TX_CLK	0x1f
+-			MX8MP_IOMUXC_SAI1_TXD7__GPIO4_IO19		0x34
++		>;
++	};
++
++	pinctrl_phy0: phy0grp {
++		fsl,pins = <
++			/* RESET_N: weak i/o, open drain, external 1k pull-up */
++			MX8MP_IOMUXC_SAI1_TXD7__GPIO4_IO19		0x20
+ 		>;
+ 	};
+ 
+@@ -407,7 +413,13 @@
+ 			MX8MP_IOMUXC_SAI1_TXD3__ENET1_RGMII_TD3		0x1f
+ 			MX8MP_IOMUXC_SAI1_TXD4__ENET1_RGMII_TX_CTL	0x1f
+ 			MX8MP_IOMUXC_SAI1_TXD5__ENET1_RGMII_TXC		0x1f
+-			MX8MP_IOMUXC_SAI1_RXD0__GPIO4_IO02		0x34
++		>;
++	};
++
++	pinctrl_phy1: phy1grp {
++		fsl,pins = <
++			/* RESET_N: weak i/o, open drain, external 1k pull-up */
++			MX8MP_IOMUXC_SAI1_RXD0__GPIO4_IO02		0x20
+ 		>;
+ 	};
+ 
+-- 
+2.43.0
+

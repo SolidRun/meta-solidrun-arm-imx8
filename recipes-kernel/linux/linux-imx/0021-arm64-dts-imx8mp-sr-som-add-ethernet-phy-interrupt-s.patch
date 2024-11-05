@@ -1,0 +1,93 @@
+From c2492933726561d11afceaa1a9603af901eebcdb Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Wed, 23 Oct 2024 13:39:58 +0200
+Subject: [PATCH] arm64: dts: imx8mp-sr-som: add ethernet phy interrupt support
+
+Add descriptions for the interrupt lines of both ethernet phys,
+and configure the reset lines as weak open-drain.
+
+Split off the phy signals into their own pinctrl nodes to allow separate
+reference / control.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ .../boot/dts/freescale/imx8mp-sr-som.dtsi     | 28 ++++++++++++++++---
+ 1 file changed, 24 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-sr-som.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-sr-som.dtsi
+index f18ba5620..5ab7c33fb 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-sr-som.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mp-sr-som.dtsi
+@@ -87,7 +87,7 @@ &dsp {
+ /*eth0*/
+ &eqos {
+ 	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_eqos>;
++	pinctrl-0 = <&pinctrl_eqos>, <&pinctrl_phy0>;
+ 	phy-mode = "rgmii-id";
+ 	phy-handle = <&ethphy0>;
+ 	snps,force_thresh_dma_mode;
+@@ -105,6 +105,8 @@ ethphy0: ethernet-phy@0 {
+ 			reg = <0>;
+ 			eee-broken-1000t;
+ 			reset-gpios = <&gpio4 19 GPIO_ACTIVE_LOW>;
++			interrupt-parent = <&gpio4>;
++			interrupts = <18 IRQ_TYPE_LEVEL_LOW>;
+ 		};
+ 	};
+ 
+@@ -167,7 +169,7 @@ queue4 {
+ /*eth1*/
+ &fec {
+ 	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_fec>;
++	pinctrl-0 = <&pinctrl_fec>, <&pinctrl_phy1>;
+ 	phy-mode = "rgmii-id";
+ 	phy-handle = <&ethphy1>;
+ 	fsl,magic-packet;
+@@ -180,6 +182,8 @@ mdio {
+ 		ethphy1: ethernet-phy@1 {
+ 			reg = <1>;
+ 			reset-gpios = <&gpio4 2 GPIO_ACTIVE_LOW>;
++			interrupt-parent = <&gpio4>;
++			interrupts = <3 IRQ_TYPE_LEVEL_LOW>;
+ 		};
+ 	};
+ };
+@@ -538,7 +542,15 @@ MX8MP_IOMUXC_ENET_TD2__ENET_QOS_RGMII_TD2       0x1f
+                         MX8MP_IOMUXC_ENET_TD3__ENET_QOS_RGMII_TD3       0x1f
+                         MX8MP_IOMUXC_ENET_TX_CTL__ENET_QOS_RGMII_TX_CTL 0x1f
+                         MX8MP_IOMUXC_ENET_TXC__CCM_ENET_QOS_CLOCK_GENERATE_TX_CLK       0x1f
+-                        MX8MP_IOMUXC_SAI1_TXD7__GPIO4_IO19              0x34
++		>;
++	};
++
++	pinctrl_phy0: phy0grp {
++		fsl,pins = <
++			/* INT_N: weak i/o, external 1.5k pull-up */
++			MX8MP_IOMUXC_SAI1_TXD6__GPIO4_IO18		0x0
++			/* RESET_N: weak i/o, open drain, external 1k pull-up */
++			MX8MP_IOMUXC_SAI1_TXD7__GPIO4_IO19		0x20
+ 		>;
+ 	};
+ 
+@@ -558,7 +570,15 @@ MX8MP_IOMUXC_SAI1_TXD2__ENET1_RGMII_TD2         0x1f
+                         MX8MP_IOMUXC_SAI1_TXD3__ENET1_RGMII_TD3         0x1f
+                         MX8MP_IOMUXC_SAI1_TXD4__ENET1_RGMII_TX_CTL      0x1f
+                         MX8MP_IOMUXC_SAI1_TXD5__ENET1_RGMII_TXC         0x1f
+-                        MX8MP_IOMUXC_SAI1_RXD0__GPIO4_IO02              0x34
++		>;
++	};
++
++	pinctrl_phy1: phy1grp {
++		fsl,pins = <
++			/* INT_N: weak i/o, external 1.5k pull-up */
++			MX8MP_IOMUXC_SAI1_RXD1__GPIO4_IO03		0x0
++			/* RESET_N: weak i/o, open drain, external 1k pull-up */
++			MX8MP_IOMUXC_SAI1_RXD0__GPIO4_IO02		0x20
+ 		>;
+ 	};
+ 
+-- 
+2.43.0
+
