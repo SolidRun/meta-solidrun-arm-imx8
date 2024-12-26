@@ -40,6 +40,7 @@ SRC_URI += " \
 	file://0038-board-solidrun-imx8mp-Add-HummingBoard-IIOT-tlv-base.patch \
 	file://0039-imx8mp_solidrun-update-SKU-parsing-for-HummingBoard-.patch \
 	file://0040-board-solidrun-imx8mp-configure-phy-reset-lines-open.patch \
+	file://0041-imx8mp_solidrun-update-SKU-parsing-to-detect-SRHBIIOT.patch \
 	file://0201-HACK-fastboot-emmc_dev-default-to-0.patch \
 	file://0202-HACK-usb-ci_udc-ignore-ID-pin-value.patch \
 	file://0203-board-solidrun-add-imx8dxl-som.patch \

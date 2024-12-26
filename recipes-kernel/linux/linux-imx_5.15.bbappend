@@ -17,12 +17,17 @@ SRC_URI += " \
 	file://0012-arm64-dts-add-support-for-imx8mp-hummingboard-extend.patch \
 	file://0013-arm64-dts-split-pcie-reset-signals-for-hb-pulse-and-.patch \
 	file://0014-adv7511-driver-update.patch \
+	file://0015-arm64-dts-add-support-for-imx8mp-hummingboard-pro.patch \
 	file://0016-Revert-net-rfkill-gpio-add-device-tree-support.patch \
 	file://0017-net-rfkill-gpio-add-DT-support.patch \
 	file://0018-net-rfkill-gpio-prevent-value-glitch-during-probe.patch \
 	file://0019-net-rfkill-gpio-set-GPIO-direction.patch \
 	file://0020-arm64-dts-imx8mp-hummingboard-pulse-use-upstream-rfk.patch \
 	file://0021-arm64-dts-imx8mp-sr-som-add-ethernet-phy-interrupt-s.patch \
+	file://0022-arm64-dts-imx8mp-sr-som-fix-phy-interrupt-support.patch \
+	file://0023-net-stmmac-don-t-reject-VLANs-when-IFF_PROMISC-is-se.patch \
+	file://0024-USB-serial-option-add-Quectel-EM05GV2.patch \
+	file://0025-arm64-dts-add-support-for-imx8mp-hummingboard-iiot.patch \
 	file://0100-dt-bindings-net-adin-document-phy-clock-output-prope.patch \
 	file://0101-dt-bindings-net-adin-add-pin-polarity-properties-for.patch \
 	file://0102-net-phy-adin-add-support-for-setting-led-link-status.patch \
