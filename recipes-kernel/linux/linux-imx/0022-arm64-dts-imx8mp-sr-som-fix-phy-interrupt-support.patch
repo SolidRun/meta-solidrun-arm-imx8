@@ -1,0 +1,47 @@
+From 875fcc390bb774942b76857da0b2cac6c5f1c04a Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Sun, 10 Nov 2024 17:16:25 +0100
+Subject: [PATCH] arm64: dts: imx8mp-sr-som: fix phy interrupt support
+
+Contrary to previous change description, the interrupt lines do not
+have external pull-up and require the CPU to activate internal pull-up
+on the pads.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ arch/arm64/boot/dts/freescale/imx8mp-sr-som.dtsi | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-sr-som.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-sr-som.dtsi
+index 5ab7c33fb..375265829 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-sr-som.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mp-sr-som.dtsi
+@@ -547,9 +547,9 @@ MX8MP_IOMUXC_ENET_TXC__CCM_ENET_QOS_CLOCK_GENERATE_TX_CLK       0x1f
+ 
+ 	pinctrl_phy0: phy0grp {
+ 		fsl,pins = <
+-			/* INT_N: weak i/o, external 1.5k pull-up */
+-			MX8MP_IOMUXC_SAI1_TXD6__GPIO4_IO18		0x0
+-			/* RESET_N: weak i/o, open drain, external 1k pull-up */
++			/* INT_N: weak i/o, pull-up */
++			MX8MP_IOMUXC_SAI1_TXD6__GPIO4_IO18		0x140
++			/* RESET_N: weak i/o, open drain, external 10k pull-up */
+ 			MX8MP_IOMUXC_SAI1_TXD7__GPIO4_IO19		0x20
+ 		>;
+ 	};
+@@ -575,9 +575,9 @@ MX8MP_IOMUXC_SAI1_TXD5__ENET1_RGMII_TXC         0x1f
+ 
+ 	pinctrl_phy1: phy1grp {
+ 		fsl,pins = <
+-			/* INT_N: weak i/o, external 1.5k pull-up */
+-			MX8MP_IOMUXC_SAI1_RXD1__GPIO4_IO03		0x0
+-			/* RESET_N: weak i/o, open drain, external 1k pull-up */
++			/* INT_N: weak i/o, pull-up */
++			MX8MP_IOMUXC_SAI1_RXD1__GPIO4_IO03		0x140
++			/* RESET_N: weak i/o, open drain, external 10k pull-up */
+ 			MX8MP_IOMUXC_SAI1_RXD0__GPIO4_IO02		0x20
+ 		>;
+ 	};
+-- 
+2.43.0
+

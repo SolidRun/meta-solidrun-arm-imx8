@@ -1,0 +1,118 @@
+From 01a1da6f877db1c034317810479d5435c7784152 Mon Sep 17 00:00:00 2001
+From: Yazan Shhady <yazan.shhady@solid-run.com>
+Date: Wed, 27 Dec 2023 15:48:06 +0200
+Subject: [PATCH 2/2] arm64: dts: add support for imx8mp hummingboard pro
+
+imx8mp-hummingboard-pro.dts entry added and imx8mp-hummingboard-extended.dts
+just includes this file for backward compatibiltiy as the board name changed
+
+Signed-off-by: Yazan Shhady <yazan.shhady@solid-run.com>
+---
+ arch/arm64/boot/dts/freescale/Makefile        |  1 +
+ .../imx8mp-hummingboard-extended.dts          | 36 +++----------------
+ .../dts/freescale/imx8mp-hummingboard-pro.dts | 36 +++++++++++++++++++
+ 3 files changed, 41 insertions(+), 32 deletions(-)
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pro.dts
+
+diff --git a/arch/arm64/boot/dts/freescale/Makefile b/arch/arm64/boot/dts/freescale/Makefile
+index 421faf67edc9..f91e289abbe6 100644
+--- a/arch/arm64/boot/dts/freescale/Makefile
++++ b/arch/arm64/boot/dts/freescale/Makefile
+@@ -121,6 +121,7 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-ddr4-evk.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-ndm.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-cubox-m.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-hummingboard-extended.dtb
++dtb-$(CONFIG_ARCH_MXC) += imx8mp-hummingboard-pro.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-hummingboard-mate.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-hummingboard-pulse.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-hummingboard-ripple.dtb
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-extended.dts b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-extended.dts
+index f1c47092bddd..0bed70d7db06 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-extended.dts
++++ b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-extended.dts
+@@ -1,36 +1,8 @@
+ // SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+ /*
+- * Copyright 2023 Josua Mayer <josua@solid-run.com>
++ * Device Tree Source for the i.MX8MP HummingBoard Pro/Extended
++ *
++ * Copyright (C) 2023 SolidRun Ltd.
+  */
+ 
+-/dts-v1/;
+-
+-#include <dt-bindings/usb/pd.h>
+-#include "imx8mp-sr-som.dtsi"
+-#include "imx8mp-hummingboard-pulse.dtsi"
+-
+-/ {
+-	model = "SolidRun i.MX8MP HummingBoard Extended";
+-	compatible = "fsl,imx8mp-sr-som", "fsl,imx8mp";
+-
+-	/*
+-	 * leave m.2 W_DISABLE signal floating to improve
+-	 * compatibility with certain pcie cards;
+-	 */
+-	/delete-node/ rfkill_m2_wdis;
+-};
+-
+-&fec {
+-	status = "okay";
+-};
+-
+-&iomuxc {
+-	pinctrl_pcie: pciegrp {
+-		fsl,pins = <MX8MP_IOMUXC_GPIO1_IO06__GPIO1_IO06	0x19>;
+-	};
+-};
+-
+-&pcie{
+-	pinctrl-0 = <&pinctrl_pcie>;
+-	reset-gpio = <&gpio1 6 GPIO_ACTIVE_LOW>;
+-};
++#include "imx8mp-hummingboard-pro.dts"
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pro.dts b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pro.dts
+new file mode 100644
+index 000000000000..8699053b31ca
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mp-hummingboard-pro.dts
+@@ -0,0 +1,36 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++* Device Tree Source for the i.MX8MP HummingBoard Pro 
++*/
++
++/dts-v1/;
++
++#include <dt-bindings/usb/pd.h>
++#include "imx8mp-sr-som.dtsi"
++#include "imx8mp-hummingboard-pulse.dtsi"
++
++/ {
++	model = "SolidRun i.MX8MP HummingBoard Pro";
++	compatible = "fsl,imx8mp-sr-som", "fsl,imx8mp";
++
++	/*
++	 * leave m.2 W_DISABLE signal floating to improve
++	 * compatibility with certain pcie cards;
++	 */
++	/delete-node/ rfkill_m2_wdis;
++};
++
++&fec {
++	status = "okay";
++};
++
++&iomuxc {
++	pinctrl_pcie: pciegrp {
++		fsl,pins = <MX8MP_IOMUXC_GPIO1_IO06__GPIO1_IO06	0x19>;
++	};
++};
++
++&pcie{
++	pinctrl-0 = <&pinctrl_pcie>;
++	reset-gpio = <&gpio1 6 GPIO_ACTIVE_LOW>;
++};
+-- 
+2.25.1
+
