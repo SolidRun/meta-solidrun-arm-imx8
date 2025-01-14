@@ -1,0 +1,42 @@
+From 8570a351b2daeeacfb1757743cadf5ab05527612 Mon Sep 17 00:00:00 2001
+From: Yazan Shhady <yazan.shhady@solid-run.com>
+Date: Mon, 26 Apr 2021 17:40:02 +0300
+Subject: [PATCH] imx8mn: Update RDC configuration for UART4
+
+Modified the Resource Domain Controller (RDC) configuration for UART4 on
+the i.MX8MN platform. Changed the domain permissions from Doamin 1
+(D1R | D1W) to Domain 0 (D0R | D0W).
+
+This change ensures that UART4 is accessible by Domain 0 for general
+use by the Operating System, resolving access errors.
+
+Signed-off-by: Yazan Shhady <yazan.shhady@solid-run.com>
+---
+ plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c b/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c
+index 312eb32d..30aba7bb 100644
+--- a/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c
++++ b/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c
+@@ -61,7 +61,7 @@ static const struct imx_rdc_cfg rdc[] = {
+ 	RDC_MDAn(RDC_MDA_M7, DID1),
+ 
+ 	/* peripherals domain permission */
+-	RDC_PDAPn(RDC_PDAP_UART4, D1R | D1W),
++	RDC_PDAPn(RDC_PDAP_UART4, D0R | D0W),
+ 	RDC_PDAPn(RDC_PDAP_UART2, D0R | D0W),
+ 	RDC_PDAPn(RDC_PDAP_RDC, D0R | D0W | D1R),
+ 
+@@ -109,7 +109,7 @@ static const struct imx_rdc_cfg rdc[] = {
+ 	RDC_MDAn(RDC_MDA_M7, DID1),
+ 
+ 	/* peripherals domain permission */
+-	RDC_PDAPn(RDC_PDAP_UART4, D1R | D1W),
++	RDC_PDAPn(RDC_PDAP_UART4, D0R | D0W),
+ 	RDC_PDAPn(RDC_PDAP_UART2, D0R | D0W),
+ 	RDC_PDAPn(RDC_PDAP_RDC, D0R | D0W | D1R),
+ 
+-- 
+2.43.0
+

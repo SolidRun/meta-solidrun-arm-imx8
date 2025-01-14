@@ -1,0 +1,2764 @@
+From 5d22bfbd7c424ae0cb25568e264c1c8dc0eabf3c Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Wed, 1 Jan 2025 14:18:19 +0100
+Subject: [PATCH] add support for solidrun solidsense n8 board
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ .../imx8mn-solidsense-n8-compact-u-boot.dtsi  |  167 +++
+ arch/arm/dts/imx8mn-solidsense-n8-compact.dts |  836 +++++++++++++
+ arch/arm/mach-imx/imx8m/Kconfig               |   12 +-
+ board/solidrun/solidsense-n8/Kconfig          |   18 +
+ board/solidrun/solidsense-n8/Makefile         |   18 +
+ board/solidrun/solidsense-n8/board.c          |  134 +++
+ board/solidrun/solidsense-n8/ddr4_timing.c    | 1058 +++++++++++++++++
+ board/solidrun/solidsense-n8/spl.c            |  133 +++
+ board/solidrun/solidsense-n8/supercap.c       |  134 +++
+ configs/solidsense-n8_defconfig               |  134 +++
+ include/configs/imx8mn_evk.h                  |    2 +-
+ 11 files changed, 2644 insertions(+), 2 deletions(-)
+ create mode 100644 arch/arm/dts/imx8mn-solidsense-n8-compact-u-boot.dtsi
+ create mode 100644 arch/arm/dts/imx8mn-solidsense-n8-compact.dts
+ create mode 100644 board/solidrun/solidsense-n8/Kconfig
+ create mode 100644 board/solidrun/solidsense-n8/Makefile
+ create mode 100644 board/solidrun/solidsense-n8/board.c
+ create mode 100644 board/solidrun/solidsense-n8/ddr4_timing.c
+ create mode 100644 board/solidrun/solidsense-n8/spl.c
+ create mode 100644 board/solidrun/solidsense-n8/supercap.c
+ create mode 100644 configs/solidsense-n8_defconfig
+
+diff --git a/arch/arm/dts/imx8mn-solidsense-n8-compact-u-boot.dtsi b/arch/arm/dts/imx8mn-solidsense-n8-compact-u-boot.dtsi
+new file mode 100644
+index 00000000000..6f887972474
+--- /dev/null
++++ b/arch/arm/dts/imx8mn-solidsense-n8-compact-u-boot.dtsi
+@@ -0,0 +1,167 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright 2019, 2021 NXP
++ * Copyright 2025 Josua Mayer <josua@solid-run.com>
++ */
++
++#include "imx8mn-u-boot.dtsi"
++#include "imx8mn-sec-def.h"
++
++/ {
++	mcu_rdc {
++		compatible = "imx8m,mcu_rdc";
++			    /* rdc config when MCU starts
++			     * master
++			     *   SDMA3p --> domain 1
++			     *   SDMA3b --> domian 1
++			     *   SDMA3_SPBA2  --> domian 1
++			     * peripheral:
++			     *   SAI3   --> Only Domian 1 can access
++			     *   GPT1   --> Only Domian 1 can access
++			     * memory:
++			     *   TCM    --> Only Domian 1 can access (0x7E0000~0x81FFFF)
++			     *   DDR    --> Only Domian 1 can access (0x80000000~0x81000000)
++			     * end.
++			     */
++		start-config = <
++			    RDC_MDA  RDC_MDA_SDMA3p DID1 0x0 0x0
++			    RDC_MDA  RDC_MDA_SDMA3b DID1 0x0 0x0
++			    RDC_MDA  RDC_MDA_SDMA3_SPBA2 DID1 0x0 0x0
++			    RDC_PDAP RDC_PDAP_SAI3  PDAP_D1_ACCESS 0x0 0x0
++			    RDC_PDAP RDC_PDAP_GPT1  PDAP_D1_ACCESS 0x0 0x0
++			    RDC_MEM_REGION 26 TCM_START TCM_END MEM_D1_ACCESS
++			    RDC_MEM_REGION 0 M4_EVK_DDR4_START M4_EVK_DDR4_END MEM_D1_ACCESS
++			    0x0      0x0            0x0  0x0 0x0
++			  >;
++			    /* rdc config when MCU stops
++			     * memory:
++			     *   TCM    --> domain 0/1 can access (0x7E0000~0x81FFFF)
++			     *   DDR    --> domain 0/1 can access (0x80000000~0x81000000)
++			     * end.
++			     */
++		stop-config = <
++			    RDC_MEM_REGION 26 TCM_START TCM_END MEM_D0D1_ACCESS
++			    RDC_MEM_REGION 0 M4_EVK_DDR4_START M4_EVK_DDR4_END MEM_D0D1_ACCESS
++			    0x0      0x0            0x0  0x0 0x0
++			  >;
++	};
++};
++
++&fec1 {
++	phy-handle = <&phy>;
++
++	mdio {
++		ethernet-phy@0 {
++			status = "disabled";
++		};
++
++		ethernet-phy@4 {
++			status = "disabled";
++		};
++
++		phy: ethernet-phy@ffffffff {
++			/*
++			 * The PHY can appear either:
++			 * - AR8035: at address 4
++			 * - ADIN1300: at address 0
++			 * Actual address being detected at runtime.
++			 */
++			reg = <0xffffffff>;
++			reset-gpios = <&gpio3 19 GPIO_ACTIVE_LOW>;
++			reset-assert-us = <10000>;
++			reset-deassert-us = <5000>;
++		};
++	};
++};
++
++&i2c1 {
++	bootph-all;
++
++	pmic@4b {
++		bootph-all;
++
++		regulators {
++			bootph-all;
++		};
++	};
++
++};
++
++&gpio1 {
++	bootph-all;
++};
++
++&gpio2 {
++	bootph-all;
++};
++
++&i2c1_pins {
++	bootph-all;
++};
++
++&pmic_pins {
++	bootph-all;
++};
++
++&reg_vdd_1v8 {
++	bootph-all;
++};
++
++&reg_vdd_3v3 {
++	bootph-all;
++};
++
++&reg_usdhc2_vmmc {
++	bootph-all;
++	u-boot,off-on-delay-us = <20000>;
++};
++
++&regulator_usdhc2_vmmc_pins {
++	bootph-all;
++};
++
++&uart2 {
++	bootph-all;
++};
++
++&uart2_pins {
++	bootph-all;
++};
++
++&usbg1 {
++	status = "disabled";
++};
++
++&usdhc2 {
++	bootph-all;
++	sd-uhs-sdr104;
++	sd-uhs-ddr50;
++	assigned-clocks = <&clk IMX8MN_CLK_USDHC2>;
++	assigned-clock-rates = <400000000>;
++	assigned-clock-parents = <&clk IMX8MN_SYS_PLL1_400M>;
++};
++
++&usdhc2_pins {
++	bootph-all;
++};
++
++&usdhc3 {
++	bootph-all;
++	mmc-hs400-1_8v;
++	mmc-hs400-enhanced-strobe;
++	assigned-clocks = <&clk IMX8MN_CLK_USDHC3>;
++	assigned-clock-rates = <400000000>;
++	assigned-clock-parents = <&clk IMX8MN_SYS_PLL1_400M>;
++	/* fsl_esdhc_imx needs explicit pinctrl for each mode */
++	pinctrl-names = "default", "state_100mhz", "state_200mhz";
++	pinctrl-1 = <&usdhc3_pins>;
++	pinctrl-2 = <&usdhc3_pins>;
++};
++
++&usdhc3_pins {
++	bootph-all;
++};
++
++&wdog1_pins {
++	bootph-all;
++};
+diff --git a/arch/arm/dts/imx8mn-solidsense-n8-compact.dts b/arch/arm/dts/imx8mn-solidsense-n8-compact.dts
+new file mode 100644
+index 00000000000..2ca22dc3e46
+--- /dev/null
++++ b/arch/arm/dts/imx8mn-solidsense-n8-compact.dts
+@@ -0,0 +1,836 @@
++// SPDX-License-Identifier: (GPL-2.0 OR MIT)
++//
++// Device Tree file for SolidSense N8 Compact
++//
++// Copyright 2024 Josua Mayer <josua@solid-run.com>
++
++/dts-v1/;
++
++#include <dt-bindings/leds/common.h>
++
++#include "imx8mn.dtsi"
++
++/ {
++	model = "SolidRun SolidSense N8 Compact";
++	compatible = "solidrun,solidsense-n8-compact", "fsl,imx8mn";
++
++	aliases {
++		gpio5 = &expander;
++		rtc0 = &rtc;
++		rtc1 = &snvs_rtc;
++		usb0 = &usbotg1;
++		watchdog0 = &wdog1;
++		watchdog1 = &rtc;
++	};
++
++	chosen {
++		stdout-path = &uart2;
++	};
++
++	/* poll IO Expander and reboot in case of power loss*/
++	gpio-keys {
++		compatible = "gpio-keys";
++		autorepeat;
++
++		key-power-fail {
++			label = "Power Fail";
++			linux,code = <KEY_RESTART>;
++			gpios = <&expander 1 GPIO_ACTIVE_LOW>;
++			debounce-interval = <100>;
++			linux,can-disable;
++		};
++
++		key-low-charge {
++			label = "Low Charge";
++			linux,code = <BTN_MISC>;
++			gpios = <&expander 2 GPIO_ACTIVE_LOW>;
++			debounce-interval = <100>;
++			linux,can-disable;
++		};
++	};
++
++	/* LED labels based on enclosure, schematic names differ. */
++	leds {
++		compatible = "gpio-leds";
++		pinctrl-names = "default";
++		pinctrl-0 = <&led_pins>;
++
++		/* D20 */
++		led1 {
++			label = "led1";
++			gpios = <&gpio1 13 GPIO_ACTIVE_HIGH>;
++			default-state = "off";
++		};
++
++		/* D18 */
++		led2 {
++			label = "led2";
++			gpios = <&gpio1 11 GPIO_ACTIVE_HIGH>;
++			default-state = "off";
++		};
++
++		/* D19 */
++		led3 {
++			label = "led3";
++			gpios = <&gpio1 12 GPIO_ACTIVE_HIGH>;
++			default-state = "off";
++		};
++	};
++
++	reg_modem_vbat: regulator-modem-vbat {
++		compatible = "regulator-fixed";
++		regulator-name = "modem-vbat";
++		pinctrl-names = "default";
++		pinctrl-0 = <&regulator_modem_vbat_pins>;
++		regulator-min-microvolt = <3800000>;
++		regulator-max-microvolt = <3800000>;
++		gpio = <&gpio3 25 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		regulator-always-on;
++	};
++
++	/* power to lte modems behind hub ports 2/3 */
++	reg_modem_vbus: regulator-modem-vbus {
++		compatible = "regulator-fixed";
++		regulator-name = "modem-vbus";
++		pinctrl-names = "default";
++		pinctrl-0 = <&regulator_modem_vbus_pins>;
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++		gpio = <&gpio5 4 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		regulator-always-on;
++	};
++
++	/* power to usb hub, and type-a behind hub port 1 */
++	reg_usb1_vbus: regulator-usb1-vbus {
++		compatible = "regulator-fixed";
++		regulator-name = "usb1-vbus";
++		pinctrl-names = "default";
++		pinctrl-0 = <&regulator_usb1_vbus_pins>;
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++		gpio = <&gpio5 5 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++	};
++
++	reg_vdd_1v8: regulator-vdd-1v8 {
++		compatible = "regulator-fixed";
++		regulator-name = "vdd-1v8";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++	};
++
++	reg_vdd_3v3: regulator-vdd-3v3 {
++		compatible = "regulator-fixed";
++		regulator-name = "vdd-3v3";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++	};
++
++	reg_usdhc2_vmmc: regulator-usdhc2-vmmc {
++		compatible = "regulator-fixed";
++		regulator-name = "usdhc2-vmmc";
++		pinctrl-names = "default";
++		pinctrl-0 = <&regulator_usdhc2_vmmc_pins>;
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		vin-supply = <&reg_vdd_3v3>;
++		gpio = <&gpio2 19 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		off-on-delay-us = <250>;
++	};
++
++	rfkill {
++		compatible = "rfkill-gpio";
++		label = "rfkill-wwan";
++		radio-type = "wwan";
++		pinctrl-names = "default";
++		pinctrl-0 = <&modem_pins>;
++		reset-gpios = <&gpio1 7 GPIO_ACTIVE_HIGH>;
++	};
++
++	usdhc1_pwrseq: usdhc1-pwrseq {
++		compatible = "mmc-pwrseq-simple";
++		reset-gpios = <&gpio2 10 GPIO_ACTIVE_LOW>;
++	};
++};
++
++&ecspi2 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&ecspi2_pins>;
++	/* native chip-select causes reading 0xffffffff */
++	cs-gpios = <&gpio5 13 GPIO_ACTIVE_LOW>;
++	num-cs = <1>;
++	status = "okay";
++
++	can@0 {
++		compatible = "microchip,mcp2518fd";
++		reg = <0>;
++		spi-max-frequency = <20000000>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&can_pins>;
++		interrupt-parent = <&gpio5>;
++		interrupts = <1 IRQ_TYPE_EDGE_FALLING>;
++		clocks = <&clk IMX8MN_CLK_CLKOUT1>;
++		/* generate 8MHz clock from soc-internal 24mhz reference */
++		assigned-clocks = <&clk IMX8MN_CLK_CLKOUT1_SEL>,
++			  <&clk IMX8MN_CLK_CLKOUT1_DIV>;
++		assigned-clock-rates = <0>, <8000000>;
++		assigned-clock-parents = <&clk IMX8MN_CLK_24M>, <0>;
++	};
++};
++
++&fec1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&fec1_pins>;
++	phy-mode = "rgmii-id";
++	phy-handle = <&phy4>;
++	local-mac-address = [00 00 00 00 00 00];
++	fsl,magic-packet;
++	status = "okay";
++
++	mdio {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		/*
++		 * Depending on board revision two different phys are used:
++		 * - v1.1: atheros phy at address 4
++		 * - v1.2+: analog devices phy at address 0
++		 * Configure first version by default.
++		 * On v1.2 and later, U-Boot will enable the correct phy
++		 * based on runtime detection and patch dtb accordingly.
++		 */
++
++		/* ADIN1300 */
++		phy0: ethernet-phy@0 {
++			reg = <0>;
++			reset-gpios = <&gpio3 19 GPIO_ACTIVE_LOW>;
++			reset-assert-us = <10>;
++			reset-deassert-us = <5000>;
++			interrupt-parent = <&gpio1>;
++			interrupts = <10 IRQ_TYPE_LEVEL_LOW>;
++			adi,link-st-polarity = <GPIO_ACTIVE_LOW>;
++			adi,led-polarity = <GPIO_ACTIVE_LOW>;
++			status = "disabled";
++
++			leds {
++				#address-cells = <1>;
++				#size-cells = <0>;
++
++				led@0 {
++					reg = <0>;
++					color = <LED_COLOR_ID_YELLOW>;
++					function = LED_FUNCTION_LAN;
++					default-state = "keep";
++					active-low;
++				};
++			};
++		};
++
++		/* AR8035 */
++		phy4: ethernet-phy@4 {
++			reg = <4>;
++			reset-gpios = <&gpio3 19 GPIO_ACTIVE_LOW>;
++			reset-assert-us = <10000>;
++			status = "okay";
++		};
++	};
++};
++
++&gpio5 {
++	usb-hub-reset-hog {
++		gpio-hog;
++		gpios = <3 GPIO_ACTIVE_LOW>;
++		output-low; /* deasserted */
++		line-name = "usb-hub-reset";
++	};
++};
++
++&i2c1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&i2c1_pins>;
++	status = "okay";
++
++	pmic@4b {
++		compatible = "rohm,bd71847";
++		reg = <0x4b>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pmic_pins>;
++		interrupt-parent = <&gpio1>;
++		interrupts = <3 IRQ_TYPE_LEVEL_LOW>;
++		rohm,reset-snvs-powered;
++
++		#clock-cells = <0>;
++		clocks = <&osc_32k>;
++		clock-output-names = "clk-32k-out";
++
++		regulators {
++			BUCK1 {
++				// supplies soc vdd, soc mipi vdd @ 0.9V
++				regulator-name = "buck1";
++				regulator-min-microvolt = <700000>;
++				regulator-max-microvolt = <1300000>;
++				regulator-boot-on;
++				regulator-always-on;
++				regulator-ramp-delay = <1250>;
++				rohm,dvs-run-voltage = <850000>;
++				rohm,dvs-suspend-voltage = <750000>;
++			};
++
++			BUCK2 {
++				regulator-name = "buck2";
++				regulator-min-microvolt = <700000>;
++				regulator-max-microvolt = <1300000>;
++				regulator-boot-on;
++				regulator-always-on;
++				regulator-ramp-delay = <1250>;
++				rohm,dvs-run-voltage = <1000000>;
++				rohm,dvs-idle-voltage = <900000>;
++				rohm,dvs-suspend-voltage = <0>;
++			};
++
++			BUCK3 {
++				// BUCK5 in datasheet
++				// output floating
++				regulator-name = "buck3";
++				regulator-min-microvolt = <700000>;
++				regulator-max-microvolt = <1350000>;
++			};
++
++			BUCK4 {
++				// BUCK6 in datasheet
++				// supplies ldo3, ldo5, muxsw
++				regulator-name = "buck4";
++				regulator-min-microvolt = <3000000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-boot-on;
++				regulator-always-on;
++			};
++
++			BUCK5 {
++				// BUCK7 in datasheet
++				// supplies ldo4, ldo6, muxsw
++				// enables dram vpp @ 2.5V
++				regulator-name = "buck5";
++				regulator-min-microvolt = <1605000>;
++				regulator-max-microvolt = <1995000>;
++				regulator-boot-on;
++				regulator-always-on;
++			};
++
++			BUCK6 {
++				// BUCK8 in datasheet
++				// supplies dram @ 1.2V
++				regulator-name = "buck6";
++				regulator-min-microvolt = <800000>;
++				regulator-max-microvolt = <1400000>;
++				regulator-boot-on;
++				regulator-always-on;
++			};
++
++			LDO1 {
++				// supplies soc snvs @ 1.8V
++				regulator-name = "ldo1";
++				regulator-min-microvolt = <1600000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-boot-on;
++				regulator-always-on;
++			};
++
++			LDO2 {
++				// supplies soc snvs @ 0.8V
++				regulator-name = "ldo2";
++				regulator-min-microvolt = <800000>;
++				regulator-max-microvolt = <900000>;
++				regulator-boot-on;
++				regulator-always-on;
++			};
++
++			LDO3 {
++				// supplies soc vdd @ 1.8V
++				regulator-name = "ldo3";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-boot-on;
++				regulator-always-on;
++			};
++
++			LDO4 {
++				// output floating
++				regulator-name = "ldo4";
++				regulator-min-microvolt = <900000>;
++				regulator-max-microvolt = <1800000>;
++			};
++
++			LDO5 {
++				// output floating
++				regulator-name = "ldo5";
++				regulator-min-microvolt = <800000>;
++				regulator-max-microvolt = <3300000>;
++			};
++
++			LDO6 {
++				// supplies soc vdd mipi @ 1.2V
++				regulator-name = "ldo6";
++				regulator-min-microvolt = <900000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-boot-on;
++				regulator-always-on;
++			};
++		};
++	};
++};
++
++&i2c2 {
++	/*
++	 * routed to various connectors:
++	 * - basler camera (CON2)
++	 * - touchscreen (J3)
++	 * - expansion connector (J14)
++	 */
++	pinctrl-names = "default";
++	pinctrl-0 = <&i2c2_pins>;
++	status = "okay";
++};
++
++&i2c3 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&i2c3_pins>;
++	status = "okay";
++
++	expander: gpio@20 {
++		compatible = "ti,tca6408";
++		reg = <0x20>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&gpio_expander_pins>;
++		reset-gpios = <&gpio3 16 GPIO_ACTIVE_LOW>;
++		interrupt-parent = <&gpio2>;
++		interrupts = <11 IRQ_TYPE_EDGE_FALLING>;
++		interrupt-controller;
++		#interrupt-cells = <2>;
++		gpio-controller;
++		#gpio-cells = <2>;
++		gpio-line-names = "SYSGD", "PFO#", "CAPGD", "CAPFLT#",
++				  "CHGEN#", "BSTEN#", "", "";
++	};
++
++	light-sensor@44 {
++		compatible = "isil,isl29023";
++		reg = <0x44>;
++	};
++
++	accelerometer@53 {
++		compatible = "adi,adxl345";
++		reg = <0x53>;
++	};
++
++	/* battery-charger@68 */
++
++	rtc: rtc@69 {
++		compatible = "abracon,abx80x";
++		reg = <0x69>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&rtc_pins>;
++		abracon,tc-diode = "schottky";
++		abracon,tc-resistor = <3>;
++		interrupt-parent = <&gpio1>;
++		interrupts = <1 IRQ_TYPE_EDGE_FALLING>;
++	};
++};
++
++&i2c4 {
++	/* routed to expansion connector (J14) */
++	pinctrl-names = "default";
++	pinctrl-0 = <&i2c4_pins>;
++	status = "okay";
++};
++
++&iomuxc {
++	pinctr-names = "default";
++	pinctrl-0 = <&tamper_pins>, <&usb_hub_pins>;
++
++	ieee802151_radio_pins: ieee802151-radio-pins {
++		fsl,pins = <
++			/* RESETN */
++			MX8MN_IOMUXC_GPIO1_IO05_GPIO1_IO5	0x0 /* TODO: pull / set 1? */
++			/* VDD_EN */
++			MX8MN_IOMUXC_GPIO1_IO06_GPIO1_IO6	0x0
++			/* SWDCLK */
++			MX8MN_IOMUXC_GPIO1_IO14_GPIO1_IO14	0x0 /* TODO: pull-up? */
++			/* SDIO */
++			MX8MN_IOMUXC_GPIO1_IO15_GPIO1_IO15	0x0 /* TODO: pull-up? */
++		>;
++	};
++
++	can_pins: can-pins {
++		fsl,pins = <
++			MX8MN_IOMUXC_SAI3_TXD_GPIO5_IO1		0x140
++		>;
++	};
++
++	ecspi2_pins: ecspi2-pins {
++		fsl,pins = <
++			MX8MN_IOMUXC_ECSPI2_SCLK_ECSPI2_SCLK	0x96
++			MX8MN_IOMUXC_ECSPI2_MOSI_ECSPI2_MOSI	0x1d6
++			MX8MN_IOMUXC_ECSPI2_MISO_ECSPI2_MISO	0x1d6
++			MX8MN_IOMUXC_ECSPI2_SS0_GPIO5_IO13	0x1d6
++		>;
++	};
++
++	fec1_pins: fec1-pins {
++		/*
++		 * Some pins are sampled at phy reset to apply configuration:
++		 * - AR803x PHY (revision 1.1)
++		 *   - RXD[1:0]: phy address bits [1:0]
++		 *   - RXD[3:2],RX_CTL: mac interface select bits 3,1,0
++		 * - ADIN1300 PHY (revision 1.2 or later)
++		 *   - RXD[3:0]: phy address bits [3:0]
++		 *   - RX_CTL,RXC: mac interface select bits 1,0
++		 * SoC enables pull-down at reset, PHYs have internal
++		 * pull-down, so pinmux may unset pull-enable.
++		 */
++		fsl,pins = <
++			MX8MN_IOMUXC_ENET_MDC_ENET1_MDC			0x2
++			MX8MN_IOMUXC_ENET_MDIO_ENET1_MDIO		0x2
++			MX8MN_IOMUXC_ENET_TD3_ENET1_RGMII_TD3		0x1e
++			MX8MN_IOMUXC_ENET_TD2_ENET1_RGMII_TD2		0x1e
++			MX8MN_IOMUXC_ENET_TD1_ENET1_RGMII_TD1		0x1e
++			MX8MN_IOMUXC_ENET_TD0_ENET1_RGMII_TD0		0x1e
++			/* RD[3:0] sampled at phy reset for address bits [3:0] */
++			MX8MN_IOMUXC_ENET_RD3_ENET1_RGMII_RD3		0x90
++			MX8MN_IOMUXC_ENET_RD2_ENET1_RGMII_RD2		0x90
++			MX8MN_IOMUXC_ENET_RD1_ENET1_RGMII_RD1		0x90
++			MX8MN_IOMUXC_ENET_RD0_ENET1_RGMII_RD0		0x90
++			MX8MN_IOMUXC_ENET_TXC_ENET1_RGMII_TXC		0x10
++			MX8MN_IOMUXC_ENET_RXC_ENET1_RGMII_RXC		0x90
++			MX8MN_IOMUXC_ENET_RX_CTL_ENET1_RGMII_RX_CTL	0x90
++			MX8MN_IOMUXC_ENET_TX_CTL_ENET1_RGMII_TX_CTL	0x10
++			/* phy reset */
++			MX8MN_IOMUXC_SAI5_RXFS_GPIO3_IO19		0x0
++			/* phy interrupt */
++			MX8MN_IOMUXC_GPIO1_IO10_GPIO1_IO10		0x140
++		>;
++	};
++
++	gpio_expander_pins: gpio-expander-pins {
++		fsl,pins = <
++			MX8MN_IOMUXC_NAND_READY_B_GPIO3_IO16	0x140
++			MX8MN_IOMUXC_SD1_STROBE_GPIO2_IO11	0x140
++		>;
++	};
++
++	i2c1_pins: i2c1-pins {
++		fsl,pins = <
++			MX8MN_IOMUXC_I2C1_SCL_I2C1_SCL		0x400001c2
++			MX8MN_IOMUXC_I2C1_SDA_I2C1_SDA		0x400001c2
++		>;
++	};
++
++	i2c2_pins: i2c2-pins {
++		fsl,pins = <
++			MX8MN_IOMUXC_I2C2_SCL_I2C2_SCL		0x400001c2
++			MX8MN_IOMUXC_I2C2_SDA_I2C2_SDA		0x400001c2
++		>;
++	};
++
++	i2c3_pins: i2c3-pins {
++		fsl,pins = <
++			MX8MN_IOMUXC_I2C3_SCL_I2C3_SCL		0x400001c2
++			MX8MN_IOMUXC_I2C3_SDA_I2C3_SDA		0x400001c2
++		>;
++	};
++
++	i2c4_pins: i2c4-pins {
++		fsl,pins = <
++			MX8MN_IOMUXC_I2C4_SCL_I2C4_SCL		0x400001c2
++			MX8MN_IOMUXC_I2C4_SDA_I2C4_SDA		0x400001c2
++		>;
++	};
++
++	led_pins: led-pins {
++		fsl,pins = <
++			MX8MN_IOMUXC_GPIO1_IO11_GPIO1_IO11	0x100
++			MX8MN_IOMUXC_GPIO1_IO12_GPIO1_IO12	0x100
++			MX8MN_IOMUXC_GPIO1_IO13_GPIO1_IO13	0x100
++		>;
++	};
++
++	modem_pins: modem-pins {
++		fsl,pins = <
++			/* RESET_N: modem-internal pull-down */
++			MX8MN_IOMUXC_GPIO1_IO07_GPIO1_IO7	0x0
++			/* PWRKEY: pull-down ensures always-on */
++			MX8MN_IOMUXC_GPIO1_IO08_GPIO1_IO8	0x100
++		>;
++	};
++
++	pmic_pins: pmic-pins {
++		fsl,pins = <
++			MX8MN_IOMUXC_GPIO1_IO03_GPIO1_IO3	0x140
++		>;
++	};
++
++	regulator_modem_vbat_pins: regulator-modem-vbat-pins {
++		fsl,pins = <
++			MX8MN_IOMUXC_SAI5_MCLK_GPIO3_IO25	0x0
++		>;
++	};
++
++	regulator_modem_vbus_pins: regulator-modem-vbus-pins {
++		fsl,pins = <
++			MX8MN_IOMUXC_SPDIF_RX_GPIO5_IO4		0x0
++		>;
++	};
++
++	regulator_usb1_vbus_pins: regulator-usb1-vbus-pins {
++		fsl,pins = <
++			MX8MN_IOMUXC_SPDIF_EXT_CLK_GPIO5_IO5	0x0
++		>;
++	};
++
++	regulator_usdhc2_vmmc_pins: regulator-usdhc2-vmmc-pins {
++		fsl,pins = <
++			MX8MN_IOMUXC_SD2_RESET_B_GPIO2_IO19	0x0
++		>;
++	};
++
++	rtc_pins: rtc-pins {
++		fsl,pins = <
++			MX8MN_IOMUXC_GPIO1_IO01_GPIO1_IO1	0x140
++			MX8MN_IOMUXC_SAI3_RXFS_GPIO4_IO28	0x100
++		>;
++	};
++
++	tamper_pins: tamper-pins {
++		/*
++		 * Routed to physical tamper input (J12),
++		 * accelerometer and light-sensor interrupts.
++		 */
++		fsl,pins = <
++			MX8MN_IOMUXC_GPIO1_IO09_GPIO1_IO9	0x140
++		>;
++	};
++
++	uart1_pins: uart1-pins {
++		fsl,pins = <
++			MX8MN_IOMUXC_UART1_RXD_UART1_DCE_RX	0x140
++			MX8MN_IOMUXC_UART1_TXD_UART1_DCE_TX	0x140
++			MX8MN_IOMUXC_UART3_RXD_UART1_DCE_CTS_B	0x140
++			MX8MN_IOMUXC_UART3_TXD_UART1_DCE_RTS_B	0x140
++			/* BT_REG_ON */
++			MX8MN_IOMUXC_SD1_DATA4_GPIO2_IO6	0x0
++			/* BT_WAKE_DEV */
++			MX8MN_IOMUXC_SD1_DATA5_GPIO2_IO7	0x0
++			/* BT_WAKE_HOST */
++			MX8MN_IOMUXC_SD1_DATA6_GPIO2_IO8	0x100
++		>;
++	};
++
++	uart2_pins: uart2-pins {
++		fsl,pins = <
++			MX8MN_IOMUXC_UART2_RXD_UART2_DCE_RX	0x140
++			MX8MN_IOMUXC_UART2_TXD_UART2_DCE_TX	0x140
++		>;
++	};
++
++	uart3_pins: uart3-pins {
++		fsl,pins = <
++			MX8MN_IOMUXC_ECSPI1_MOSI_UART3_DTE_RX	0x140
++			MX8MN_IOMUXC_ECSPI1_SCLK_UART3_DTE_TX	0x140
++			MX8MN_IOMUXC_ECSPI1_MISO_UART3_DTE_RTS_B	0x140
++			MX8MN_IOMUXC_ECSPI1_SS0_UART3_DTE_CTS_B	0x140
++		>;
++	};
++
++	uart4_pins: uart4-pins {
++		fsl,pins = <
++			MX8MN_IOMUXC_UART4_RXD_UART4_DCE_RX	0x140
++			MX8MN_IOMUXC_UART4_TXD_UART4_DCE_TX	0x140
++		>;
++	};
++
++	usb_hub_pins: usb-hub-pins {
++		fsl,pins = <
++			MX8MN_IOMUXC_SPDIF_TX_GPIO5_IO3		0x0
++		>;
++	};
++
++	usdhc1_pins: usdhc1-pins {
++		fsl,pins = <
++			MX8MN_IOMUXC_SD1_CLK_USDHC1_CLK		0x190
++			MX8MN_IOMUXC_SD1_CMD_USDHC1_CMD		0x1d0
++			MX8MN_IOMUXC_SD1_DATA0_USDHC1_DATA0	0x1d0
++			MX8MN_IOMUXC_SD1_DATA1_USDHC1_DATA1	0x1d0
++			MX8MN_IOMUXC_SD1_DATA2_USDHC1_DATA2	0x1d0
++			MX8MN_IOMUXC_SD1_DATA3_USDHC1_DATA3	0x1d0
++			/* wifi refclk */
++			MX8MN_IOMUXC_GPIO1_IO00_ANAMIX_REF_CLK_32K	0x0
++			/* WL_WAKE_HOST */
++			MX8MN_IOMUXC_SD1_DATA7_GPIO2_IO9	0x100
++			/* WL_REG_ON */
++			MX8MN_IOMUXC_SD1_RESET_B_GPIO2_IO10	0x0
++		>;
++	};
++
++	usdhc2_pins: usdhc2-pins {
++		fsl,pins = <
++			MX8MN_IOMUXC_SD2_CLK_USDHC2_CLK		0x190
++			MX8MN_IOMUXC_SD2_CMD_USDHC2_CMD		0x1d0
++			MX8MN_IOMUXC_SD2_DATA0_USDHC2_DATA0	0x1d0
++			MX8MN_IOMUXC_SD2_DATA1_USDHC2_DATA1	0x1d0
++			MX8MN_IOMUXC_SD2_DATA2_USDHC2_DATA2	0x1d0
++			MX8MN_IOMUXC_SD2_DATA3_USDHC2_DATA3	0x1d0
++			MX8MN_IOMUXC_SD2_CD_B_USDHC2_CD_B	0x0
++			/* usdhc2 signalling voltage pmic control */
++			MX8MN_IOMUXC_GPIO1_IO04_USDHC2_VSELECT	0x140
++		>;
++	};
++
++	usdhc2_100mhz_pins: usdhc2-100mhz-pins {
++		fsl,pins = <
++			MX8MN_IOMUXC_SD2_CLK_USDHC2_CLK		0x194
++			MX8MN_IOMUXC_SD2_CMD_USDHC2_CMD		0x1d4
++			MX8MN_IOMUXC_SD2_DATA0_USDHC2_DATA0	0x1d4
++			MX8MN_IOMUXC_SD2_DATA1_USDHC2_DATA1	0x1d4
++			MX8MN_IOMUXC_SD2_DATA2_USDHC2_DATA2	0x1d4
++			MX8MN_IOMUXC_SD2_DATA3_USDHC2_DATA3	0x1d4
++			MX8MN_IOMUXC_SD2_CD_B_USDHC2_CD_B	0x0
++			/* usdhc2 signalling voltage pmic control */
++			MX8MN_IOMUXC_GPIO1_IO04_USDHC2_VSELECT	0x140
++		>;
++	};
++
++	usdhc2_200mhz_pins: usdhc2-100mhz-pins {
++		fsl,pins = <
++			MX8MN_IOMUXC_SD2_CLK_USDHC2_CLK		0x196
++			MX8MN_IOMUXC_SD2_CMD_USDHC2_CMD		0x1d6
++			MX8MN_IOMUXC_SD2_DATA0_USDHC2_DATA0	0x1d6
++			MX8MN_IOMUXC_SD2_DATA1_USDHC2_DATA1	0x1d6
++			MX8MN_IOMUXC_SD2_DATA2_USDHC2_DATA2	0x1d6
++			MX8MN_IOMUXC_SD2_DATA3_USDHC2_DATA3	0x1d6
++			MX8MN_IOMUXC_SD2_CD_B_USDHC2_CD_B	0x0
++			/* usdhc2 signalling voltage pmic control */
++			MX8MN_IOMUXC_GPIO1_IO04_USDHC2_VSELECT	0x140
++		>;
++	};
++
++	usdhc3_pins: usdhc3-pins {
++		fsl,pins = <
++			MX8MN_IOMUXC_NAND_WE_B_USDHC3_CLK	0x190
++			MX8MN_IOMUXC_NAND_WP_B_USDHC3_CMD	0x1d0
++			MX8MN_IOMUXC_NAND_DATA04_USDHC3_DATA0	0x1d0
++			MX8MN_IOMUXC_NAND_DATA05_USDHC3_DATA1	0x1d0
++			MX8MN_IOMUXC_NAND_DATA06_USDHC3_DATA2	0x1d0
++			MX8MN_IOMUXC_NAND_DATA07_USDHC3_DATA3	0x1d0
++			MX8MN_IOMUXC_NAND_RE_B_USDHC3_DATA4	0x1d0
++			MX8MN_IOMUXC_NAND_CE2_B_USDHC3_DATA5	0x1d0
++			MX8MN_IOMUXC_NAND_CE3_B_USDHC3_DATA6	0x1d0
++			MX8MN_IOMUXC_NAND_CLE_USDHC3_DATA7	0x1d0
++			MX8MN_IOMUXC_NAND_CE1_B_USDHC3_STROBE	0x190
++		>;
++	};
++
++	wdog1_pins: wdog1-pins {
++		fsl,pins = <
++			MX8MN_IOMUXC_GPIO1_IO02_WDOG1_WDOG_B	0x140
++		>;
++	};
++};
++
++/* Bluetooth */
++&uart1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&uart1_pins>;
++	uart-has-rtscts;
++	/* select 80MHz parent clock to support maximum baudrate 4Mbps */
++	assigned-clocks = <&clk IMX8MN_CLK_UART1>;
++	assigned-clock-parents = <&clk IMX8MN_SYS_PLL1_80M>;
++	status = "okay";
++
++	bluetooth {
++		compatible = "brcm,bcm4330-bt";
++		device-wakeup-gpios = <&gpio2 7 GPIO_ACTIVE_HIGH>;
++		host-wakeup-gpios = <&gpio2 8 GPIO_ACTIVE_HIGH>;
++		shutdown-gpios = <&gpio2 6 GPIO_ACTIVE_HIGH>;
++		max-speed = <3000000>;
++	};
++};
++
++/* console */
++&uart2 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&uart2_pins>;
++	status = "okay";
++};
++
++/* RS485 */
++&uart3 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&uart3_pins>;
++	uart-has-rtscts;
++	linux,rs485-enabled-at-boot-time;
++	fsl,dte-mode;
++	status = "okay";
++};
++
++/* 802.15.1 radio */
++&uart4 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&uart4_pins &ieee802151_radio_pins>;
++	status = "okay";
++};
++
++&usbotg1 {
++	vbus-supply = <&reg_usb1_vbus>;
++	dr_mode = "host";
++	disable-over-current;
++	status  = "okay";
++};
++
++/* WiFi */
++&usdhc1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&usdhc1_pins>;
++	vmmc-supply = <&reg_vdd_3v3>;
++	vqmmc-supply = <&reg_vdd_1v8>;
++	bus-width = <4>;
++	mmc-pwrseq = <&usdhc1_pwrseq>;
++	status = "okay";
++};
++
++/* microSD */
++&usdhc2 {
++	pinctrl-names = "default", "state_100mhz", "state_200mhz";
++	pinctrl-0 = <&usdhc2_pins>;
++	pinctrl-1 = <&usdhc2_100mhz_pins>;
++	pinctrl-2 = <&usdhc2_200mhz_pins>;
++	vmmc-supply = <&reg_usdhc2_vmmc>;
++	bus-width = <4>;
++	broken-cd;
++	status = "okay";
++};
++
++/* eMMC */
++&usdhc3 {
++	/*
++	 * Use lowest drive strength for all high-speed modes to minimise
++	 * electro-magnetic emissions.
++	 * In this particular design HS-400 still works okay, no extra
++	 * pinctrl for 100mhz and 200mhz are required.
++	 */
++	pinctrl-names = "default";
++	pinctrl-0 = <&usdhc3_pins>;
++	vmmc-supply = <&reg_vdd_3v3>;
++	vqmmc-supply = <&reg_vdd_1v8>;
++	bus-width = <8>;
++	non-removable;
++	status = "okay";
++};
++
++&wdog1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&wdog1_pins>;
++	status = "okay";
++};
+diff --git a/arch/arm/mach-imx/imx8m/Kconfig b/arch/arm/mach-imx/imx8m/Kconfig
+index 473cfa8e5e3..f7fc35cc283 100644
+--- a/arch/arm/mach-imx/imx8m/Kconfig
++++ b/arch/arm/mach-imx/imx8m/Kconfig
+@@ -446,6 +446,15 @@ config TARGET_LIBREM5
+ 	select SUPPORT_SPL
+ 	select IMX8M_LPDDR4
+ 
++config TARGET_SOLIDSENSE_N8
++	bool "SolidRun SolidSense N8 Compact"
++	select IMX8MN
++	select SUPPORT_SPL
++	select IMX8M_DDR4
++	select FSL_CAAM
++	select FSL_BLOB
++	select SPL_CRYPTO if SPL
++
+ endchoice
+ 
+ source "board/advantech/imx8mp_rsb3720a1/Kconfig"
+@@ -477,10 +486,11 @@ source "board/phytec/phycore_imx8mp/Kconfig"
+ source "board/polyhex/imx8mp_debix_model_a/Kconfig"
+ source "board/purism/librem5/Kconfig"
+ source "board/ronetix/imx8mq-cm/Kconfig"
++source "board/solidrun/solidsense-n8/Kconfig"
+ source "board/technexion/pico-imx8mq/Kconfig"
+ source "board/variscite/imx8mn_var_som/Kconfig"
+ source "board/toradex/verdin-imx8mm/Kconfig"
+ source "board/toradex/verdin-imx8mp/Kconfig"
+-source "board/voxelbotics/navqp/Kconfig"
++source "board/voxelbotics/navqp/Kconfig""
+ 
+ endif
+diff --git a/board/solidrun/solidsense-n8/Kconfig b/board/solidrun/solidsense-n8/Kconfig
+new file mode 100644
+index 00000000000..25ac2b1de3a
+--- /dev/null
++++ b/board/solidrun/solidsense-n8/Kconfig
+@@ -0,0 +1,18 @@
++if TARGET_SOLIDSENSE_N8
++
++config SYS_BOARD
++	default "solidsense-n8"
++
++config SYS_VENDOR
++	default "solidrun"
++
++config SYS_CONFIG_NAME
++	default "imx8mn_evk"
++
++config IMX8MN_LOW_DRIVE_MODE
++	bool "Enable the low drive mode of iMX8MN on SolidSense N8"
++
++config IMX_CONFIG
++	default "board/freescale/imx8mn_evk/imximage-8mn-ddr4.cfg"
++
++endif
+diff --git a/board/solidrun/solidsense-n8/Makefile b/board/solidrun/solidsense-n8/Makefile
+new file mode 100644
+index 00000000000..990a6f2b76e
+--- /dev/null
++++ b/board/solidrun/solidsense-n8/Makefile
+@@ -0,0 +1,18 @@
++#
++# Copyright 2018 NXP
++# Copyright 2024 Josua Mayer <josua@solid-run.com>
++#
++# SPDX-License-Identifier:      GPL-2.0+
++#
++
++obj-y += board.o
++ifdef CONFIG_SPL_BUILD
++obj-y += spl.o
++ifdef IMX8MN_LOW_DRIVE_MODE
++obj-y += ddr4_timing_ld.o
++else
++obj-y += ddr4_timing.o
++endif
++else
++obj-y += supercap.o
++endif
+diff --git a/board/solidrun/solidsense-n8/board.c b/board/solidrun/solidsense-n8/board.c
+new file mode 100644
+index 00000000000..037eb92be68
+--- /dev/null
++++ b/board/solidrun/solidsense-n8/board.c
+@@ -0,0 +1,134 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright 2019 NXP
++ * Copyright 2025 Josua Mayer <josua@solid-run.com>
++ */
++
++#include <asm/arch/clock.h>
++#include <asm/arch/imx8mn_pins.h>
++#include <asm/arch/sys_proto.h>
++#include <asm/mach-imx/boot_mode.h>
++#include <asm/mach-imx/iomux-v3.h>
++#include <env.h>
++#include <mmc.h>
++#include <netdev.h>
++#include <phy.h>
++
++#define UART_PAD_CTRL	(PAD_CTL_DSE6 | PAD_CTL_FSEL1)
++#define WDOG_PAD_CTRL	(PAD_CTL_DSE6 | PAD_CTL_ODE | PAD_CTL_PUE | PAD_CTL_PE)
++
++static const iomux_v3_cfg_t uart_pads[] = {
++	IMX8MN_PAD_UART2_RXD__UART2_DCE_RX | MUX_PAD_CTRL(UART_PAD_CTRL),
++	IMX8MN_PAD_UART2_TXD__UART2_DCE_TX | MUX_PAD_CTRL(UART_PAD_CTRL),
++};
++
++static const iomux_v3_cfg_t wdog_pads[] = {
++	IMX8MN_PAD_GPIO1_IO02__WDOG1_WDOG_B  | MUX_PAD_CTRL(WDOG_PAD_CTRL),
++};
++
++int board_early_init_f(void)
++{
++	struct wdog_regs *wdog = (struct wdog_regs *)WDOG1_BASE_ADDR;
++
++	/* configure GPIO1_IO02 pad connected to pmic for WDOG_B function */
++	imx_iomux_v3_setup_multiple_pads(wdog_pads, ARRAY_SIZE(wdog_pads));
++
++	/* configure watchdog to toggle WDOG_B signal on expire */
++	set_wdog_reset(wdog);
++
++	/* configure console uart pads */
++	imx_iomux_v3_setup_multiple_pads(uart_pads, ARRAY_SIZE(uart_pads));
++
++	/* start uart clock to activate console */
++	init_uart_clk(1);
++
++	return 0;
++}
++
++static int find_ethernet_phy(void)
++{
++	struct mii_dev *bus = NULL;
++	struct phy_device *phydev = NULL;
++	int phy_addr = -ENOENT;
++
++	if (IS_ENABLED(CONFIG_FEC_MXC)) {
++		bus = fec_get_miibus(ENET1_BASE_ADDR, -1);
++		if (!bus)
++			return -ENOENT;
++
++		// scan address 0, 4
++		phydev = phy_find_by_mask(bus, 0b00010001);
++		if (!phydev)
++			return -ENOENT;
++		pr_debug("%s: detected ethernet phy at address %d\n", __func__, phydev->addr);
++		phy_addr = phydev->addr;
++	}
++
++	return phy_addr;
++}
++
++/*
++ * Configure the correct ethernet PHYs nodes in device-tree:
++ * - AR8035 at addresses 4: SolidSense N8 Compact v1.0+
++ * - ADIN1300 at address 0: SolidSense N8 Compact v1.2+
++ */
++int ft_board_setup(void *fdt, struct bd_info *bd)
++{
++	int node_fec, node_phy0, node_phy4;
++	int ret, phy;
++	bool enable_phy0 = false, enable_phy4 = false;
++	u32 phy_handle;
++
++	// detect phy
++	phy = find_ethernet_phy();
++	switch (phy) {
++	case 0:
++		enable_phy0 = true;
++		break;
++	case 4:
++		enable_phy4 = true;
++		break;
++	default:
++		pr_err("%s: couldn't detect ethernet phy, not patching dtb!\n", __func__);
++		return 0;
++	}
++
++	// update all phy nodes status
++	node_phy0 = fdt_path_offset(fdt, "/soc@0/bus@30800000/ethernet@30be0000/mdio/ethernet-phy@0");
++	ret = fdt_setprop_string(fdt, node_phy0, "status", enable_phy0 ? "okay" : "disabled");
++	if (ret < 0 && enable_phy0)
++		pr_err("%s: failed to enable ethernet phy at address 0 in dtb!\n", __func__);
++	node_phy4 = fdt_path_offset(fdt, "/soc@0/bus@30800000/ethernet@30be0000/mdio/ethernet-phy@4");
++	ret = fdt_setprop_string(fdt, node_phy4, "status", enable_phy4 ? "okay" : "disabled");
++	if (ret < 0 && enable_phy4)
++		pr_err("%s: failed to enable ethernet phy at address 4 in dtb!\n", __func__);
++
++	// update phy-handle
++	phy_handle = fdt_get_phandle(fdt, enable_phy0 ? node_phy0 : node_phy4);
++	node_fec = fdt_path_offset(fdt, "/soc@0/bus@30800000/ethernet@30be0000");
++	ret = fdt_setprop_u32(fdt, node_fec, "phy-handle", phy_handle);
++	if (ret < 0)
++		pr_err("%s: failed to update phy-handle in dtb!\n", __func__);
++
++	return 0;
++}
++
++int board_init(void)
++{
++	return 0;
++}
++
++int board_late_init(void)
++{
++	if (IS_ENABLED(CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG))
++		env_set("board_name", "SolidSense N8 Compact");
++
++	return 0;
++}
++
++#if CONFIG_IS_ENABLED(ANDROID_BOOT_IMAGE)
++int mmc_map_to_kernel_blk(int dev_no)
++{
++	return dev_no;
++}
++#endif /* CONFIG_IS_ENABLED(ANDROID_BOOT_IMAGE) */
+diff --git a/board/solidrun/solidsense-n8/ddr4_timing.c b/board/solidrun/solidsense-n8/ddr4_timing.c
+new file mode 100644
+index 00000000000..07da619a857
+--- /dev/null
++++ b/board/solidrun/solidsense-n8/ddr4_timing.c
+@@ -0,0 +1,1058 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright 2019 NXP
++ *
++ * Generated code from MX8M_DDR_tool
++ * Align with uboot version:
++ * imx_v2018.03_4.14.78_1.0.0_ga ~ imx_v2018.04_4.19.35_1.1.0_ga
++ */
++
++#include <linux/kernel.h>
++#include <asm/arch/ddr.h>
++//#include <asm/arch/imx8m_ddr.h>
++
++struct dram_cfg_param ddr_ddrc_cfg[] = {
++	/** Initialize DDRC registers **/
++	{ 0x3d400000, 0x81040010 },
++	{ 0x3d400030, 0x20 },
++	{ 0x3d400034, 0x221306 },
++	{ 0x3d400050, 0x210070 },
++	{ 0x3d400054, 0x10008 },
++	{ 0x3d400060, 0x0 },
++	{ 0x3d400064, 0x9200d2 },
++	{ 0x3d4000c0, 0x0 },
++	{ 0x3d4000c4, 0x1000 },
++	{ 0x3d4000d0, 0xc0030126 },
++	{ 0x3d4000d4, 0x770000 },
++	{ 0x3d4000dc, 0x8640105 },
++	{ 0x3d4000e0, 0x180200 },
++	{ 0x3d4000e4, 0x110000 },
++	{ 0x3d4000e8, 0x2000600 },
++	{ 0x3d4000ec, 0x810 },
++	{ 0x3d4000f0, 0x20 },
++	{ 0x3d4000f4, 0xec7 },
++	{ 0x3d400100, 0x11122914 },
++	{ 0x3d400104, 0x4051c },
++	{ 0x3d400108, 0x609050d },
++	{ 0x3d40010c, 0x400c },
++	{ 0x3d400110, 0x9030409 },
++	{ 0x3d400114, 0x6060403 },
++	{ 0x3d40011c, 0x606 },
++	{ 0x3d400120, 0x5050d08 },
++	{ 0x3d400124, 0x2040a },
++	{ 0x3d40012c, 0x1409010e },
++	{ 0x3d400130, 0x8 },
++	{ 0x3d40013c, 0x0 },
++	{ 0x3d400180, 0x1000040 },
++	{ 0x3d400184, 0x493e },
++	{ 0x3d400190, 0x38c8207 },
++	{ 0x3d400194, 0x2020303 },
++	{ 0x3d400198, 0x7f04011 },
++	{ 0x3d40019c, 0xb0 },
++	{ 0x3d4001a0, 0xe0400018 },
++	{ 0x3d4001a4, 0x48005a },
++	{ 0x3d4001a8, 0x80000000 },
++	{ 0x3d4001b0, 0x1 },
++	{ 0x3d4001b4, 0xc07 },
++	{ 0x3d4001b8, 0x4 },
++	{ 0x3d4001c0, 0x1 },
++	{ 0x3d4001c4, 0x0 },
++	{ 0x3d400200, 0x3f1f },
++	{ 0x3d400204, 0x3f0909 },
++	{ 0x3d400208, 0x700 },
++	{ 0x3d40020c, 0x0 },
++	{ 0x3d400210, 0x1f1f },
++	{ 0x3d400214, 0x7070707 },
++	{ 0x3d400218, 0x7070707 },
++	{ 0x3d40021c, 0xf0f },
++	{ 0x3d400220, 0x3f01 },
++	{ 0x3d400240, 0x6000614 },
++	{ 0x3d400244, 0x1323 },
++	{ 0x3d400400, 0x100 },
++	{ 0x3d400250, 0x317d1a07 },
++	{ 0x3d400254, 0xf },
++	{ 0x3d40025c, 0x2a001b76 },
++	{ 0x3d400264, 0x7300b473 },
++	{ 0x3d40026c, 0x30000e06 },
++	{ 0x3d400300, 0x14 },
++	{ 0x3d40036c, 0x10 },
++	{ 0x3d400404, 0x13193 },
++	{ 0x3d400408, 0x6096 },
++	{ 0x3d400490, 0x1 },
++	{ 0x3d400494, 0x2000c00 },
++	{ 0x3d400498, 0x3c00db },
++	{ 0x3d40049c, 0x100009 },
++	{ 0x3d4004a0, 0x2 },
++	{ 0x3d402050, 0x210070 },
++	{ 0x3d402064, 0x40005e },
++	{ 0x3d4020dc, 0x40105 },
++	{ 0x3d4020e0, 0x0 },
++	{ 0x3d4020e8, 0x2000600 },
++	{ 0x3d4020ec, 0x10 },
++	{ 0x3d402100, 0xb081209 },
++	{ 0x3d402104, 0x2020d },
++	{ 0x3d402108, 0x5050309 },
++	{ 0x3d40210c, 0x400c },
++	{ 0x3d402110, 0x5030206 },
++	{ 0x3d402114, 0x3030202 },
++	{ 0x3d40211c, 0x303 },
++	{ 0x3d402120, 0x3030d04 },
++	{ 0x3d402124, 0x20208 },
++	{ 0x3d40212c, 0x1005010e },
++	{ 0x3d402130, 0x8 },
++	{ 0x3d40213c, 0x0 },
++	{ 0x3d402180, 0x1000040 },
++	{ 0x3d402190, 0x3858204 },
++	{ 0x3d402194, 0x2020303 },
++	{ 0x3d4021b4, 0x504 },
++	{ 0x3d4021b8, 0x4 },
++	{ 0x3d402240, 0x6000604 },
++	{ 0x3d4020f4, 0xec7 },
++};
++
++/* PHY Initialize Configuration */
++struct dram_cfg_param ddr_ddrphy_cfg[] = {
++	{ 0x1005f, 0x2fd },
++	{ 0x1015f, 0x2fd },
++	{ 0x1105f, 0x2fd },
++	{ 0x1115f, 0x2fd },
++	{ 0x11005f, 0x2fd },
++	{ 0x11015f, 0x2fd },
++	{ 0x11105f, 0x2fd },
++	{ 0x11115f, 0x2fd },
++	{ 0x55, 0x355 },
++	{ 0x1055, 0x355 },
++	{ 0x2055, 0x355 },
++	{ 0x3055, 0x355 },
++	{ 0x4055, 0x55 },
++	{ 0x5055, 0x55 },
++	{ 0x6055, 0x355 },
++	{ 0x7055, 0x355 },
++	{ 0x8055, 0x355 },
++	{ 0x9055, 0x355 },
++	{ 0x200c5, 0xa },
++	{ 0x1200c5, 0x6 },
++	{ 0x2002e, 0x2 },
++	{ 0x12002e, 0x1 },
++	{ 0x20024, 0x8 },
++	{ 0x2003a, 0x2 },
++	{ 0x120024, 0x8 },
++	{ 0x2003a, 0x2 },
++	{ 0x20056, 0x6 },
++	{ 0x120056, 0xa },
++	{ 0x1004d, 0x1a },
++	{ 0x1014d, 0x1a },
++	{ 0x1104d, 0x1a },
++	{ 0x1114d, 0x1a },
++	{ 0x11004d, 0x1a },
++	{ 0x11014d, 0x1a },
++	{ 0x11104d, 0x1a },
++	{ 0x11114d, 0x1a },
++	{ 0x10049, 0xe38 },
++	{ 0x10149, 0xe38 },
++	{ 0x11049, 0xe38 },
++	{ 0x11149, 0xe38 },
++	{ 0x110049, 0xe38 },
++	{ 0x110149, 0xe38 },
++	{ 0x111049, 0xe38 },
++	{ 0x111149, 0xe38 },
++	{ 0x43, 0x63 },
++	{ 0x1043, 0x63 },
++	{ 0x2043, 0x63 },
++	{ 0x3043, 0x63 },
++	{ 0x4043, 0x63 },
++	{ 0x5043, 0x63 },
++	{ 0x6043, 0x63 },
++	{ 0x7043, 0x63 },
++	{ 0x8043, 0x63 },
++	{ 0x9043, 0x63 },
++	{ 0x20018, 0x1 },
++	{ 0x20075, 0x2 },
++	{ 0x20050, 0x0 },
++	{ 0x20008, 0x258 },
++	{ 0x120008, 0x10a },
++	{ 0x20088, 0x9 },
++	{ 0x200b2, 0x268 },
++	{ 0x10043, 0x5b1 },
++	{ 0x10143, 0x5b1 },
++	{ 0x11043, 0x5b1 },
++	{ 0x11143, 0x5b1 },
++	{ 0x1200b2, 0x268 },
++	{ 0x110043, 0x5b1 },
++	{ 0x110143, 0x5b1 },
++	{ 0x111043, 0x5b1 },
++	{ 0x111143, 0x5b1 },
++	{ 0x200fa, 0x1 },
++	{ 0x1200fa, 0x1 },
++	{ 0x20019, 0x5 },
++	{ 0x120019, 0x5 },
++	{ 0x200f0, 0x5555 },
++	{ 0x200f1, 0x5555 },
++	{ 0x200f2, 0x5555 },
++	{ 0x200f3, 0x5555 },
++	{ 0x200f4, 0x5555 },
++	{ 0x200f5, 0x5555 },
++	{ 0x200f6, 0x5555 },
++	{ 0x200f7, 0xf000 },
++	{ 0x20025, 0x0 },
++	{ 0x2002d, 0x0 },
++	{ 0x12002d, 0x0 },
++	{ 0x2005b, 0x7529 },
++	{ 0x2005c, 0x0 },
++	{ 0x200c7, 0x21 },
++	{ 0x200ca, 0x24 },
++	{ 0x200cc, 0x1f7 },
++	{ 0x1200c7, 0x21 },
++	{ 0x1200ca, 0x24 },
++	{ 0x1200cc, 0x1f7 },
++	{ 0x2007d, 0x212 },
++	{ 0x12007d, 0x212 },
++	{ 0x2007c, 0x61 },
++	{ 0x12007c, 0x61 },
++	{ 0x1004a, 0x500 },
++	{ 0x1104a, 0x500 },
++	{ 0x2002c, 0x0 },
++};
++
++/* ddr phy trained csr */
++struct dram_cfg_param ddr_ddrphy_trained_csr[] = {
++	{0x0200b2,0x0},
++	{0x1200b2,0x0},
++	{0x2200b2,0x0},
++	{0x0200cb,0x0},
++	{0x010043,0x0},
++	{0x110043,0x0},
++	{0x210043,0x0},
++	{0x010143,0x0},
++	{0x110143,0x0},
++	{0x210143,0x0},
++	{0x011043,0x0},
++	{0x111043,0x0},
++	{0x211043,0x0},
++	{0x011143,0x0},
++	{0x111143,0x0},
++	{0x211143,0x0},
++	{0x000080,0x0},
++	{0x100080,0x0},
++	{0x200080,0x0},
++	{0x001080,0x0},
++	{0x101080,0x0},
++	{0x201080,0x0},
++	{0x002080,0x0},
++	{0x102080,0x0},
++	{0x202080,0x0},
++	{0x003080,0x0},
++	{0x103080,0x0},
++	{0x203080,0x0},
++	{0x004080,0x0},
++	{0x104080,0x0},
++	{0x204080,0x0},
++	{0x005080,0x0},
++	{0x105080,0x0},
++	{0x205080,0x0},
++	{0x006080,0x0},
++	{0x106080,0x0},
++	{0x206080,0x0},
++	{0x007080,0x0},
++	{0x107080,0x0},
++	{0x207080,0x0},
++	{0x008080,0x0},
++	{0x108080,0x0},
++	{0x208080,0x0},
++	{0x009080,0x0},
++	{0x109080,0x0},
++	{0x209080,0x0},
++	{0x010080,0x0},
++	{0x110080,0x0},
++	{0x210080,0x0},
++	{0x010180,0x0},
++	{0x110180,0x0},
++	{0x210180,0x0},
++	{0x010081,0x0},
++	{0x110081,0x0},
++	{0x210081,0x0},
++	{0x010181,0x0},
++	{0x110181,0x0},
++	{0x210181,0x0},
++	{0x010082,0x0},
++	{0x110082,0x0},
++	{0x210082,0x0},
++	{0x010182,0x0},
++	{0x110182,0x0},
++	{0x210182,0x0},
++	{0x010083,0x0},
++	{0x110083,0x0},
++	{0x210083,0x0},
++	{0x010183,0x0},
++	{0x110183,0x0},
++	{0x210183,0x0},
++	{0x011080,0x0},
++	{0x111080,0x0},
++	{0x211080,0x0},
++	{0x011180,0x0},
++	{0x111180,0x0},
++	{0x211180,0x0},
++	{0x011081,0x0},
++	{0x111081,0x0},
++	{0x211081,0x0},
++	{0x011181,0x0},
++	{0x111181,0x0},
++	{0x211181,0x0},
++	{0x011082,0x0},
++	{0x111082,0x0},
++	{0x211082,0x0},
++	{0x011182,0x0},
++	{0x111182,0x0},
++	{0x211182,0x0},
++	{0x011083,0x0},
++	{0x111083,0x0},
++	{0x211083,0x0},
++	{0x011183,0x0},
++	{0x111183,0x0},
++	{0x211183,0x0},
++	{0x0100d0,0x0},
++	{0x1100d0,0x0},
++	{0x2100d0,0x0},
++	{0x0101d0,0x0},
++	{0x1101d0,0x0},
++	{0x2101d0,0x0},
++	{0x0100d1,0x0},
++	{0x1100d1,0x0},
++	{0x2100d1,0x0},
++	{0x0101d1,0x0},
++	{0x1101d1,0x0},
++	{0x2101d1,0x0},
++	{0x0100d2,0x0},
++	{0x1100d2,0x0},
++	{0x2100d2,0x0},
++	{0x0101d2,0x0},
++	{0x1101d2,0x0},
++	{0x2101d2,0x0},
++	{0x0100d3,0x0},
++	{0x1100d3,0x0},
++	{0x2100d3,0x0},
++	{0x0101d3,0x0},
++	{0x1101d3,0x0},
++	{0x2101d3,0x0},
++	{0x0110d0,0x0},
++	{0x1110d0,0x0},
++	{0x2110d0,0x0},
++	{0x0111d0,0x0},
++	{0x1111d0,0x0},
++	{0x2111d0,0x0},
++	{0x0110d1,0x0},
++	{0x1110d1,0x0},
++	{0x2110d1,0x0},
++	{0x0111d1,0x0},
++	{0x1111d1,0x0},
++	{0x2111d1,0x0},
++	{0x0110d2,0x0},
++	{0x1110d2,0x0},
++	{0x2110d2,0x0},
++	{0x0111d2,0x0},
++	{0x1111d2,0x0},
++	{0x2111d2,0x0},
++	{0x0110d3,0x0},
++	{0x1110d3,0x0},
++	{0x2110d3,0x0},
++	{0x0111d3,0x0},
++	{0x1111d3,0x0},
++	{0x2111d3,0x0},
++	{0x010068,0x0},
++	{0x010168,0x0},
++	{0x010268,0x0},
++	{0x010368,0x0},
++	{0x010468,0x0},
++	{0x010568,0x0},
++	{0x010668,0x0},
++	{0x010768,0x0},
++	{0x010868,0x0},
++	{0x010069,0x0},
++	{0x010169,0x0},
++	{0x010269,0x0},
++	{0x010369,0x0},
++	{0x010469,0x0},
++	{0x010569,0x0},
++	{0x010669,0x0},
++	{0x010769,0x0},
++	{0x010869,0x0},
++	{0x01006a,0x0},
++	{0x01016a,0x0},
++	{0x01026a,0x0},
++	{0x01036a,0x0},
++	{0x01046a,0x0},
++	{0x01056a,0x0},
++	{0x01066a,0x0},
++	{0x01076a,0x0},
++	{0x01086a,0x0},
++	{0x01006b,0x0},
++	{0x01016b,0x0},
++	{0x01026b,0x0},
++	{0x01036b,0x0},
++	{0x01046b,0x0},
++	{0x01056b,0x0},
++	{0x01066b,0x0},
++	{0x01076b,0x0},
++	{0x01086b,0x0},
++	{0x011068,0x0},
++	{0x011168,0x0},
++	{0x011268,0x0},
++	{0x011368,0x0},
++	{0x011468,0x0},
++	{0x011568,0x0},
++	{0x011668,0x0},
++	{0x011768,0x0},
++	{0x011868,0x0},
++	{0x011069,0x0},
++	{0x011169,0x0},
++	{0x011269,0x0},
++	{0x011369,0x0},
++	{0x011469,0x0},
++	{0x011569,0x0},
++	{0x011669,0x0},
++	{0x011769,0x0},
++	{0x011869,0x0},
++	{0x01106a,0x0},
++	{0x01116a,0x0},
++	{0x01126a,0x0},
++	{0x01136a,0x0},
++	{0x01146a,0x0},
++	{0x01156a,0x0},
++	{0x01166a,0x0},
++	{0x01176a,0x0},
++	{0x01186a,0x0},
++	{0x01106b,0x0},
++	{0x01116b,0x0},
++	{0x01126b,0x0},
++	{0x01136b,0x0},
++	{0x01146b,0x0},
++	{0x01156b,0x0},
++	{0x01166b,0x0},
++	{0x01176b,0x0},
++	{0x01186b,0x0},
++	{0x01008c,0x0},
++	{0x11008c,0x0},
++	{0x21008c,0x0},
++	{0x01018c,0x0},
++	{0x11018c,0x0},
++	{0x21018c,0x0},
++	{0x01008d,0x0},
++	{0x11008d,0x0},
++	{0x21008d,0x0},
++	{0x01018d,0x0},
++	{0x11018d,0x0},
++	{0x21018d,0x0},
++	{0x01008e,0x0},
++	{0x11008e,0x0},
++	{0x21008e,0x0},
++	{0x01018e,0x0},
++	{0x11018e,0x0},
++	{0x21018e,0x0},
++	{0x01008f,0x0},
++	{0x11008f,0x0},
++	{0x21008f,0x0},
++	{0x01018f,0x0},
++	{0x11018f,0x0},
++	{0x21018f,0x0},
++	{0x01108c,0x0},
++	{0x11108c,0x0},
++	{0x21108c,0x0},
++	{0x01118c,0x0},
++	{0x11118c,0x0},
++	{0x21118c,0x0},
++	{0x01108d,0x0},
++	{0x11108d,0x0},
++	{0x21108d,0x0},
++	{0x01118d,0x0},
++	{0x11118d,0x0},
++	{0x21118d,0x0},
++	{0x01108e,0x0},
++	{0x11108e,0x0},
++	{0x21108e,0x0},
++	{0x01118e,0x0},
++	{0x11118e,0x0},
++	{0x21118e,0x0},
++	{0x01108f,0x0},
++	{0x11108f,0x0},
++	{0x21108f,0x0},
++	{0x01118f,0x0},
++	{0x11118f,0x0},
++	{0x21118f,0x0},
++	{0x0100c0,0x0},
++	{0x1100c0,0x0},
++	{0x2100c0,0x0},
++	{0x0101c0,0x0},
++	{0x1101c0,0x0},
++	{0x2101c0,0x0},
++	{0x0102c0,0x0},
++	{0x1102c0,0x0},
++	{0x2102c0,0x0},
++	{0x0103c0,0x0},
++	{0x1103c0,0x0},
++	{0x2103c0,0x0},
++	{0x0104c0,0x0},
++	{0x1104c0,0x0},
++	{0x2104c0,0x0},
++	{0x0105c0,0x0},
++	{0x1105c0,0x0},
++	{0x2105c0,0x0},
++	{0x0106c0,0x0},
++	{0x1106c0,0x0},
++	{0x2106c0,0x0},
++	{0x0107c0,0x0},
++	{0x1107c0,0x0},
++	{0x2107c0,0x0},
++	{0x0108c0,0x0},
++	{0x1108c0,0x0},
++	{0x2108c0,0x0},
++	{0x0100c1,0x0},
++	{0x1100c1,0x0},
++	{0x2100c1,0x0},
++	{0x0101c1,0x0},
++	{0x1101c1,0x0},
++	{0x2101c1,0x0},
++	{0x0102c1,0x0},
++	{0x1102c1,0x0},
++	{0x2102c1,0x0},
++	{0x0103c1,0x0},
++	{0x1103c1,0x0},
++	{0x2103c1,0x0},
++	{0x0104c1,0x0},
++	{0x1104c1,0x0},
++	{0x2104c1,0x0},
++	{0x0105c1,0x0},
++	{0x1105c1,0x0},
++	{0x2105c1,0x0},
++	{0x0106c1,0x0},
++	{0x1106c1,0x0},
++	{0x2106c1,0x0},
++	{0x0107c1,0x0},
++	{0x1107c1,0x0},
++	{0x2107c1,0x0},
++	{0x0108c1,0x0},
++	{0x1108c1,0x0},
++	{0x2108c1,0x0},
++	{0x0100c2,0x0},
++	{0x1100c2,0x0},
++	{0x2100c2,0x0},
++	{0x0101c2,0x0},
++	{0x1101c2,0x0},
++	{0x2101c2,0x0},
++	{0x0102c2,0x0},
++	{0x1102c2,0x0},
++	{0x2102c2,0x0},
++	{0x0103c2,0x0},
++	{0x1103c2,0x0},
++	{0x2103c2,0x0},
++	{0x0104c2,0x0},
++	{0x1104c2,0x0},
++	{0x2104c2,0x0},
++	{0x0105c2,0x0},
++	{0x1105c2,0x0},
++	{0x2105c2,0x0},
++	{0x0106c2,0x0},
++	{0x1106c2,0x0},
++	{0x2106c2,0x0},
++	{0x0107c2,0x0},
++	{0x1107c2,0x0},
++	{0x2107c2,0x0},
++	{0x0108c2,0x0},
++	{0x1108c2,0x0},
++	{0x2108c2,0x0},
++	{0x0100c3,0x0},
++	{0x1100c3,0x0},
++	{0x2100c3,0x0},
++	{0x0101c3,0x0},
++	{0x1101c3,0x0},
++	{0x2101c3,0x0},
++	{0x0102c3,0x0},
++	{0x1102c3,0x0},
++	{0x2102c3,0x0},
++	{0x0103c3,0x0},
++	{0x1103c3,0x0},
++	{0x2103c3,0x0},
++	{0x0104c3,0x0},
++	{0x1104c3,0x0},
++	{0x2104c3,0x0},
++	{0x0105c3,0x0},
++	{0x1105c3,0x0},
++	{0x2105c3,0x0},
++	{0x0106c3,0x0},
++	{0x1106c3,0x0},
++	{0x2106c3,0x0},
++	{0x0107c3,0x0},
++	{0x1107c3,0x0},
++	{0x2107c3,0x0},
++	{0x0108c3,0x0},
++	{0x1108c3,0x0},
++	{0x2108c3,0x0},
++	{0x0110c0,0x0},
++	{0x1110c0,0x0},
++	{0x2110c0,0x0},
++	{0x0111c0,0x0},
++	{0x1111c0,0x0},
++	{0x2111c0,0x0},
++	{0x0112c0,0x0},
++	{0x1112c0,0x0},
++	{0x2112c0,0x0},
++	{0x0113c0,0x0},
++	{0x1113c0,0x0},
++	{0x2113c0,0x0},
++	{0x0114c0,0x0},
++	{0x1114c0,0x0},
++	{0x2114c0,0x0},
++	{0x0115c0,0x0},
++	{0x1115c0,0x0},
++	{0x2115c0,0x0},
++	{0x0116c0,0x0},
++	{0x1116c0,0x0},
++	{0x2116c0,0x0},
++	{0x0117c0,0x0},
++	{0x1117c0,0x0},
++	{0x2117c0,0x0},
++	{0x0118c0,0x0},
++	{0x1118c0,0x0},
++	{0x2118c0,0x0},
++	{0x0110c1,0x0},
++	{0x1110c1,0x0},
++	{0x2110c1,0x0},
++	{0x0111c1,0x0},
++	{0x1111c1,0x0},
++	{0x2111c1,0x0},
++	{0x0112c1,0x0},
++	{0x1112c1,0x0},
++	{0x2112c1,0x0},
++	{0x0113c1,0x0},
++	{0x1113c1,0x0},
++	{0x2113c1,0x0},
++	{0x0114c1,0x0},
++	{0x1114c1,0x0},
++	{0x2114c1,0x0},
++	{0x0115c1,0x0},
++	{0x1115c1,0x0},
++	{0x2115c1,0x0},
++	{0x0116c1,0x0},
++	{0x1116c1,0x0},
++	{0x2116c1,0x0},
++	{0x0117c1,0x0},
++	{0x1117c1,0x0},
++	{0x2117c1,0x0},
++	{0x0118c1,0x0},
++	{0x1118c1,0x0},
++	{0x2118c1,0x0},
++	{0x0110c2,0x0},
++	{0x1110c2,0x0},
++	{0x2110c2,0x0},
++	{0x0111c2,0x0},
++	{0x1111c2,0x0},
++	{0x2111c2,0x0},
++	{0x0112c2,0x0},
++	{0x1112c2,0x0},
++	{0x2112c2,0x0},
++	{0x0113c2,0x0},
++	{0x1113c2,0x0},
++	{0x2113c2,0x0},
++	{0x0114c2,0x0},
++	{0x1114c2,0x0},
++	{0x2114c2,0x0},
++	{0x0115c2,0x0},
++	{0x1115c2,0x0},
++	{0x2115c2,0x0},
++	{0x0116c2,0x0},
++	{0x1116c2,0x0},
++	{0x2116c2,0x0},
++	{0x0117c2,0x0},
++	{0x1117c2,0x0},
++	{0x2117c2,0x0},
++	{0x0118c2,0x0},
++	{0x1118c2,0x0},
++	{0x2118c2,0x0},
++	{0x0110c3,0x0},
++	{0x1110c3,0x0},
++	{0x2110c3,0x0},
++	{0x0111c3,0x0},
++	{0x1111c3,0x0},
++	{0x2111c3,0x0},
++	{0x0112c3,0x0},
++	{0x1112c3,0x0},
++	{0x2112c3,0x0},
++	{0x0113c3,0x0},
++	{0x1113c3,0x0},
++	{0x2113c3,0x0},
++	{0x0114c3,0x0},
++	{0x1114c3,0x0},
++	{0x2114c3,0x0},
++	{0x0115c3,0x0},
++	{0x1115c3,0x0},
++	{0x2115c3,0x0},
++	{0x0116c3,0x0},
++	{0x1116c3,0x0},
++	{0x2116c3,0x0},
++	{0x0117c3,0x0},
++	{0x1117c3,0x0},
++	{0x2117c3,0x0},
++	{0x0118c3,0x0},
++	{0x1118c3,0x0},
++	{0x2118c3,0x0},
++	{0x010020,0x0},
++	{0x110020,0x0},
++	{0x210020,0x0},
++	{0x011020,0x0},
++	{0x111020,0x0},
++	{0x211020,0x0},
++	{0x02007d,0x0},
++	{0x12007d,0x0},
++	{0x22007d,0x0},
++	{0x010040,0x0},
++	{0x010140,0x0},
++	{0x010240,0x0},
++	{0x010340,0x0},
++	{0x010440,0x0},
++	{0x010540,0x0},
++	{0x010640,0x0},
++	{0x010740,0x0},
++	{0x010840,0x0},
++	{0x010030,0x0},
++	{0x010130,0x0},
++	{0x010230,0x0},
++	{0x010330,0x0},
++	{0x010430,0x0},
++	{0x010530,0x0},
++	{0x010630,0x0},
++	{0x010730,0x0},
++	{0x010830,0x0},
++	{0x011040,0x0},
++	{0x011140,0x0},
++	{0x011240,0x0},
++	{0x011340,0x0},
++	{0x011440,0x0},
++	{0x011540,0x0},
++	{0x011640,0x0},
++	{0x011740,0x0},
++	{0x011840,0x0},
++	{0x011030,0x0},
++	{0x011130,0x0},
++	{0x011230,0x0},
++	{0x011330,0x0},
++	{0x011430,0x0},
++	{0x011530,0x0},
++	{0x011630,0x0},
++	{0x011730,0x0},
++	{0x011830,0x0},
++};
++
++/* P0 message block paremeter for training firmware */
++struct dram_cfg_param ddr_fsp0_cfg[] = {
++	{ 0xd0000, 0x0 },
++	{ 0x54003, 0x960 },
++	{ 0x54004, 0x2 },
++	{ 0x54005, 0x2830 },
++	{ 0x54006, 0x25e },
++	{ 0x54007, 0x1000 },
++	{ 0x54008, 0x101 },
++	{ 0x5400b, 0x31f },
++	{ 0x5400c, 0xc8 },
++	{ 0x5400d, 0x100 },
++	{ 0x54012, 0x1 },
++	{ 0x5402f, 0x864 },
++	{ 0x54030, 0x105 },
++	{ 0x54031, 0x18 },
++	{ 0x54032, 0x200 },
++	{ 0x54033, 0x200 },
++	{ 0x54034, 0x600 },
++	{ 0x54035, 0x810 },
++	{ 0x54036, 0x101 },
++	{ 0x5403f, 0x1221 },
++	{ 0x541fc, 0x100 },
++	{ 0xd0000, 0x1 },
++};
++
++/* P1 message block paremeter for training firmware */
++struct dram_cfg_param ddr_fsp1_cfg[] = {
++	{ 0xd0000, 0x0 },
++	{ 0x54002, 0x1 },
++	{ 0x54003, 0x42a },
++	{ 0x54004, 0x2 },
++	{ 0x54005, 0x2830 },
++	{ 0x54006, 0x25e },
++	{ 0x54007, 0x1000 },
++	{ 0x54008, 0x101 },
++	{ 0x5400b, 0x21f },
++	{ 0x5400c, 0xc8 },
++	{ 0x5400d, 0x100 },
++	{ 0x54012, 0x1 },
++	{ 0x5402f, 0x4 },
++	{ 0x54030, 0x105 },
++	{ 0x54033, 0x200 },
++	{ 0x54034, 0x600 },
++	{ 0x54035, 0x10 },
++	{ 0x54036, 0x101 },
++	{ 0x5403f, 0x1221 },
++	{ 0x541fc, 0x100 },
++	{ 0xd0000, 0x1 },
++};
++
++/* P0 2D message block paremeter for training firmware */
++struct dram_cfg_param ddr_fsp0_2d_cfg[] = {
++	{ 0xd0000, 0x0 },
++	{ 0x54003, 0x960 },
++	{ 0x54004, 0x2 },
++	{ 0x54005, 0x2830 },
++	{ 0x54006, 0x25e },
++	{ 0x54007, 0x1000 },
++	{ 0x54008, 0x101 },
++	{ 0x5400b, 0x61 },
++	{ 0x5400c, 0xc8 },
++	{ 0x5400d, 0x100 },
++	{ 0x5400e, 0x1f7f },
++	{ 0x54012, 0x1 },
++	{ 0x5402f, 0x864 },
++	{ 0x54030, 0x105 },
++	{ 0x54031, 0x18 },
++	{ 0x54032, 0x200 },
++	{ 0x54033, 0x200 },
++	{ 0x54034, 0x600 },
++	{ 0x54035, 0x810 },
++	{ 0x54036, 0x101 },
++	{ 0x5403f, 0x1221 },
++	{ 0x541fc, 0x100 },
++	{ 0xd0000, 0x1 },
++};
++
++/* DRAM PHY init engine image */
++struct dram_cfg_param ddr_phy_pie[] = {
++	{ 0xd0000, 0x0 },
++	{ 0x90000, 0x10 },
++	{ 0x90001, 0x400 },
++	{ 0x90002, 0x10e },
++	{ 0x90003, 0x0 },
++	{ 0x90004, 0x0 },
++	{ 0x90005, 0x8 },
++	{ 0x90029, 0xb },
++	{ 0x9002a, 0x480 },
++	{ 0x9002b, 0x109 },
++	{ 0x9002c, 0x8 },
++	{ 0x9002d, 0x448 },
++	{ 0x9002e, 0x139 },
++	{ 0x9002f, 0x8 },
++	{ 0x90030, 0x478 },
++	{ 0x90031, 0x109 },
++	{ 0x90032, 0x2 },
++	{ 0x90033, 0x10 },
++	{ 0x90034, 0x139 },
++	{ 0x90035, 0xb },
++	{ 0x90036, 0x7c0 },
++	{ 0x90037, 0x139 },
++	{ 0x90038, 0x44 },
++	{ 0x90039, 0x633 },
++	{ 0x9003a, 0x159 },
++	{ 0x9003b, 0x14f },
++	{ 0x9003c, 0x630 },
++	{ 0x9003d, 0x159 },
++	{ 0x9003e, 0x47 },
++	{ 0x9003f, 0x633 },
++	{ 0x90040, 0x149 },
++	{ 0x90041, 0x4f },
++	{ 0x90042, 0x633 },
++	{ 0x90043, 0x179 },
++	{ 0x90044, 0x8 },
++	{ 0x90045, 0xe0 },
++	{ 0x90046, 0x109 },
++	{ 0x90047, 0x0 },
++	{ 0x90048, 0x7c8 },
++	{ 0x90049, 0x109 },
++	{ 0x9004a, 0x0 },
++	{ 0x9004b, 0x1 },
++	{ 0x9004c, 0x8 },
++	{ 0x9004d, 0x0 },
++	{ 0x9004e, 0x45a },
++	{ 0x9004f, 0x9 },
++	{ 0x90050, 0x0 },
++	{ 0x90051, 0x448 },
++	{ 0x90052, 0x109 },
++	{ 0x90053, 0x40 },
++	{ 0x90054, 0x633 },
++	{ 0x90055, 0x179 },
++	{ 0x90056, 0x1 },
++	{ 0x90057, 0x618 },
++	{ 0x90058, 0x109 },
++	{ 0x90059, 0x40c0 },
++	{ 0x9005a, 0x633 },
++	{ 0x9005b, 0x149 },
++	{ 0x9005c, 0x8 },
++	{ 0x9005d, 0x4 },
++	{ 0x9005e, 0x48 },
++	{ 0x9005f, 0x4040 },
++	{ 0x90060, 0x633 },
++	{ 0x90061, 0x149 },
++	{ 0x90062, 0x0 },
++	{ 0x90063, 0x4 },
++	{ 0x90064, 0x48 },
++	{ 0x90065, 0x40 },
++	{ 0x90066, 0x633 },
++	{ 0x90067, 0x149 },
++	{ 0x90068, 0x10 },
++	{ 0x90069, 0x4 },
++	{ 0x9006a, 0x18 },
++	{ 0x9006b, 0x0 },
++	{ 0x9006c, 0x4 },
++	{ 0x9006d, 0x78 },
++	{ 0x9006e, 0x549 },
++	{ 0x9006f, 0x633 },
++	{ 0x90070, 0x159 },
++	{ 0x90071, 0xd49 },
++	{ 0x90072, 0x633 },
++	{ 0x90073, 0x159 },
++	{ 0x90074, 0x94a },
++	{ 0x90075, 0x633 },
++	{ 0x90076, 0x159 },
++	{ 0x90077, 0x441 },
++	{ 0x90078, 0x633 },
++	{ 0x90079, 0x149 },
++	{ 0x9007a, 0x42 },
++	{ 0x9007b, 0x633 },
++	{ 0x9007c, 0x149 },
++	{ 0x9007d, 0x1 },
++	{ 0x9007e, 0x633 },
++	{ 0x9007f, 0x149 },
++	{ 0x90080, 0x0 },
++	{ 0x90081, 0xe0 },
++	{ 0x90082, 0x109 },
++	{ 0x90083, 0xa },
++	{ 0x90084, 0x10 },
++	{ 0x90085, 0x109 },
++	{ 0x90086, 0x9 },
++	{ 0x90087, 0x3c0 },
++	{ 0x90088, 0x149 },
++	{ 0x90089, 0x9 },
++	{ 0x9008a, 0x3c0 },
++	{ 0x9008b, 0x159 },
++	{ 0x9008c, 0x18 },
++	{ 0x9008d, 0x10 },
++	{ 0x9008e, 0x109 },
++	{ 0x9008f, 0x0 },
++	{ 0x90090, 0x3c0 },
++	{ 0x90091, 0x109 },
++	{ 0x90092, 0x18 },
++	{ 0x90093, 0x4 },
++	{ 0x90094, 0x48 },
++	{ 0x90095, 0x18 },
++	{ 0x90096, 0x4 },
++	{ 0x90097, 0x58 },
++	{ 0x90098, 0xb },
++	{ 0x90099, 0x10 },
++	{ 0x9009a, 0x109 },
++	{ 0x9009b, 0x1 },
++	{ 0x9009c, 0x10 },
++	{ 0x9009d, 0x109 },
++	{ 0x9009e, 0x5 },
++	{ 0x9009f, 0x7c0 },
++	{ 0x900a0, 0x109 },
++	{ 0x900a1, 0x0 },
++	{ 0x900a2, 0x8140 },
++	{ 0x900a3, 0x10c },
++	{ 0x900a4, 0x10 },
++	{ 0x900a5, 0x8138 },
++	{ 0x900a6, 0x10c },
++	{ 0x900a7, 0x8 },
++	{ 0x900a8, 0x7c8 },
++	{ 0x900a9, 0x101 },
++	{ 0x900aa, 0x8 },
++	{ 0x900ab, 0x448 },
++	{ 0x900ac, 0x109 },
++	{ 0x900ad, 0xf },
++	{ 0x900ae, 0x7c0 },
++	{ 0x900af, 0x109 },
++	{ 0x900b0, 0x47 },
++	{ 0x900b1, 0x630 },
++	{ 0x900b2, 0x109 },
++	{ 0x900b3, 0x8 },
++	{ 0x900b4, 0x618 },
++	{ 0x900b5, 0x109 },
++	{ 0x900b6, 0x8 },
++	{ 0x900b7, 0xe0 },
++	{ 0x900b8, 0x109 },
++	{ 0x900b9, 0x0 },
++	{ 0x900ba, 0x7c8 },
++	{ 0x900bb, 0x109 },
++	{ 0x900bc, 0x8 },
++	{ 0x900bd, 0x8140 },
++	{ 0x900be, 0x10c },
++	{ 0x900bf, 0x0 },
++	{ 0x900c0, 0x1 },
++	{ 0x900c1, 0x8 },
++	{ 0x900c2, 0x8 },
++	{ 0x900c3, 0x4 },
++	{ 0x900c4, 0x8 },
++	{ 0x900c5, 0x8 },
++	{ 0x900c6, 0x7c8 },
++	{ 0x900c7, 0x101 },
++	{ 0x90006, 0x0 },
++	{ 0x90007, 0x0 },
++	{ 0x90008, 0x8 },
++	{ 0x90009, 0x0 },
++	{ 0x9000a, 0x0 },
++	{ 0x9000b, 0x0 },
++	{ 0xd00e7, 0x400 },
++	{ 0x90017, 0x0 },
++	{ 0x90026, 0x2b },
++	{ 0x2000b, 0x4b },
++	{ 0x2000c, 0x96 },
++	{ 0x2000d, 0x5dc },
++	{ 0x2000e, 0x2c },
++	{ 0x12000b, 0x21 },
++	{ 0x12000c, 0x42 },
++	{ 0x12000d, 0x29a },
++	{ 0x12000e, 0x21 },
++	{ 0x9000c, 0x0 },
++	{ 0x9000d, 0x173 },
++	{ 0x9000e, 0x60 },
++	{ 0x9000f, 0x6110 },
++	{ 0x90010, 0x2152 },
++	{ 0x90011, 0xdfbd },
++	{ 0x90012, 0xffff },
++	{ 0x90013, 0x6152 },
++	{ 0x20089, 0x1 },
++	{ 0x20088, 0x19 },
++	{ 0xc0080, 0x0 },
++	{ 0xd0000, 0x1 }
++};
++
++struct dram_fsp_msg ddr_dram_fsp_msg[] = {
++	{
++		/* P0 2400mts 1D */
++		.drate = 2400,
++		.fw_type = FW_1D_IMAGE,
++		.fsp_cfg = ddr_fsp0_cfg,
++		.fsp_cfg_num = ARRAY_SIZE(ddr_fsp0_cfg),
++	},
++	{
++		/* P1 1066mts 1D */
++		.drate = 1066,
++		.fw_type = FW_1D_IMAGE,
++		.fsp_cfg = ddr_fsp1_cfg,
++		.fsp_cfg_num = ARRAY_SIZE(ddr_fsp1_cfg),
++	},
++	{
++		/* P0 2400mts 2D */
++		.drate = 2400,
++		.fw_type = FW_2D_IMAGE,
++		.fsp_cfg = ddr_fsp0_2d_cfg,
++		.fsp_cfg_num = ARRAY_SIZE(ddr_fsp0_2d_cfg),
++	},
++};
++
++/* ddr timing config params */
++struct dram_timing_info dram_timing = {
++	.ddrc_cfg = ddr_ddrc_cfg,
++	.ddrc_cfg_num = ARRAY_SIZE(ddr_ddrc_cfg),
++	.ddrphy_cfg = ddr_ddrphy_cfg,
++	.ddrphy_cfg_num = ARRAY_SIZE(ddr_ddrphy_cfg),
++	.fsp_msg = ddr_dram_fsp_msg,
++	.fsp_msg_num = ARRAY_SIZE(ddr_dram_fsp_msg),
++	.ddrphy_trained_csr = ddr_ddrphy_trained_csr,
++	.ddrphy_trained_csr_num = ARRAY_SIZE(ddr_ddrphy_trained_csr),
++	.ddrphy_pie = ddr_phy_pie,
++	.ddrphy_pie_num = ARRAY_SIZE(ddr_phy_pie),
++	.fsp_table = { 2400, 1066, },
++};
+diff --git a/board/solidrun/solidsense-n8/spl.c b/board/solidrun/solidsense-n8/spl.c
+new file mode 100644
+index 00000000000..a4e4bdfab42
+--- /dev/null
++++ b/board/solidrun/solidsense-n8/spl.c
+@@ -0,0 +1,133 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright 2018-2019, 2021 NXP
++ * Copyright 2025 Josua Mayer <josua@solid-run.com>
++ */
++
++#include <asm/arch/ddr.h>
++#include <asm/arch/sys_proto.h>
++#include <asm/mach-imx/boot_mode.h>
++#include <asm/sections.h>
++#include <dm/uclass.h>
++#include <hang.h>
++#include <init.h>
++#include <power/pmic.h>
++#include <power/bd71837.h>
++#include <spl.h>
++
++DECLARE_GLOBAL_DATA_PTR;
++
++int spl_board_boot_device(enum boot_device boot_dev_spl)
++{
++	switch (boot_dev_spl) {
++	case SD2_BOOT:
++		return BOOT_DEVICE_MMC1;
++	case MMC3_BOOT:
++		return BOOT_DEVICE_MMC2;
++	default:
++		if (IS_ENABLED(CONFIG_SPL_BOOTROM_SUPPORT))
++			return BOOT_DEVICE_BOOTROM;
++
++		return BOOT_DEVICE_NONE;
++	}
++}
++
++void spl_dram_init(void)
++{
++	ddr_init(&dram_timing);
++}
++
++int power_init_board(void)
++{
++	struct udevice *dev;
++	int ret;
++
++	ret = pmic_get("pmic@4b", &dev);
++	if (ret == -ENODEV) {
++		puts("No pmic@4b\n");
++		return 0;
++	}
++	if (ret != 0)
++		return ret;
++
++	/* decrease RESET key long push time from the default 10s to 10ms */
++	pmic_reg_write(dev, BD718XX_PWRONCONFIG1, 0x0);
++
++	/* unlock the PMIC regs */
++	pmic_reg_write(dev, BD718XX_REGLOCK, 0x1);
++
++	/* Set VDD_ARM to typical value 0.85v for 1.2Ghz */
++	pmic_reg_write(dev, BD718XX_BUCK2_VOLT_RUN, 0xf);
++
++	if (IS_ENABLED(CONFIG_IMX8MN_LOW_DRIVE_MODE)) {
++		/* Set VDD_SOC/VDD_DRAM to typical value 0.8v for low drive mode */
++		pmic_reg_write(dev, BD718XX_BUCK1_VOLT_RUN, 0xa);
++	} else {
++		/* Set VDD_SOC/VDD_DRAM to typical value 0.85v for nominal mode */
++		pmic_reg_write(dev, BD718XX_BUCK1_VOLT_RUN, 0xf);
++	}
++
++	/* Set VDD_SOC 0.75v for low-v suspend */
++	pmic_reg_write(dev, BD718XX_BUCK1_VOLT_SUSP, 0x5);
++
++	/* increase NVCC_DRAM_1V2 to 1.2v for DDR4 */
++	pmic_reg_write(dev, BD718XX_4TH_NODVS_BUCK_VOLT, 0x28);
++
++	/* lock the PMIC regs */
++	pmic_reg_write(dev, BD718XX_REGLOCK, 0x11);
++
++	return 0;
++}
++
++void spl_board_init(void)
++{
++	arch_misc_init();
++
++	puts("Normal Boot\n");
++}
++
++int board_fit_config_name_match(const char *name)
++{
++	/* only have one board, match any dtb */
++	return 0;
++}
++
++void board_init_f(ulong dummy)
++{
++	struct udevice *dev;
++	int ret;
++
++	/* Clear the BSS. */
++	memset(__bss_start, 0, __bss_end - __bss_start);
++
++	arch_cpu_init();
++
++	board_early_init_f();
++
++	timer_init();
++
++	ret = spl_early_init();
++	if (ret) {
++		debug("spl_early_init() failed: %d\n", ret);
++		hang();
++	}
++
++	ret = uclass_get_device_by_name(UCLASS_CLK,
++					"clock-controller@30380000",
++					&dev);
++	if (ret < 0) {
++		printf("Failed to find clock node. Check device tree\n");
++		hang();
++	}
++
++	preloader_console_init();
++
++	enable_tzc380();
++
++	power_init_board();
++
++	/* DDR initialization */
++	spl_dram_init();
++
++	board_init_r(NULL, 0);
++}
+diff --git a/board/solidrun/solidsense-n8/supercap.c b/board/solidrun/solidsense-n8/supercap.c
+new file mode 100644
+index 00000000000..f3ccbf8c913
+--- /dev/null
++++ b/board/solidrun/solidsense-n8/supercap.c
+@@ -0,0 +1,134 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++/*
++ * Copyright 2021 Alvaro Karsz <alvaro.karsz@solid-run.com>
++ * Copyright 2025 Josua Mayer <josua@solid-run.com>
++ */
++
++#include <button.h>
++#include <command.h>
++#include <linux/err.h>
++
++static struct udevice *button_power, *button_charge;
++
++static int supercap_get_status(bool *powered, bool *charged)
++{
++	int ret;
++
++	/* get power fail button */
++	if (IS_ERR_OR_NULL(button_power)) {
++		ret = button_get_by_label("Power Fail", &button_power);
++		if (ret) {
++			printf("Failed to get supercap \"Power Fail\" button: %d\n", ret);
++			return ret;
++		}
++	}
++
++	/* get full charge button */
++	if (IS_ERR_OR_NULL(button_charge)) {
++		ret = button_get_by_label("Low Charge", &button_charge);
++		if (ret) {
++			printf("Failed to get supercap \"Full Charge\" button: %d\n", ret);
++			return ret;
++		}
++	}
++
++	/* query power fail button */
++	ret = button_get_state(button_power);
++	if (ret < 0) {
++		printf("Failed to get supercap \"Power Fail\" button state: %d\n", ret);
++		return CMD_RET_FAILURE;
++	}
++	*powered = (ret == BUTTON_OFF);
++
++	/* query full charge button */
++	ret = button_get_state(button_charge);
++	if (ret < 0) {
++		printf("Failed to get supercap \"Full Charge\" button state: %d\n", ret);
++		return ret;
++	}
++	*charged = (ret == BUTTON_OFF);
++
++	return 0;
++}
++
++/*
++ * Function that can be called from U-boot
++ * This function will check if power is connected.
++ * If power is not connected, it will keep checking forever.
++ *
++ * function receives 1 argument <mode>: this function has 2 modes:
++ * mode = 1: boot if power is connected.
++ * mode = 2: boot if power is connected and capacitor charge is over 90%.
++ */
++static int check_power_connection(struct cmd_tbl *cmdtp, int flag, int argc,
++				  char *const argv[])
++{
++	int ret;
++	char mode; /* function mode, get from argv */
++	bool powered, charged;
++
++	/* validate number of arguments */
++	if (argc == 1) {
++		/* no arguments, set default mode - 0 */
++		mode = '0';
++	} else if (argc == 2) {
++		/* get mode from argv */
++		mode = *argv[1];
++	} else {
++		/* invalid number of arguments */
++		return cmd_usage(cmdtp);
++	}
++
++	/* check mode */
++	switch (mode) {
++	case '0':
++		printf("Power check - show status\n");
++
++		if (supercap_get_status(&powered, &charged))
++			return CMD_RET_FAILURE;
++
++		if (powered)
++			puts("Powered, ");
++		else
++			puts("Not powered, ");
++		if (charged)
++			puts("Charged.\n");
++		else
++			puts("Not charged.\n");
++
++		return CMD_RET_SUCCESS;
++	case '1':
++		printf("Power check - wait till power is connected\n");
++
++		do {
++			ret = supercap_get_status(&powered, &charged);
++			if (ret)
++				return CMD_RET_FAILURE;
++		} while (!powered);
++
++		return CMD_RET_SUCCESS;
++	case '2':
++		printf("Power check - wait till power is connected and capacitor charge is 90%%\n");
++
++		do {
++			ret = supercap_get_status(&powered, &charged);
++			if (ret)
++				return CMD_RET_FAILURE;
++		} while (!powered || !charged);
++
++		return CMD_RET_SUCCESS;
++	default: /*ilegal mode, ignore function and boot*/
++		printf("Power check - illegal mode\n");
++		return cmd_usage(cmdtp);
++	}
++}
++
++U_BOOT_CMD(
++		check_power_connection, 2, 0, check_power_connection,
++		"Check if power is connected\n"
++		"	check_power_connection <mode>\n"
++		"	mode = 0: show status\n"
++		"	mode = 1: wait till power is connected\n"
++		"	mode = 2: wait till power is connected and capacitor charge is over 90%\n",
++		" <mode>\n"
++);
+diff --git a/configs/solidsense-n8_defconfig b/configs/solidsense-n8_defconfig
+new file mode 100644
+index 00000000000..320066f92fd
+--- /dev/null
++++ b/configs/solidsense-n8_defconfig
+@@ -0,0 +1,134 @@
++CONFIG_ARM=y
++CONFIG_ARCH_IMX8M=y
++CONFIG_TEXT_BASE=0x40200000
++CONFIG_SYS_MALLOC_LEN=0x2000000
++CONFIG_SPL_GPIO=y
++CONFIG_SPL_LIBCOMMON_SUPPORT=y
++CONFIG_SPL_LIBGENERIC_SUPPORT=y
++CONFIG_NR_DRAM_BANKS=2
++CONFIG_ENV_SIZE=0x4000
++CONFIG_ENV_OFFSET=0x380000
++CONFIG_DM_GPIO=y
++CONFIG_DEFAULT_DEVICE_TREE="imx8mn-solidsense-n8-compact"
++CONFIG_SPL_TEXT_BASE=0x912000
++CONFIG_TARGET_SOLIDSENSE_N8=y
++CONFIG_OF_LIBFDT_OVERLAY=y
++CONFIG_SYS_MONITOR_LEN=524288
++CONFIG_SPL_MMC=y
++CONFIG_SPL_SERIAL=y
++CONFIG_SPL_DRIVERS_MISC=y
++CONFIG_SPL_STACK=0x95dff0
++CONFIG_SPL=y
++CONFIG_IMX_BOOTAUX=y
++CONFIG_SPL_IMX_ROMAPI_LOADADDR=0x48000000
++CONFIG_SYS_LOAD_ADDR=0x40400000
++CONFIG_SYS_MEMTEST_START=0x60000000
++CONFIG_SYS_MEMTEST_END=0x80000000
++CONFIG_REMAKE_ELF=y
++CONFIG_FIT=y
++CONFIG_FIT_EXTERNAL_OFFSET=0x3000
++CONFIG_SPL_LOAD_FIT=y
++CONFIG_SYS_BOOTM_LEN=0x2000000
++CONFIG_DISTRO_DEFAULTS=y
++CONFIG_OF_BOARD_SETUP=y
++CONFIG_OF_SYSTEM_SETUP=y
++CONFIG_BOOTCOMMAND="check_power_connection 2;run distro_bootcmd;run bsp_bootcmd"
++CONFIG_DEFAULT_FDT_FILE="freescale/imx8mn-solidsense-n8-compact.dtb"
++CONFIG_SYS_CBSIZE=2048
++CONFIG_SYS_PBSIZE=2074
++CONFIG_ARCH_MISC_INIT=y
++CONFIG_BOARD_EARLY_INIT_F=y
++CONFIG_BOARD_LATE_INIT=y
++CONFIG_SPL_MAX_SIZE=0x34000
++CONFIG_SPL_HAS_BSS_LINKER_SECTION=y
++CONFIG_SPL_BSS_START_ADDR=0x95e000
++CONFIG_SPL_BSS_MAX_SIZE=0x2000
++CONFIG_SPL_BOARD_INIT=y
++CONFIG_SPL_BOOTROM_SUPPORT=y
++# CONFIG_SPL_SHARES_INIT_SP_ADDR is not set
++CONFIG_SPL_SYS_MALLOC=y
++CONFIG_SPL_HAS_CUSTOM_MALLOC_START=y
++CONFIG_SPL_CUSTOM_SYS_MALLOC_ADDR=0x42200000
++CONFIG_SPL_SYS_MALLOC_SIZE=0x80000
++CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_USE_SECTOR=y
++CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR=0x300
++CONFIG_SPL_I2C=y
++CONFIG_SPL_POWER=y
++CONFIG_SPL_WATCHDOG=y
++CONFIG_KASLR=y
++CONFIG_SYS_PROMPT="u-boot=> "
++# CONFIG_BOOTM_NETBSD is not set
++# CONFIG_CMD_EXPORTENV is not set
++# CONFIG_CMD_IMPORTENV is not set
++CONFIG_CMD_ERASEENV=y
++CONFIG_CRC32_VERIFY=y
++CONFIG_CMD_MEMTEST=y
++CONFIG_CMD_CLK=y
++CONFIG_CMD_FUSE=y
++CONFIG_CMD_GPIO=y
++CONFIG_CMD_I2C=y
++CONFIG_CMD_MMC=y
++CONFIG_CMD_USB=y
++CONFIG_CMD_WDT=y
++CONFIG_CMD_CACHE=y
++CONFIG_CMD_RTC=y
++CONFIG_CMD_REGULATOR=y
++CONFIG_OF_CONTROL=y
++CONFIG_SPL_OF_CONTROL=y
++CONFIG_ENV_OVERWRITE=y
++CONFIG_ENV_IS_NOWHERE=y
++CONFIG_ENV_IS_IN_MMC=y
++CONFIG_SYS_RELOC_GD_ENV_ADDR=y
++CONFIG_SYS_MMC_ENV_DEV=1
++CONFIG_SPL_DM=y
++CONFIG_BUTTON=y
++CONFIG_BUTTON_GPIO=y
++CONFIG_SPL_CLK_IMX8MN=y
++CONFIG_CLK_IMX8MN=y
++CONFIG_GPIO_HOG=y
++CONFIG_MXC_GPIO=y
++CONFIG_DM_PCA953X=y
++CONFIG_DM_I2C=y
++CONFIG_SUPPORT_EMMC_BOOT=y
++CONFIG_MMC_IO_VOLTAGE=y
++CONFIG_SPL_MMC_IO_VOLTAGE=y
++CONFIG_MMC_UHS_SUPPORT=y
++CONFIG_MMC_HS400_ES_SUPPORT=y
++CONFIG_SPL_MMC_HS400_ES_SUPPORT=y
++CONFIG_MMC_HS400_SUPPORT=y
++CONFIG_SPL_MMC_HS400_SUPPORT=y
++CONFIG_FSL_USDHC=y
++CONFIG_MTD=y
++CONFIG_PHYLIB=y
++CONFIG_PHY_ADIN=y
++CONFIG_PHY_ATHEROS=y
++CONFIG_DM_ETH_PHY=y
++CONFIG_PHY_GIGE=y
++CONFIG_FEC_MXC=y
++CONFIG_MII=y
++CONFIG_PINCTRL=y
++CONFIG_SPL_PINCTRL=y
++CONFIG_PINCTRL_IMX8M=y
++CONFIG_POWER_DOMAIN=y
++CONFIG_IMX8M_POWER_DOMAIN=y
++CONFIG_IMX8M_BLK_CTRL=y
++CONFIG_DM_PMIC=y
++CONFIG_SPL_DM_PMIC_BD71837=y
++CONFIG_DM_REGULATOR=y
++CONFIG_SPL_DM_REGULATOR=y
++CONFIG_DM_REGULATOR_FIXED=y
++CONFIG_DM_REGULATOR_GPIO=y
++CONFIG_DM_RNG=y
++CONFIG_DM_RTC=y
++CONFIG_RTC_ABX80X=y
++CONFIG_DM_SERIAL=y
++CONFIG_MXC_UART=y
++CONFIG_SYSRESET=y
++CONFIG_SYSRESET_PSCI=y
++CONFIG_DM_THERMAL=y
++CONFIG_IMX_TMU=y
++CONFIG_USB=y
++# CONFIG_SPL_DM_USB is not set
++CONFIG_USB_EHCI_HCD=y
++CONFIG_IMX_WATCHDOG=y
++CONFIG_WDT=y
+diff --git a/include/configs/imx8mn_evk.h b/include/configs/imx8mn_evk.h
+index 6c5c6406d6f..1dd3f1d36b4 100644
+--- a/include/configs/imx8mn_evk.h
++++ b/include/configs/imx8mn_evk.h
+@@ -141,7 +141,7 @@
+ #define CFG_SYS_SDRAM_BASE           0x40000000
+ #define PHYS_SDRAM                      0x40000000
+ 
+-#ifdef CONFIG_TARGET_IMX8MN_DDR3_EVK
++#if defined(CONFIG_TARGET_IMX8MN_DDR3_EVK) || defined(CONFIG_TARGET_SOLIDSENSE_N8)
+ #define PHYS_SDRAM_SIZE			0x40000000 /* 1GB DDR */
+ #else
+ #define PHYS_SDRAM_SIZE			0x80000000 /* 2GB DDR */
+-- 
+2.43.0
+

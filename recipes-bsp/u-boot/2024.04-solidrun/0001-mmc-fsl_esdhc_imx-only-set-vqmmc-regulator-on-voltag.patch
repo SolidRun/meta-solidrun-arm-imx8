@@ -1,0 +1,69 @@
+From eb40455109a8f9c7a33fa3e0cbe6e63b8b2f4bd4 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Thu, 2 Jan 2025 16:08:12 +0100
+Subject: [PATCH 1/2] mmc: fsl_esdhc_imx: only set vqmmc regulator on voltage
+ change
+
+vqmmc-supply might be a fixed regulator returning an error on
+regulator_set_value. esdhc_set_voltage therefore returns an error when
+called with a fixed-regulator as vqmmc-supply.
+
+It is however perfectly legitimate to call esdhc_set_voltage in order to
+select the one voltage matching the fixed regulator..
+
+Update esdhc_set_voltage to always call regulator_get_value first and
+skip set_value when no change is needed.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ drivers/mmc/fsl_esdhc_imx.c | 26 +++++++++++++++-----------
+ 1 file changed, 15 insertions(+), 11 deletions(-)
+
+diff --git a/drivers/mmc/fsl_esdhc_imx.c b/drivers/mmc/fsl_esdhc_imx.c
+index eaee79afed8..4af67c4cecd 100644
+--- a/drivers/mmc/fsl_esdhc_imx.c
++++ b/drivers/mmc/fsl_esdhc_imx.c
+@@ -769,13 +769,15 @@ static int esdhc_set_voltage(struct mmc *mmc)
+ 			return -ENOTSUPP;
+ 		if (CONFIG_IS_ENABLED(DM_REGULATOR) &&
+ 		    !IS_ERR_OR_NULL(priv->vqmmc_dev)) {
+-			ret = regulator_set_value(priv->vqmmc_dev,
+-						  3300000);
+-			if (ret) {
+-				printf("Setting to 3.3V error");
+-				return -EIO;
+-			}
++			if (regulator_get_value(priv->vqmmc_dev) != 3300000) {
++				ret = regulator_set_value(priv->vqmmc_dev,
++							  3300000);
++				if (ret) {
++					printf("Setting to 3.3V error");
++					return -EIO;
++				}
+ 			mdelay(5);
++			}
+ 		}
+ 
+ 		esdhc_clrbits32(&regs->vendorspec, ESDHC_VENDORSPEC_VSELECT);
+@@ -787,11 +789,13 @@ static int esdhc_set_voltage(struct mmc *mmc)
+ 	case MMC_SIGNAL_VOLTAGE_180:
+ 		if (CONFIG_IS_ENABLED(DM_REGULATOR) &&
+ 		    !IS_ERR_OR_NULL(priv->vqmmc_dev)) {
+-			ret = regulator_set_value(priv->vqmmc_dev,
+-						  1800000);
+-			if (ret) {
+-				printf("Setting to 1.8V error");
+-				return -EIO;
++			if (regulator_get_value(priv->vqmmc_dev) != 1800000) {
++				ret = regulator_set_value(priv->vqmmc_dev,
++							  1800000);
++				if (ret) {
++					printf("Setting to 1.8V error");
++					return -EIO;
++				}
+ 			}
+ 		}
+ 		esdhc_setbits32(&regs->vendorspec, ESDHC_VENDORSPEC_VSELECT);
+-- 
+2.43.0
+
