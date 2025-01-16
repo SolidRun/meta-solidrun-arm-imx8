@@ -191,4 +191,4 @@ jobs:
           aws_bucket: ${{ secrets.IMAGES_S3_BUCKET }}
           endpoint: ${{ secrets.IMAGES_S3_HOST }}
           source_dir: s3
-          destination_dir: IMX8/imx8mp_yocto_kirkstone-5.15.71-2.2.2/${{ needs.build_images.outputs.build_tag }}
+          destination_dir: IMX8/meta-solidrun-arm-imx8/kirkstone-lf-5.15.71-2.2.2/${{ needs.build_images.outputs.build_tag }}
