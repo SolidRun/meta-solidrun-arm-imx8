@@ -1,0 +1,46 @@
+From ca366a102107df50d7112d624ff4d9039649c804 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Thu, 16 Jan 2025 14:19:08 +0100
+Subject: [PATCH] board: solidrun: solidsense-n8: fix phy detection running
+ twice
+
+Before starting kernel board code attempts to identify the ethernet phy
+address for patching Linux DTB.
+The fec_get_miibus function allocates structures and can not be called
+twice for the same bus. Store the mdio bus handle in a static variable
+and reuse it when the phy detection function is called again.
+
+This fixes dtb patching after u-boot failed to start the first boot
+target.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ board/solidrun/solidsense-n8/board.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/board/solidrun/solidsense-n8/board.c b/board/solidrun/solidsense-n8/board.c
+index 037eb92be6..d6e63936ea 100644
+--- a/board/solidrun/solidsense-n8/board.c
++++ b/board/solidrun/solidsense-n8/board.c
+@@ -45,14 +45,16 @@ int board_early_init_f(void)
+ 	return 0;
+ }
+ 
++static struct mii_dev *bus = NULL;
++
+ static int find_ethernet_phy(void)
+ {
+-	struct mii_dev *bus = NULL;
+ 	struct phy_device *phydev = NULL;
+ 	int phy_addr = -ENOENT;
+ 
+ 	if (IS_ENABLED(CONFIG_FEC_MXC)) {
+-		bus = fec_get_miibus(ENET1_BASE_ADDR, -1);
++		if (bus == NULL)
++			bus = fec_get_miibus(ENET1_BASE_ADDR, -1);
+ 		if (!bus)
+ 			return -ENOENT;
+ 
+-- 
+2.43.0
+
