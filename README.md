@@ -6,9 +6,9 @@ This is a yocto meta layer for adding SolidRun i.MX8 based products support to N
 
 - [SolidSense N8 Compact](https://www.solid-run.com/edge-gateway-solidsense/#iot-compact)
 
-## Compile base image
+## Build Instructions
 
-### Build Dependencies
+### Host Dependencies
 
 Install the `repo` command according to NXP's [i.MX Repo Manifest README](https://github.com/nxp-imx/imx-manifest/blob/db1867b81676a2513b91267e4c85369dee20a800/README.md#install-the-repo-utility), as well as the "Build Host Packages" per [Yocto Documentation](https://docs.yoctoproject.org/5.0.3/brief-yoctoprojectqs/index.html#build-host-packages).
 
@@ -38,32 +38,25 @@ repo sync
 
 ### Setup Build Directory
 
-```
-[MACHINE=<machine>] [DISTRO=fsl-imx-<backend>] source ./imx-setup-release.sh -b bld-<backend>
+Initialise a new build directory using NXP's `imx-setup-release.sh` script:
 
-<machine>   defaults to `imx6qsabresd`
-<backend>   Graphics backend type
-    xwayland    Wayland with X11 support - default distro
-    wayland     Wayland
-    fb          Framebuffer (not supported for mx8)
+    MACHINE=solidsense-n8 DISTRO=fsl-imx-xwayland source ./imx-setup-release.sh -b build
 
-MACHINE=solidsense-n8 DISTRO=fsl-imx-xwayland source ./imx-setup-release.sh -b build
-```
+Then add to `conf/bblayers.conf` the SolidRun meta layer:
 
-Add to `conf/bblayers.conf`:
+    BBLAYERS += "${BSPDIR}/sources/meta-solidrun-arm-imx8"
 
-```
-BBLAYERS += "${BSPDIR}/sources/meta-solidrun-arm-imx8"
-```
+When returning to the build directory at a later time the command below should be used instead:
 
-Re-enter: `. ./setup-environment build`
+    . ./setup-environment build
 
 ### Build
 
-```
-bitbake imx-image-core
-```
+With the build directory set up, any desirable yocto target may be built, e.g. the nxp `imx-image-core`:
 
+    bitbake imx-image-core
+
+Build results will be produced in the `tmp/deploy/images/solidsense-n8` subdirectory.
 
 ## Common Issues
 
@@ -110,3 +103,10 @@ As a workaround ensure that the host OS does not have boost development files in
 rm -rf tmp sstate-cache
 bitbake shared-mime-info-native
 ```
+
+## Maintainer Notes
+
+### Patching Linux / U-Boot / ATF / etc.:
+
+Development is done in [imx8mp_build: branch "develop-lf-6.6.52-2.2.0-imx8mn"](https://github.com/SolidRun/imx8mp_build/tree/develop-lf-6.6.52-2.2.0-imx8mn) first, it serves as the reference BSP for HW validation.
+Patches should be copied without changes from imx8mp_build to this layer.
