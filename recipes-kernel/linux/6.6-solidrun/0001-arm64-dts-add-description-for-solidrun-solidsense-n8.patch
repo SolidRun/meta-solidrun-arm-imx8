@@ -1,7 +1,8 @@
-From 2eba895d4403300ef17d1fa7964f69b847aa19b8 Mon Sep 17 00:00:00 2001
+From b5dd28478fa69a1c88cab3060b05169f1bf0f423 Mon Sep 17 00:00:00 2001
 From: Josua Mayer <josua@solid-run.com>
 Date: Fri, 3 Jan 2025 14:01:38 +0100
-Subject: [PATCH] arm64: dts: add description for solidrun solidsense-n8 board
+Subject: [PATCH 1/7] arm64: dts: add description for solidrun solidsense-n8
+ board
 
 Signed-off-by: Josua Mayer <josua@solid-run.com>
 ---
