@@ -3,6 +3,12 @@
 This is the SolidRun Yocto BSP Layer for i.MX8 Landing Page.
 Specific releases are organised in branches below:
 
+- [scarthgap-imx8m](https://github.com/SolidRun/meta-solidrun-arm-imx8/tree/scarthgap-imx8m): Yocto 5.0 Scarthgap - NXP Embedded Linux 6.6.52-2.2.0
+
+   Supported Platforms:
+
+   - [SolidSense N8 Compact](https://www.solid-run.com/edge-gateway-solidsense/#iot-compact)
+
 - [kirkstone-imx8m](https://github.com/SolidRun/meta-solidrun-arm-imx8/tree/kirkstone-imx8m): Yocto 4.0 Kirkstone - NXP Embedded Linux 5.15.71-2.2.0
 
    Supported Platforms:
