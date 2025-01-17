@@ -6,6 +6,10 @@ This is a yocto meta layer for adding SolidRun i.MX8 based products support to N
 
 - [SolidSense N8 Compact](https://www.solid-run.com/edge-gateway-solidsense/#iot-compact)
 
+## Binaries
+
+Binaries are generated automatically by our CI infrastructure to [images.solid-run.com](https://images.solid-run.com/IMX8/meta-solidrun-arm-imx8/)
+
 ## Build Instructions
 
 ### Host Dependencies
@@ -14,7 +18,7 @@ Install the `repo` command according to NXP's [i.MX Repo Manifest README](https:
 
 ### Download Yocto Recipes
 
-Start in a new empty directory with plenty of free disk space - at least 100GB. Then download the build recipes:
+Start in a new empty directory with plenty of free disk space - at least 150GB. Then download the build recipes:
 
 ```
 repo init -u https://github.com/nxp-imx/imx-manifest -b imx-linux-scarthgap -m imx-6.6.52-2.2.0.xml
