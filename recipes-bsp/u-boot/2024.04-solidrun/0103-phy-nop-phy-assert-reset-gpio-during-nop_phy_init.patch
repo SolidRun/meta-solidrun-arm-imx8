@@ -1,0 +1,31 @@
+From 73db3b20e20db27c2d2602afde1c6116ba6aadbc Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Wed, 14 May 2025 13:19:33 +0300
+Subject: [PATCH 2/3] phy: nop-phy: assert reset-gpio during nop_phy_init
+
+On i.MX8M Mini platform "usb reset" command never triggers the nop phy
+reset function.
+Add explicit assertion and delay to nop_phy_init to ensure the gpio is
+togged also during "usb reset" command.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ drivers/phy/nop-phy.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/phy/nop-phy.c b/drivers/phy/nop-phy.c
+index c53e3216d0..f67ab3b2a6 100644
+--- a/drivers/phy/nop-phy.c
++++ b/drivers/phy/nop-phy.c
+@@ -46,6 +46,8 @@ static int nop_phy_init(struct phy *phy)
+ #if CONFIG_IS_ENABLED(DM_GPIO)
+ 	/* Take phy out of reset */
+ 	if (dm_gpio_is_valid(&priv->reset_gpio)) {
++		dm_gpio_set_value(&priv->reset_gpio, true);
++		udelay(10000);
+ 		ret = dm_gpio_set_value(&priv->reset_gpio, false);
+ 		if (ret) {
+ 			if (CONFIG_IS_ENABLED(CLK))
+-- 
+2.43.0
+

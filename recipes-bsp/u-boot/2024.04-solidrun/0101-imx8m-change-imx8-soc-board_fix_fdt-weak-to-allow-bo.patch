@@ -1,0 +1,34 @@
+From 89c465b2ca0454e148a69a815dcc042032f99313 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Mon, 12 May 2025 18:49:30 +0300
+Subject: [PATCH 1/2] imx8m: change imx8 soc board_fix_fdt weak to allow board
+ override
+
+The board_fix_fdt function is intended to allow boards fixing the u-boot
+device-tree before driver model starts.
+
+Change the implementation in imx8 soc.c to weak so that boards may
+actually implement it by themselves avoiding linker error for duplicate
+symbol.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ arch/arm/mach-imx/imx8m/soc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/mach-imx/imx8m/soc.c b/arch/arm/mach-imx/imx8m/soc.c
+index c3282ccc21..ad0d9b36ca 100644
+--- a/arch/arm/mach-imx/imx8m/soc.c
++++ b/arch/arm/mach-imx/imx8m/soc.c
+@@ -1826,7 +1826,7 @@ usb_modify_speed:
+ 
+ #ifdef CONFIG_OF_BOARD_FIXUP
+ #ifndef CONFIG_SPL_BUILD
+-int board_fix_fdt(void *fdt)
++__weak int board_fix_fdt(void *fdt)
+ {
+ 	if (is_imx8mpul()) {
+ 		int i = 0;
+-- 
+2.43.0
+

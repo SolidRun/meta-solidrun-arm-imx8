@@ -5,6 +5,9 @@ This is a yocto meta layer for adding SolidRun i.MX8 based products support to N
 ## HW Compatibility
 
 - [SolidSense N8 Compact](https://www.solid-run.com/edge-gateway-solidsense/#iot-compact)
+- [i.MX8M Mini SoM](https://www.solid-run.com/embedded-industrial-iot/nxp-i-mx8-family/imx8m-mini-som/)
+
+  - [HummingBoard Ripple](https://www.solid-run.com/embedded-industrial-iot/nxp-i-mx8-family/hummingboard-m/#ripple)
 
 ## Binaries
 
@@ -39,6 +42,13 @@ EOF
 
 repo sync
 ```
+
+### Supported Machines
+
+- `imx8mm-sr-som`: i.MX8M Mini SoM on HummingBoard Ripple
+- `solidsense-n8`: SolidSense N8 Compact
+
+The instructions below use `solidsense-n8` as an example, substitute as needed.
 
 ### Setup Build Directory
 
@@ -114,3 +124,8 @@ bitbake shared-mime-info-native
 
 Development is done in [imx8mp_build: branch "develop-lf-6.6.52-2.2.0-imx8mn"](https://github.com/SolidRun/imx8mp_build/tree/develop-lf-6.6.52-2.2.0-imx8mn) first, it serves as the reference BSP for HW validation.
 Patches should be copied without changes from imx8mp_build to this layer.
+
+For separation between different products patches, number their patches at different offsets:
+
+- 0001: i.MX8M Nano SolidSense N8 Patches
+- 0101: i.MX8M Mini Patches
