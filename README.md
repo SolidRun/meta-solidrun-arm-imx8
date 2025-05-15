@@ -7,6 +7,10 @@ Specific releases are organised in branches below:
 
    Supported Platforms:
 
+   - [i.MX8M Mini SoM](https://www.solid-run.com/embedded-industrial-iot/nxp-i-mx8-family/imx8m-mini-som/)
+
+     - [i.MX8 HummingBoard Ripple](https://www.solid-run.com/embedded-industrial-iot/nxp-i-mx8-family/hummingboard-m/#ripple)
+
    - [SolidSense N8 Compact](https://www.solid-run.com/edge-gateway-solidsense/#iot-compact)
 
 - [kirkstone-imx8m](https://github.com/SolidRun/meta-solidrun-arm-imx8/tree/kirkstone-imx8m): Yocto 4.0 Kirkstone - NXP Embedded Linux 5.15.71-2.2.0
