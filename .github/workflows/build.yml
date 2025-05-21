@@ -297,10 +297,134 @@ jobs:
           target: "/${{ github.repository_id }}/${{ steps.tag_step.outputs.build_tag }}/imx8mn"
           recursive: true
 
+  build_imx8mp:
+    needs: prepare_container
+    runs-on: self-hosted
+    timeout-minutes: 1080
+    container:
+        image: ciserver.ci:5000/${{ github.repository_id }}:latest
+        credentials:
+            username: ${{ secrets.CI_CACHE_REGISTRY_LOGIN }}
+            password: ${{ secrets.CI_CACHE_REGISTRY_PASSWORD }}
+        options: --user developer
+    outputs:
+      build_tag: ${{ steps.tag_step.outputs.build_tag }}
+    steps:
+      - name: Checkout dependency layers
+        shell: bash {0}
+        run: |
+          repo init -u https://github.com/nxp-imx/imx-manifest -b imx-linux-scarthgap -m imx-6.6.52-2.2.0.xml
+          repo sync
+
+      - name: Checkout pull-request version of meta-solidrun-arm-imx8
+        uses: actions/checkout@v4
+        with:
+          path: sources/meta-solidrun-arm-imx8
+
+      - name: Get build tag
+        shell: bash {0}
+        id: tag_step
+        run: |
+          build_tag=$(date +%Y-%m-%d)_$(cd sources/meta-solidrun-arm-imx8; git rev-parse --short HEAD)
+          echo "build_tag=$build_tag" >> "$GITHUB_OUTPUT"
+
+      - name: Create cache dir
+        run: mkdir -p buildcache
+
+      - name: Fetch cache from server
+        uses: tespkg/actions-cache/restore@v1
+        with:
+          endpoint: ciserver.ci
+          port: 9000
+          insecure: true
+          accessKey: ${{ secrets.CI_CACHE_MINIO_ACCESS }}
+          secretKey: ${{ secrets.CI_CACHE_MINIO_SECRET }}
+          bucket: cicache
+          use-fallback: false
+          key: ${{ github.repository }}-lf-6.6.52-2.2.0-imx8mp
+          path: |
+            buildcache
+
+      - name: Configure
+        shell: bash {0}
+        run: |
+            EULA=1
+            MACHINE=imx8mp-sr-som DISTRO=fsl-imx-xwayland source ./imx-setup-release.sh -b build
+            printf 'BBLAYERS += "%s"\n' '${BSPDIR}/sources/meta-solidrun-arm-imx8' >> conf/bblayers.conf
+            echo "require conf/includes/ci.conf" >> conf/local.conf
+
+      - name: Download Sources (ignore errors)
+        shell: bash {0}
+        run: |
+            . ./setup-environment build
+            export CACHE_DIR="$GITHUB_WORKSPACE/buildcache"
+            export BB_ENV_PASSTHROUGH_ADDITIONS="$BB_ENV_PASSTHROUGH_ADDITIONS CACHE_DIR"
+            bitbake -k imx-image-core --runall=fetch
+        continue-on-error: true
+
+      - name: Build (ignore errors)
+        id: build_step
+        shell: bash {0}
+        run: |
+            . ./setup-environment build
+            export CACHE_DIR="$GITHUB_WORKSPACE/buildcache"
+            export BB_ENV_PASSTHROUGH_ADDITIONS="$BB_ENV_PASSTHROUGH_ADDITIONS CACHE_DIR"
+            bitbake -k imx-image-core
+        continue-on-error: true
+
+      - name: Update cache on the server (build may have failed)
+#        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        uses: tespkg/actions-cache/save@v1
+        with:
+          endpoint: ciserver.ci
+          port: 9000
+          insecure: true
+          accessKey: ${{ secrets.CI_CACHE_MINIO_ACCESS }}
+          secretKey: ${{ secrets.CI_CACHE_MINIO_SECRET }}
+          bucket: cicache
+          use-fallback: false
+          key: ${{ github.repository }}-lf-6.6.52-2.2.0-imx8mp
+          path: |
+            buildcache
+
+      - name: Fail Late
+        if: failure() && steps.build_step.outcome == 'failure'
+        shell: bash {0}
+        run: |
+            false
+
+      - name: Select artifacts for publishing
+        shell: bash -e {0}
+        run: |
+            ls -lh build/tmp/deploy/images/imx8mp-sr-som
+            mkdir deploy
+            DEPLOY_PATH=build/tmp/deploy/images/imx8mp-sr-som
+            cp -L $DEPLOY_PATH/imx-image-core-imx8mp-sr-som.rootfs.wic.bmap deploy/
+            cp -L $DEPLOY_PATH/imx-image-core-imx8mp-sr-som.rootfs.wic.zst deploy/
+            cp -L $DEPLOY_PATH/imx-image-core-imx8mp-sr-som.rootfs.manifest deploy/
+            cp -L $DEPLOY_PATH/imx8mp-cubox-m.dtb deploy/
+            cp -L $DEPLOY_PATH/Image deploy/
+            cp -L $DEPLOY_PATH/modules-imx8mp-sr-som.tgz deploy/
+            cp -L $DEPLOY_PATH/imx-boot-imx8mp-sr-som-sd.bin-flash_evk deploy/u-boot-imx8mp-sr-som-sd.bin
+            ls -lh deploy/
+
+      - name: Deploy to the local minio storage
+        uses: yakubique/minio-upload@v1.1.3
+        with:
+          endpoint: http://ciserver.ci:9000
+          insecure: true
+          access_key: ${{ secrets.CI_CACHE_MINIO_ACCESS }}
+          secret_key: ${{ secrets.CI_CACHE_MINIO_SECRET }}
+          bucket: cipublish
+          source: ./deploy
+          target: "/${{ github.repository_id }}/${{ steps.tag_step.outputs.build_tag }}/imx8mp"
+          recursive: true
+
   publish_imx8mm:
     needs:
       - build_imx8mm
       - build_imx8mn
+      - build_imx8mp
     runs-on: self-hosted
     if: github.event_name == 'push'
     steps:
@@ -330,6 +454,7 @@ jobs:
     needs:
       - build_imx8mm
       - build_imx8mn
+      - build_imx8mp
     runs-on: self-hosted
     if: github.event_name == 'push'
     steps:
@@ -354,3 +479,33 @@ jobs:
           endpoint: ${{ secrets.IMAGES_S3_HOST }}
           source_dir: deploy
           destination_dir: IMX8/meta-solidrun-arm-imx8/scarthgap-lf-6.6.52-2.2.0/${{ needs.build_imx8mn.outputs.build_tag }}/solidsense-n8
+
+  publish_imx8mp:
+    needs:
+      - build_imx8mm
+      - build_imx8mn
+      - build_imx8mp
+    runs-on: self-hosted
+    if: github.event_name == 'push'
+    steps:
+      - name: Download artifacts from the local minio storage
+        uses: yakubique/minio-download@v1.1.1
+        with:
+          endpoint: http://ciserver.ci:9000
+          insecure: true
+          access_key: ${{ secrets.CI_CACHE_MINIO_ACCESS }}
+          secret_key: ${{ secrets.CI_CACHE_MINIO_SECRET }}
+          bucket: cipublish
+          source: "/${{ github.repository_id }}/${{ needs.build_imx8mn.outputs.build_tag }}/imx8mp/"
+          target: "."
+          recursive: true
+
+      - name: Upload to S3
+        uses: shallwefootball/upload-s3-action@v1.3.3
+        with:
+          aws_key_id: ${{ secrets.IMAGES_S3_ACCESS }}
+          aws_secret_access_key: ${{ secrets.IMAGES_S3_SECRET }}
+          aws_bucket: ${{ secrets.IMAGES_S3_BUCKET }}
+          endpoint: ${{ secrets.IMAGES_S3_HOST }}
+          source_dir: deploy
+          destination_dir: IMX8/meta-solidrun-arm-imx8/scarthgap-lf-6.6.52-2.2.0/${{ needs.build_imx8mp.outputs.build_tag }}/imx8mp-sr-som

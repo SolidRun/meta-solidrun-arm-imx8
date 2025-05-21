@@ -13,3 +13,8 @@ SRC_URI:append:solidsense-n8 = " \
 	file://0002-add-support-for-solidrun-solidsense-n8-board.patch \
 	file://0003-board-solidrun-solidsense-n8-fix-phy-detection-runni.patch \
 "
+
+# use solidrun fork
+UBOOT_SRC:imx8mp-sr-som = "git://github.com/SolidRun/u-boot.git;protocol=https"
+SRCBRANCH:imx8mp-sr-som = "lf-6.6.52-2.2.0-sr-imx8"
+SRCREV:imx8mp-sr-som = "4d9ab49f4bc3730fbe310892943dd6844a55791a"
