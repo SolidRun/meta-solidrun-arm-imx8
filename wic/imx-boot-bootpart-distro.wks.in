@@ -14,7 +14,7 @@
 # 0 |        8MiB          264MiB         264MiB + rootfs + IMAGE_EXTRA_SPACE (default 10MiB)
 #   33 32 or 33kiB, see reference manual
 #
-part u-boot --source rawcopy --sourceparams="file=imx-boot.tagged" --ondisk mmcblk --no-table --align 33
+part u-boot --source rawcopy --sourceparams="file=imx-boot.tagged" --ondisk mmcblk --no-table --align ${IMX_BOOT_SEEK}
 part /boot --source bootimg-partition --use-uuid --fstype=vfat --label boot --active --align 8192 --size 256 --sourceparams="loader=u-boot"
 part / --source rootfs --use-uuid --fstype=ext4 --label root --align 8192
 
