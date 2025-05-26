@@ -7,6 +7,10 @@ Specific releases are organised in branches below:
 
    Supported Platforms:
 
+   - [i.MX8M Plus SoM](https://www.solid-run.com/embedded-industrial-iot/nxp-i-mx8-family/imx8m-plus-som/)
+
+     - [CuBox-M](https://www.solid-run.com/industrial-computers/cubox/)
+
    - [i.MX8M Mini SoM](https://www.solid-run.com/embedded-industrial-iot/nxp-i-mx8-family/imx8m-mini-som/)
 
      - [i.MX8 HummingBoard Ripple](https://www.solid-run.com/embedded-industrial-iot/nxp-i-mx8-family/hummingboard-m/#ripple)
