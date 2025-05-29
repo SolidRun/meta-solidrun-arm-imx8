@@ -359,7 +359,7 @@ jobs:
             . ./setup-environment build
             export CACHE_DIR="$GITHUB_WORKSPACE/buildcache"
             export BB_ENV_PASSTHROUGH_ADDITIONS="$BB_ENV_PASSTHROUGH_ADDITIONS CACHE_DIR"
-            bitbake -k imx-image-core --runall=fetch
+            bitbake -k imx-image-core imx-image-full --runall=fetch
         continue-on-error: true
 
       - name: Build (ignore errors)
@@ -369,7 +369,7 @@ jobs:
             . ./setup-environment build
             export CACHE_DIR="$GITHUB_WORKSPACE/buildcache"
             export BB_ENV_PASSTHROUGH_ADDITIONS="$BB_ENV_PASSTHROUGH_ADDITIONS CACHE_DIR"
-            bitbake -k imx-image-core
+            bitbake -k imx-image-core imx-image-full
         continue-on-error: true
 
       - name: Update cache on the server (build may have failed)
@@ -402,6 +402,9 @@ jobs:
             cp -L $DEPLOY_PATH/imx-image-core-imx8mp-sr-som.rootfs.wic.bmap deploy/
             cp -L $DEPLOY_PATH/imx-image-core-imx8mp-sr-som.rootfs.wic.zst deploy/
             cp -L $DEPLOY_PATH/imx-image-core-imx8mp-sr-som.rootfs.manifest deploy/
+            cp -L $DEPLOY_PATH/imx-image-full-imx8mp-sr-som.rootfs.wic.bmap deploy/
+            cp -L $DEPLOY_PATH/imx-image-full-imx8mp-sr-som.rootfs.wic.zst deploy/
+            cp -L $DEPLOY_PATH/imx-image-full-imx8mp-sr-som.rootfs.manifest deploy/
             cp -L $DEPLOY_PATH/imx8mp-cubox-m.dtb deploy/
             cp -L $DEPLOY_PATH/Image deploy/
             cp -L $DEPLOY_PATH/modules-imx8mp-sr-som.tgz deploy/
