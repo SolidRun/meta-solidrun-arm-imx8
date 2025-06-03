@@ -17,4 +17,25 @@ SRC_URI:append:solidsense-n8 = " \
 # use solidrun fork
 UBOOT_SRC:imx8mp-sr-som = "git://github.com/SolidRun/u-boot.git;protocol=https"
 SRCBRANCH:imx8mp-sr-som = "lf-6.6.52-2.2.0-sr-imx8"
-SRCREV:imx8mp-sr-som = "4d9ab49f4bc3730fbe310892943dd6844a55791a"
+SRCREV:imx8mp-sr-som = "a31369d37a4b1c7c20ffe21cfefd41620d7c8e75"
+
+# deploy extra dtbs for imx-mkimage
+do_deploy:append:mx8m-generic-bsp() {
+    if [ -n "${UBOOT_CONFIG}" ]
+    then
+        for config in ${UBOOT_MACHINE}; do
+            i=$(expr $i + 1);
+            for type in ${UBOOT_CONFIG}; do
+                j=$(expr $j + 1);
+                if [ $j -eq $i ]
+                then
+                    for dtb_name in ${UBOOT_EXTRA_DTB_NAMES}; do
+                        install -v -m 0644 ${B}/${config}/arch/arm/dts/${dtb_name}  ${DEPLOYDIR}/${BOOT_TOOLS}/${dtb_name}-${type}
+                    done
+                fi
+            done
+            unset  j
+        done
+        unset  i
+    fi
+}
