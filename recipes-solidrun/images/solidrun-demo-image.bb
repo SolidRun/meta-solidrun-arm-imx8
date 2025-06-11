@@ -6,6 +6,7 @@ require dynamic-layers/qt6-layer/recipes-fsl/images/imx-image-full-dev.bb
 IMAGE_INSTALL:append = " \
 	chromium-ozone-wayland \
 	git \
+	htop \
 	kernel-modules \
 	pavucontrol \
 "
@@ -15,6 +16,7 @@ IMAGE_INSTALL:remove = "imx-voice-player"
 
 # install extra application launchers
 ROOTFS_POSTPROCESS_COMMAND:append = "install_sr_launchers; "
+DEPENDS:append = " librsvg-native"
 
 install_sr_launchers() {
 	# Terminal Emulator

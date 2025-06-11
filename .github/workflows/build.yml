@@ -351,6 +351,7 @@ jobs:
             EULA=1
             MACHINE=imx8mp-sr-som DISTRO=fsl-imx-xwayland source ./imx-setup-release.sh -b build
             printf 'BBLAYERS += "%s"\n' '${BSPDIR}/sources/meta-solidrun-arm-imx8' >> conf/bblayers.conf
+            printf 'BBLAYERS += "%s"\n' '${BSPDIR}/sources/meta-browser/meta-chromium' >> conf/bblayers.conf
             echo "require conf/includes/ci.conf" >> conf/local.conf
 
       - name: Download Sources (ignore errors)
@@ -359,7 +360,7 @@ jobs:
             . ./setup-environment build
             export CACHE_DIR="$GITHUB_WORKSPACE/buildcache"
             export BB_ENV_PASSTHROUGH_ADDITIONS="$BB_ENV_PASSTHROUGH_ADDITIONS CACHE_DIR"
-            bitbake -k imx-image-core imx-image-full --runall=fetch
+            bitbake -k imx-image-core imx-image-full solidrun-demo-image --runall=fetch
         continue-on-error: true
 
       - name: Build (ignore errors)
@@ -369,7 +370,7 @@ jobs:
             . ./setup-environment build
             export CACHE_DIR="$GITHUB_WORKSPACE/buildcache"
             export BB_ENV_PASSTHROUGH_ADDITIONS="$BB_ENV_PASSTHROUGH_ADDITIONS CACHE_DIR"
-            bitbake -k imx-image-core imx-image-full
+            bitbake -k imx-image-core imx-image-full solidrun-demo-image
         continue-on-error: true
 
       - name: Update cache on the server (build may have failed)
@@ -405,7 +406,14 @@ jobs:
             cp -L $DEPLOY_PATH/imx-image-full-imx8mp-sr-som.rootfs.wic.bmap deploy/
             cp -L $DEPLOY_PATH/imx-image-full-imx8mp-sr-som.rootfs.wic.zst deploy/
             cp -L $DEPLOY_PATH/imx-image-full-imx8mp-sr-som.rootfs.manifest deploy/
+            cp -L $DEPLOY_PATH/solidrun-demo-image-imx8mp-sr-som.rootfs.wic.bmap deploy/
+            cp -L $DEPLOY_PATH/solidrun-demo-image-imx8mp-sr-som.rootfs.wic.zst deploy/
+            cp -L $DEPLOY_PATH/solidrun-demo-image-imx8mp-sr-som.rootfs.manifest deploy/
             cp -L $DEPLOY_PATH/imx8mp-cubox-m.dtb deploy/
+            cp -L $DEPLOY_PATH/imx8mp-hummingboard-mate.dtb deploy/
+            cp -L $DEPLOY_PATH/imx8mp-hummingboard-pro.dtb deploy/
+            cp -L $DEPLOY_PATH/imx8mp-hummingboard-pulse.dtb deploy/
+            cp -L $DEPLOY_PATH/imx8mp-hummingboard-ripple.dtb deploy/
             cp -L $DEPLOY_PATH/Image deploy/
             cp -L $DEPLOY_PATH/modules-imx8mp-sr-som.tgz deploy/
             cp -L $DEPLOY_PATH/imx-boot-imx8mp-sr-som-sd.bin-flash_evk deploy/u-boot-imx8mp-sr-som-sd.bin
