@@ -301,6 +301,24 @@ Cache must also be cleared before the next build can succeed:
     cd <build-directory>
     rm -rf tmp sstate-cache cache
 
+### libxcrypt fails to build with host perl >= 5.38
+
+Build of libxcrypt may fail with the error below:
+
+```
+| when is deprecated at /opt/workspace/YOCTO/v2x-kirkstone/bsp/build/tmp/work/armv8a-poky-linux/libxcrypt/4.4.28-r0/git/build-aux/scripts/BuildCommon.pm line 522.
+| Compilation failed in require at ../git/build-aux/scripts/expand-selected-hashes line 28.
+| BEGIN failed--compilation aborted at ../git/build-aux/scripts/expand-selected-hashes line 28.
+| configure: error: bad value 'all' for --enable-hashes
+| NOTE: The following config.log files may provide further information.
+| NOTE: /opt/workspace/YOCTO/v2x-kirkstone/bsp/build/tmp/work/armv8a-poky-linux/libxcrypt/4.4.28-r0/build/config.log
+| ERROR: configure failed
+| WARNING: exit code 1 from a shell c
+```
+
+As a workaround a patch may be applied from the Yocto Mailing-list: [kirkstone-libxcrypt-fix-build-with-perl-5.38-and-use-master-branch.patch](https://patchwork.yoctoproject.org/project/oe-core/patch/20230726131331.2239727-1-Martin.Jansa@gmail.com/mbox/)
+
+
 ## Maintainer Notes
 
 ### Patching Linux / U-Boot / ATF / etc.:
