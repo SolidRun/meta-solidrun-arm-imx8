@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y apt-transport-https \
     python3-subunit mesa-common-dev patchelf \
     zstd liblz4-tool file locales libacl1 \
     tree sudo locales ca-certificates \
-    bash icecc
+    bash icecc zstd
 
 # Install extra non-yocto build tools
 RUN apt-get update && apt-get install -y repo

@@ -499,7 +499,7 @@ jobs:
           access_key: ${{ secrets.CI_CACHE_MINIO_ACCESS }}
           secret_key: ${{ secrets.CI_CACHE_MINIO_SECRET }}
           bucket: cipublish
-          source: "/${{ github.repository_id }}/${{ needs.build_imx8mn.outputs.build_tag }}/imx8mp/"
+          source: "/${{ github.repository_id }}/${{ needs.build_imx8mp.outputs.build_tag }}/imx8mp/"
           target: "."
           recursive: true
 

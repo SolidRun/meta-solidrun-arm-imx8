@@ -9,6 +9,14 @@ This is a yocto meta layer for adding SolidRun i.MX8 based products support to N
 
   - [HummingBoard Ripple](https://www.solid-run.com/embedded-industrial-iot/nxp-i-mx8-family/hummingboard-m/#ripple)
 
+- [i.MX8M Plus SoM](https://www.solid-run.com/embedded-industrial-iot/nxp-i-mx8-family/imx8m-plus-som/)
+
+  - [i.MX8 CuBox-M](https://www.solid-run.com/industrial-computers/cubox/)
+  - [i.MX8 HummingBoard Mate](https://www.solid-run.com/embedded-industrial-iot/nxp-i-mx8-family/hummingboard-m/#mate)
+  - [i.MX8 HummingBoard Pro](https://www.solid-run.com/embedded-industrial-iot/nxp-i-mx8-family/hummingboard-m/#pro)
+  - [i.MX8 HummingBoard Pulse](https://www.solid-run.com/embedded-industrial-iot/nxp-i-mx8-family/hummingboard-m/#pulse)
+  - [i.MX8 HummingBoard Ripple](https://www.solid-run.com/embedded-industrial-iot/nxp-i-mx8-family/hummingboard-m/#ripple)
+
 ## Binaries
 
 Binaries are generated automatically by our CI infrastructure to [images.solid-run.com](https://images.solid-run.com/IMX8/meta-solidrun-arm-imx8/)
@@ -46,6 +54,7 @@ repo sync
 ### Supported Machines
 
 - `imx8mm-sr-som`: i.MX8M Mini SoM on HummingBoard Ripple
+- `imx8mp-sr-som`: i.MX8M Plus SoM on HummingBoard Pro/Pulse/Ripple/Mate and CuBox-M
 - `solidsense-n8`: SolidSense N8 Compact
 
 The instructions below use `solidsense-n8` as an example, substitute as needed.
@@ -117,6 +126,32 @@ As a workaround ensure that the host OS does not have boost development files in
 rm -rf tmp sstate-cache
 bitbake shared-mime-info-native
 ```
+
+### permission error in disable_network
+
+Bitbake can fail with a confusing permission error while trying to disable it's child processes network access:
+
+```
+ERROR: PermissionError: [Errno 1] Operation not permitted
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/opt/workspace/YOCTO/imx8-scarthgap/sources/poky/bitbake/bin/bitbake-worker", line 278, in child
+    bb.utils.disable_network(uid, gid)
+  File "/opt/workspace/YOCTO/imx8-scarthgap/sources/poky/bitbake/lib/bb/utils.py", line 1696, in disable_network
+    with open("/proc/self/uid_map", "w") as f:
+PermissionError: [Errno 1] Operation not permitted
+
+ERROR: Task (virtual:native:/opt/workspace/YOCTO/imx8-scarthgap/sources/poky/meta/recipes-devtools/autoconf/autoconf_2.72e.bb:do_unpack) failed with exit code '1'
+```
+
+See [Ubuntu Bug 2056555](https://bugs.launchpad.net/ubuntu/+source/apparmor/+bug/2056555) for more details.
+
+As a workaround apparmor "unprivileged_userns" profile can be temporarily disabled:
+
+    sudo apparmor_parser -R /etc/apparmor.d/unprivileged_userns
+
 
 ## Maintainer Notes
 
