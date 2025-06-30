@@ -18,7 +18,7 @@ SRC_URI:append:imx8mp-sr-som = " \
 # use solidrun fork
 LINUX_IMX_SRC:imx8mp-sr-som = "git://github.com/SolidRun/linux-stable.git;protocol=https;branch=${SRCBRANCH}"
 SRCBRANCH:imx8mp-sr-som = "lf-6.6-sr-imx8"
-SRCREV:imx8mp-sr-som = "adfceb770b6a42b7fa2a9b37822dc84072de8195"
+SRCREV:imx8mp-sr-som = "16c181455a3e4c0e094940ae7185fe4157c358fa"
 
 # Enable kernel delta configs
 # NXP BSP has disabled the normal way of *.scc fragments ...

@@ -17,7 +17,7 @@ SRC_URI:append:solidsense-n8 = " \
 # use solidrun fork
 UBOOT_SRC:imx8mp-sr-som = "git://github.com/SolidRun/u-boot.git;protocol=https"
 SRCBRANCH:imx8mp-sr-som = "lf-6.6.52-2.2.0-sr-imx8"
-SRCREV:imx8mp-sr-som = "a31369d37a4b1c7c20ffe21cfefd41620d7c8e75"
+SRCREV:imx8mp-sr-som = "8aed081561d26684fd2de840ba71824398147298"
 
 # deploy extra dtbs for imx-mkimage
 do_deploy:append:mx8m-generic-bsp() {
