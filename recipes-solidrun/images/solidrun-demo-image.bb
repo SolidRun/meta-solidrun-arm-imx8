@@ -8,6 +8,7 @@ IMAGE_INSTALL:append = " \
 	git \
 	htop \
 	kernel-modules \
+	modemmanager \
 	pavucontrol \
 "
 
