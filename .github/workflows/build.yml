@@ -410,10 +410,16 @@ jobs:
             cp -L $DEPLOY_PATH/solidrun-demo-image-imx8mp-sr-som.rootfs.wic.zst deploy/
             cp -L $DEPLOY_PATH/solidrun-demo-image-imx8mp-sr-som.rootfs.manifest deploy/
             cp -L $DEPLOY_PATH/imx8mp-cubox-m.dtb deploy/
+            cp -L $DEPLOY_PATH/imx8mp-hummingboard-iiot.dtb deploy/
+            cp -L $DEPLOY_PATH/imx8mp-hummingboard-iiot-main.dtb deploy/
+            cp -L $DEPLOY_PATH/imx8mp-hummingboard-iiot-panel-dsi-WJ70N3TYJHMNG0.dtbo deploy/
+            cp -L $DEPLOY_PATH/imx8mp-hummingboard-iiot-panel-lvds-WF70A8SYJHLNGA.dtbo deploy/
             cp -L $DEPLOY_PATH/imx8mp-hummingboard-mate.dtb deploy/
             cp -L $DEPLOY_PATH/imx8mp-hummingboard-pro.dtb deploy/
             cp -L $DEPLOY_PATH/imx8mp-hummingboard-pulse.dtb deploy/
+            cp -L $DEPLOY_PATH/imx8mp-hummingboard-pulse-basler.dtbo deploy/
             cp -L $DEPLOY_PATH/imx8mp-hummingboard-ripple.dtb deploy/
+            cp -L $DEPLOY_PATH/imx8mp-sr-som-basler.dtbo deploy/
             cp -L $DEPLOY_PATH/Image deploy/
             cp -L $DEPLOY_PATH/modules-imx8mp-sr-som.tgz deploy/
             cp -L $DEPLOY_PATH/imx-boot-imx8mp-sr-som-sd.bin-flash_evk deploy/u-boot-imx8mp-sr-som-sd.bin
