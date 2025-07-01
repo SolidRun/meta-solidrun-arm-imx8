@@ -12,6 +12,7 @@ This is a yocto meta layer for adding SolidRun i.MX8 based products support to N
 - [i.MX8M Plus SoM](https://www.solid-run.com/embedded-industrial-iot/nxp-i-mx8-family/imx8m-plus-som/)
 
   - [i.MX8 CuBox-M](https://www.solid-run.com/industrial-computers/cubox/)
+  - [i.MX8 HummingBoard IIoT](https://www.solid-run.com/embedded-industrial-iot/nxp-i-mx8-family/hummingboard-m/#iiot)
   - [i.MX8 HummingBoard Mate](https://www.solid-run.com/embedded-industrial-iot/nxp-i-mx8-family/hummingboard-m/#mate)
   - [i.MX8 HummingBoard Pro](https://www.solid-run.com/embedded-industrial-iot/nxp-i-mx8-family/hummingboard-m/#pro)
   - [i.MX8 HummingBoard Pulse](https://www.solid-run.com/embedded-industrial-iot/nxp-i-mx8-family/hummingboard-m/#pulse)
