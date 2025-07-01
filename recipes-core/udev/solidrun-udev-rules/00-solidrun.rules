@@ -1,0 +1,4 @@
+# HummingBoard-IIoT
+# provide hints for dsi/lvds touchscreens to support wayland input/output mapping
+PROGRAM="/bin/cat /proc/device-tree/model", RESULT=="SolidRun i.MX8MP HummingBoard IIoT", DEVPATH=="/devices/platform/soc@0/30800000.bus/30a30000.i2c/i2c-1/i2c-9/9-0041/*", ENV{WL_OUTPUT}="LVDS-1"
+PROGRAM="/bin/cat /proc/device-tree/model", RESULT=="SolidRun i.MX8MP HummingBoard IIoT", DEVPATH=="/devices/platform/soc@0/30800000.bus/30a30000.i2c/i2c-1/i2c-8/8-0041/*", ENV{WL_OUTPUT}="DSI-1"
