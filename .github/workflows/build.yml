@@ -411,9 +411,10 @@ jobs:
             cp -L $DEPLOY_PATH/solidrun-demo-image-imx8mp-sr-som.rootfs.manifest deploy/
             cp -L $DEPLOY_PATH/imx8mp-cubox-m.dtb deploy/
             cp -L $DEPLOY_PATH/imx8mp-hummingboard-iiot.dtb deploy/
-            cp -L $DEPLOY_PATH/imx8mp-hummingboard-iiot-main.dtb deploy/
             cp -L $DEPLOY_PATH/imx8mp-hummingboard-iiot-panel-dsi-WJ70N3TYJHMNG0.dtbo deploy/
             cp -L $DEPLOY_PATH/imx8mp-hummingboard-iiot-panel-lvds-WF70A8SYJHLNGA.dtbo deploy/
+            cp -L $DEPLOY_PATH/imx8mp-hummingboard-iiot-rs485-a.dtbo deploy/
+            cp -L $DEPLOY_PATH/imx8mp-hummingboard-iiot-rs485-b.dtbo deploy/
             cp -L $DEPLOY_PATH/imx8mp-hummingboard-mate.dtb deploy/
             cp -L $DEPLOY_PATH/imx8mp-hummingboard-pro.dtb deploy/
             cp -L $DEPLOY_PATH/imx8mp-hummingboard-pulse.dtb deploy/
