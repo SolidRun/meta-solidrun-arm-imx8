@@ -1,0 +1,32 @@
+From 698f2ebcde7fb9f74a0c3bebb6dc84873cd9b22d Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Wed, 13 Dec 2023 11:16:14 +0100
+Subject: [PATCH] board: imx8mp-solidrun: re-add fdtfile vendor prefix
+
+It is convention in all mainline distributions to prefix fdtfile
+varible with the soc vendor.
+
+Revert "imx8mp-solidrun: For yocto only pass the fdtfile",
+which as the commit message suggests was not intended to be merged.
+
+Signed-off-by:  Josua Mayer <josua@solid-run.com>
+---
+ board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
+index 2b5eef0d4c..4c17eea5e4 100644
+--- a/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
++++ b/board/solidrun/imx8mp_solidrun/imx8mp_solidrun.c
+@@ -616,7 +616,7 @@ int board_late_init(void)
+ 
+ 	// auto-select device-tree
+ 	if (!env_get("fdtfile")) {
+-		if(snprintf(fdtfile, sizeof(fdtfile), "%s-%s.dtb", board_id.som_name, board_id.carrier_name) >= sizeof(fdtfile)) {
++		if(snprintf(fdtfile, sizeof(fdtfile), "freescale/%s-%s.dtb", board_id.som_name, board_id.carrier_name) >= sizeof(fdtfile)) {
+ 			pr_err("%s: buffer too small, fdtfile truncated!\n", __func__);
+ 		}
+ 		env_set("fdtfile", fdtfile);
+-- 
+2.35.3
+

@@ -35,6 +35,7 @@ SRC_URI += " \
 		file://0032-net-phy-genphy_config-disable-BMCR_PDOWN-if-set.patch \
 		file://0033-board-solidrun-imx8mp-fix-mac-address-calculation.patch \
 		file://0034-board-solidrun-imx8mp-enable-second-on-soc-ethernet.patch \
+		file://0035-board-imx8mp-solidrun-re-add-fdtfile-vendor-prefix.patch \
 		file://0036-configs-imx8mp-solidrun-move-environment-to-fit-with.patch \
 		file://0037-net-fec_mxc-add-weak-implementation-of-board_get_mac.patch \
 	file://0038-board-solidrun-imx8mp-Add-HummingBoard-IIOT-tlv-base.patch \
