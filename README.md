@@ -82,6 +82,16 @@ With the build directory set up, any desirable yocto target may be built, e.g. t
 
 Build results will be produced in the `tmp/deploy/images/solidsense-n8` subdirectory.
 
+In addition to `imx-image-core` used above additional images are available:
+
+| Image                | Description                                                      |
+| -------------------- | ---------------------------------------------------------------- |
+| imx-image-core       | basic image with weston                                          |
+| imx-image-multimedia | basic image with weston and codecs                               |
+| imx-image-full       | full image supporting all hardware functions including NXP demos |
+| imx-image-full-dev   | development version of full image                                |
+| solidrun-demo-image  | full image plus Chromium                                         |
+
 ## Common Issues
 
 ### make version 4.2.1 is known to have issues
