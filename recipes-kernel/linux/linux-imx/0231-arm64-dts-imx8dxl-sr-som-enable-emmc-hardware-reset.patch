@@ -1,0 +1,57 @@
+From ea5fdece5d3b9cb0414b14fbf7b2e5ce8982b922 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Tue, 22 Oct 2024 17:52:29 +0200
+Subject: [PATCH 31/31] arm64: dts: imx8dxl-sr-som: enable emmc hardware reset
+
+SolidRun i.MX8DXL SoM uses native usdhc1 emmc reset signal for eMMC
+reset with dedicated pull-up resistor.
+
+Declare the capability on usdhc1 node and remove pull-up from pinmux.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi b/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
+index b34884f494f7..4c15cae98285 100644
+--- a/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
+@@ -243,7 +243,7 @@ IMX8DXL_EMMC0_DATA5_CONN_EMMC0_DATA5		0x00000021
+ 				IMX8DXL_EMMC0_DATA6_CONN_EMMC0_DATA6		0x00000021
+ 				IMX8DXL_EMMC0_DATA7_CONN_EMMC0_DATA7		0x00000021
+ 				IMX8DXL_EMMC0_STROBE_CONN_EMMC0_STROBE		0x00000041
+-				IMX8DXL_EMMC0_RESET_B_CONN_EMMC0_RESET_B	0x00000021
++				IMX8DXL_EMMC0_RESET_B_CONN_EMMC0_RESET_B	0x00000061
+ 			>;
+ 		};
+ 
+@@ -260,7 +260,7 @@ IMX8DXL_EMMC0_DATA5_CONN_EMMC0_DATA5		0x00000021
+ 				IMX8DXL_EMMC0_DATA6_CONN_EMMC0_DATA6		0x00000021
+ 				IMX8DXL_EMMC0_DATA7_CONN_EMMC0_DATA7		0x00000021
+ 				IMX8DXL_EMMC0_STROBE_CONN_EMMC0_STROBE		0x00000041
+-				IMX8DXL_EMMC0_RESET_B_CONN_EMMC0_RESET_B	0x00000021
++				IMX8DXL_EMMC0_RESET_B_CONN_EMMC0_RESET_B	0x00000061
+ 			>;
+ 		};
+ 
+@@ -277,7 +277,7 @@ IMX8DXL_EMMC0_DATA5_CONN_EMMC0_DATA5		0x00000021
+ 				IMX8DXL_EMMC0_DATA6_CONN_EMMC0_DATA6		0x00000021
+ 				IMX8DXL_EMMC0_DATA7_CONN_EMMC0_DATA7		0x00000021
+ 				IMX8DXL_EMMC0_STROBE_CONN_EMMC0_STROBE		0x00000041
+-				IMX8DXL_EMMC0_RESET_B_CONN_EMMC0_RESET_B	0x00000021
++				IMX8DXL_EMMC0_RESET_B_CONN_EMMC0_RESET_B	0x00000061
+ 			>;
+ 		};
+ 
+@@ -478,6 +478,7 @@ &usdhc1 {
+ 		no-sd;
+ 		no-sdio;
+ 		non-removable;
++		cap-mmc-hw-reset;
+ 		status = "okay";
+ };
+ 
+-- 
+2.43.0
+

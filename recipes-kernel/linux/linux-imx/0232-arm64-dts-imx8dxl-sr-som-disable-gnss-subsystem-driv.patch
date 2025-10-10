@@ -1,0 +1,60 @@
+From 17873877f75c82199ed8180e4bae8be679a70ab9 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Sun, 5 Oct 2025 18:41:29 +0200
+Subject: [PATCH] arm64: dts: imx8dxl-sr-som: disable gnss subsystem driver
+
+The ublox gnss driver does not support changing baudrate at runtime.
+However the out-of-box 38400 can be too slow for the amount of messages
+mia-m10q can generate, especially after some runtime configuration
+commands.
+
+Disable the gnss node causing fallback to the tty subsystem, gps can be
+configured and accessed at ttyLP2 instead.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ .../boot/dts/freescale/imx8dxl-sr-som.dtsi    | 25 +++++++++++--------
+ 1 file changed, 15 insertions(+), 10 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi b/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
+index 4c15cae98285..7464a515c494 100644
+--- a/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-sr-som.dtsi
+@@ -422,19 +422,24 @@ &lpuart0 {
+ /* gps */
+ &lpuart2 {
+ 	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_lpuart2>;
++	pinctrl-0 = <&pinctrl_lpuart2>, <&pinctrl_lpuart2_gps>;
+ 	status = "okay";
+ 
+ 	/* MIA-M10Q */
+-	gnss {
+-		compatible = "u-blox,mia-m10", "u-blox,neo-m8";
+-		pinctrl-names = "default";
+-		pinctrl-0 = <&pinctrl_lpuart2_gps>;
+-		// enable-gpios = <&lsio_gpio2 8 GPIO_ACTIVE_HIGH>;
+-		timepulse-gpios = <&lsio_gpio2 6 GPIO_ACTIVE_HIGH>;
+-		current-speed = <38400>;
+-		u-blox,extint-gpios = <&lsio_gpio2 9 GPIO_ACTIVE_HIGH>;
+-	};
++	/*
++	 * ublox gnss driver does not support changing baudrate,
++	 * use generic tty instead of gnss subsystem.
++	 *
++	 * gnss {
++	 * 	compatible = "u-blox,mia-m10", "u-blox,neo-m8";
++	 * 	pinctrl-names = "default";
++	 * 	pinctrl-0 = <&pinctrl_lpuart2_gps>;
++	 * 	// enable-gpios = <&lsio_gpio2 8 GPIO_ACTIVE_HIGH>;
++	 * 	timepulse-gpios = <&lsio_gpio2 6 GPIO_ACTIVE_HIGH>;
++	 * 	current-speed = <38400>;
++	 * 	u-blox,extint-gpios = <&lsio_gpio2 9 GPIO_ACTIVE_HIGH>;
++	 * };
++	*/
+ };
+ 
+ &lsio_gpio1 {
+-- 
+2.51.0
+

@@ -51,6 +51,8 @@ SRC_URI += " \
 	file://0207-board-solidrun-imx8dxl-sr-som-sync-dts-with-evk.patch \
 	file://0208-board-solidrun-imx8dxl-sr-som-update-default-fdtfile.patch \
 	file://0209-board-solidrun-imx8dxl-sr-som-enable-optee-os-rpmb-s.patch \
+	file://0210-mmc-fsl_esdhc_imx-implement-emmc-hardware-reset.patch \
+	file://0211-board-solidrun-imx8dxl-sr-som-enable-emmc-hardware-r.patch \
 "
 
 LTO:class-target = ""

@@ -1,0 +1,55 @@
+From 33f2e6b0c1513daf1985adcb5d68780719933ff8 Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Tue, 22 Oct 2024 18:21:21 +0200
+Subject: [PATCH 10/11] mmc: fsl_esdhc_imx: implement emmc hardware reset
+
+NXP ESDHC supports control of native emmc reset signal when pinmux is
+set accordingly, using uSDHCx_SYS_CTRL register IPP_RST_N bit.
+Documentation is available in NXP i.MX6Q Reference Manual.
+
+During fsl_esdhc_init assert reset for at least 30us and wait an extra
+300us after deassertion.
+These particular delays were inspired by Linux sunxi-mmc hw_reset function.
+
+Tested on SolidRun i.MX8DXL SoM with a scope, and confirmed that eMMC is
+still accessible after reset. eMMC extcsd has RST_N_FUNCTION=0x01, i.e.
+reset input enabled.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ drivers/mmc/fsl_esdhc_imx.c | 6 ++++++
+ include/fsl_esdhc_imx.h     | 1 +
+ 2 files changed, 7 insertions(+)
+
+diff --git a/drivers/mmc/fsl_esdhc_imx.c b/drivers/mmc/fsl_esdhc_imx.c
+index 169d0d4df87..74e1ae79985 100644
+--- a/drivers/mmc/fsl_esdhc_imx.c
++++ b/drivers/mmc/fsl_esdhc_imx.c
+@@ -1140,6 +1140,12 @@ static int fsl_esdhc_init(struct fsl_esdhc_priv *priv,
+ 
+ 	regs = priv->esdhc_regs;
+ 
++	/* reset card */
++	esdhc_clrbits32(&regs->sysctl, SYSCTL_IPP_RST_EN);
++	udelay(10);
++	esdhc_setbits32(&regs->sysctl, SYSCTL_IPP_RST_EN);
++	udelay(300);
++
+ 	/* First reset the eSDHC controller */
+ 	ret = esdhc_reset(regs);
+ 	if (ret)
+diff --git a/include/fsl_esdhc_imx.h b/include/fsl_esdhc_imx.h
+index b8efd2a1664..62328779c6b 100644
+--- a/include/fsl_esdhc_imx.h
++++ b/include/fsl_esdhc_imx.h
+@@ -31,6 +31,7 @@
+ #define SYSCTL_RSTA		0x01000000
+ #define SYSCTL_RSTC		0x02000000
+ #define SYSCTL_RSTD		0x04000000
++#define SYSCTL_IPP_RST_EN	0x00800000
+ 
+ #define VENDORSPEC_CKEN		0x00004000
+ #define VENDORSPEC_PEREN	0x00002000
+-- 
+2.43.0
+
