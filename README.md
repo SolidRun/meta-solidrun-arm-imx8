@@ -318,6 +318,29 @@ Build of libxcrypt may fail with the error below:
 
 As a workaround a patch may be applied from the Yocto Mailing-list: [kirkstone-libxcrypt-fix-build-with-perl-5.38-and-use-master-branch.patch](https://patchwork.yoctoproject.org/project/oe-core/patch/20230726131331.2239727-1-Martin.Jansa@gmail.com/mbox/)
 
+### After `devtool modify` some packages fail to build with obscure git errors
+
+When package sources are in the devtool workspace, yocto uses externalsrc.bbclass which uses deprecated `git submodule--helper` command:
+
+```
+...
+  File "/usr/lib64/python3.6/subprocess.py", line 438, in run(input=None, timeout=None, check=True, *popenargs=(['git', 'submodule--helper', 'list'],), **kwargs={'stdout': -1, 'cwd': '/opt/workspace/YOCTO/imx8-kirkstone/build/workspace/sources/gpsd', 'env': {'HOME': '/home/josua-sr', 'LOGNAME': 'josua-sr', 'PATH': '/opt/workspace/YOCTO/imx8-kirkstone/sources/poky/scripts:/opt/workspace/YOCTO/imx8-kirkstone/sources/poky/bitbake/bin:/home/josua-sr/.local/bin:/home/josua-sr/.local/bin:/home/josua-sr/bin:/usr/local/bin:/usr/bin:/bin', 'PWD': '/opt/workspace/YOCTO/imx8-kirkstone/build', 'SHELL': '/usr/bin/zsh', 'USER': 'josua-sr', 'SSH_AUTH_SOCK': '/run/user/1001/gnupg/S.gpg-agent.ssh', 'BBPATH': '/opt/workspace/YOCTO/imx8-kirkstone/build', 'BB_ENV_PASSTHROUGH_ADDITIONS': 'ALL_PROXY BBPATH_EXTRA BB_LOGCONFIG BB_NO_NETWORK BB_NUMBER_THREADS BB_SETSCENE_ENFORCE BB_SRCREV_POLICY DISTRO FTPS_PROXY FTP_PROXY GIT_PROXY_COMMAND HTTPS_PROXY HTTP_PROXY MACHINE NO_PROXY PARALLEL_MAKE SCREENDIR SDKMACHINE SOCKS5_PASSWD SOCKS5_USER SSH_AGENT_PID SSH_AUTH_SOCK STAMPS_DIR TCLIBC TCMODE all_proxy ftp_proxy ftps_proxy http_proxy https_proxy no_proxy ', 'LC_ALL': 'en_US.UTF-8', 'GIT_INDEX_FILE': '/tmp/oe-devtool-indexs5pjg_rm'}}):
+                 raise CalledProcessError(retcode, process.args,
+    >                                     output=stdout, stderr=stderr)
+         return CompletedProcess(process.args, retcode, stdout, stderr)
+bb.data_smart.ExpansionError: Failure expanding variable do_compile[file-checksums], expression was ${@srctree_hash_files(d)} which triggered exception CalledProcessError: Command '['git', 'submodule--helper', 'list']' returned non-zero exit status 129.
+The variable dependency chain for the failure is: do_compile[file-checksums]
+
+ERROR: Parsing halted due to errors, see error messages above
+```
+
+This can be resolved locally by cherry-picking the [upstream fix in poky](https://git.yoctoproject.org/poky/commit/?id=0533edac277080e1bd130c14df0cbac61ba01a0c):
+
+```
+pushd sources/poky
+git cherry-pick 0533edac277080e1bd130c14df0cbac61ba01a0c
+popd
+```
 
 ## Maintainer Notes
 
