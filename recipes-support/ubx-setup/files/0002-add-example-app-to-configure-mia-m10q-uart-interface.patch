@@ -1,0 +1,221 @@
+From 691324f0991a45b88cd48eefc5ae8c7e85bddb1e Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Sun, 12 Oct 2025 15:09:53 +0200
+Subject: [PATCH] add example app to configure mia-m10q uart interface
+
+Add example app to configure MIA-M10Q on SolidRun i.MX8DXL System on
+Module after (re-)boot.
+
+It should issue soft reset (because the board cannot issue hard reset),
+and update baud-rate from default 38400 to 115200.
+
+This application should be built with UBXLIB_FLAGS:
+ - -DU_CFG_APP_GNSS_UART=2
+ - -DU_CFG_APP_UART_PREFIX=/dev/ttyLP
+ - -DU_CFG_APP_FILTER=GnssUartSetup"
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ example/gnss/uart_setup.c | 190 ++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 190 insertions(+)
+ create mode 100644 example/gnss/uart_setup.c
+
+diff --git a/example/gnss/uart_setup.c b/example/gnss/uart_setup.c
+new file mode 100644
+index 00000000..8b8a4393
+--- /dev/null
++++ b/example/gnss/uart_setup.c
+@@ -0,0 +1,190 @@
++/*
++ * Copyright 2019-2023 u-blox
++ * Copyright 2023-2025 Josua Mayer <josua@solid-run.com>
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++/** @brief This example configures MIA-M10Q UART baud-rate consistently
++ * after hot and cold boot for 115200.
++ */
++
++// Bring in all of the ubxlib public header files
++# include "ubxlib.h"
++
++// Bring in the application settings
++# include "u_cfg_app_platform_specific.h"
++
++# ifndef U_CFG_DISABLE_TEST_AUTOMATION
++// This purely for internal u-blox testing
++#  include "u_cfg_test_platform_specific.h"
++# endif
++
++/* ----------------------------------------------------------------
++ * COMPILE-TIME MACROS
++ * -------------------------------------------------------------- */
++
++// For u-blox internal testing only
++# ifdef U_PORT_TEST_ASSERT
++#  define EXAMPLE_FINAL_STATE(x) U_PORT_TEST_ASSERT(x);
++# else
++#  define EXAMPLE_FINAL_STATE(x)
++# endif
++
++# ifndef U_PORT_TEST_FUNCTION
++#  error if you are not using the unit test framework to run this code you must ensure that the platform clocks/RTOS are set up and either define U_PORT_TEST_FUNCTION yourself or replace it as necessary.
++# endif
++
++/* ----------------------------------------------------------------
++ * TYPES
++ * -------------------------------------------------------------- */
++
++/* ----------------------------------------------------------------
++ * VARIABLES
++ * -------------------------------------------------------------- */
++
++// GNSS configuration.
++static uDeviceCfg_t gDeviceCfg = {
++    .deviceType = U_DEVICE_TYPE_GNSS,
++    .deviceCfg = {
++        .cfgGnss = {
++            .moduleType = U_GNSS_MODULE_TYPE_M10,
++            .pinEnablePower = -1, // not used
++            .pinDataReady = -1 // Not used
++            // There is an additional field here:
++            // "i2cAddress", which we do NOT set,
++            // we allow the compiler to set it to 0
++            // and all will be fine. You may set the
++            // field to the I2C address of your GNSS
++            // device if you have modified the I2C
++            // address of your GNSS device to something
++            // other than the default value of 0x42,
++            // for example:
++            // .i2cAddress = 0x43
++        },
++    },
++    .transportType = U_DEVICE_TRANSPORT_TYPE_UART,
++    .transportCfg = {
++        .cfgUart = {
++            .uart = U_CFG_APP_GNSS_UART,
++            .baudRate = 38400,
++            .pinTxd = -1, // not relevant on Linux
++            .pinRxd = -1, // not relevant on Linux
++            .pinCts = -1, // not relevant on Linux
++            .pinRts = -1, // not relevant on Linux
++            .pPrefix = U_PORT_STRINGIFY_QUOTED(U_CFG_APP_UART_PREFIX)
++        },
++    },
++};
++
++/* ----------------------------------------------------------------
++ * STATIC FUNCTIONS
++ * -------------------------------------------------------------- */
++
++/* ----------------------------------------------------------------
++ * PUBLIC FUNCTIONS: THE EXAMPLE
++ * -------------------------------------------------------------- */
++
++// The entry point, main(): before this is called the system
++// clocks must have been started and the RTOS must be running;
++// we are in task space.
++U_PORT_TEST_FUNCTION("[example]", "GnssUartSetup")
++{
++    uDeviceHandle_t devHandle = NULL;
++    int32_t ret;
++
++    // Try to open the device at 115200 baud (in case already configured)
++    uPortInit();
++    uDeviceInit();
++    gDeviceCfg.transportCfg.cfgUart.baudRate = 115200;
++    printf("opening gps at %d baud ...", gDeviceCfg.transportCfg.cfgUart.baudRate);
++    ret = uDeviceOpen(&gDeviceCfg, &devHandle);
++    if (ret == 0) {
++        puts(" done\n");
++
++        // send hot reset
++        puts("sending hot reset ...");
++        uint8_t hot_rst_msg[] = { 0xb5, 0x62, 0x06, 0x04, 0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x0f, 0x66 };
++        ret = uGnssMsgSend(devHandle, (void *)hot_rst_msg, sizeof(hot_rst_msg));
++        if (ret != sizeof(hot_rst_msg)) {
++            printf(" error: uGnssMsgSend sent %d, expected %zu\n", ret, sizeof(hot_rst_msg));
++            goto deinit;
++        }
++        puts(" done\n");
++
++        // close device but keep it running
++        uDeviceClose(devHandle, false);
++    } else {
++        printf(" error: uDeviceOpen failed with %d (expected on cold boot)\n", ret);
++    }
++    uDeviceDeinit();
++    uPortDeinit();
++
++    // device is now at reset defaults
++
++    // Open the device at 38400 baud (reset defalt)
++    uPortInit();
++    uDeviceInit();
++    gDeviceCfg.transportCfg.cfgUart.baudRate = 38400;
++    printf("opening gps at %d baud ...", gDeviceCfg.transportCfg.cfgUart.baudRate);
++    ret = uDeviceOpen(&gDeviceCfg, &devHandle);
++    if (ret == 0) {
++        puts(" done\n");
++
++        // reconfigure to 115200
++        printf("configuring for %d baud ...", 115200);
++        uint8_t prt_cfg_msg[] = {0x24, 0x50, 0x55, 0x42, 0x58, 0x2C, 0x34, 0x31, 0x2c, 0x31, 0x2c, 0x30, 0x30, 0x32, 0x33, 0x2c, 0x30, 0x30, 0x30, 0x33, 0x2c, 0x31, 0x31, 0x35, 0x32, 0x30, 0x30, 0x2c, 0x30, 0x2a, 0x31, 0x45, 0x0d, 0x0a};
++        ret = uGnssMsgSend(devHandle, (void *)prt_cfg_msg, sizeof(prt_cfg_msg));
++        if (ret != sizeof(prt_cfg_msg)) {
++            printf(" error: uGnssMsgSend sent %d, expected %zu\n", ret, sizeof(prt_cfg_msg));
++            goto deinit;
++        }
++
++        // wait for gps reconfiguration completion
++        uPortTaskBlock(100);
++
++        // close device but keep it running
++        uDeviceClose(devHandle, false);
++    } else {
++        printf(" error: uDeviceOpen failed with %d\n", ret);
++        goto deinit;
++    }
++    uDeviceDeinit();
++    uPortDeinit();
++
++    // Open the device at 115200 baud
++    uPortInit();
++    uDeviceInit();
++    gDeviceCfg.transportCfg.cfgUart.baudRate = 115200;
++    printf("opening gps at %d baud ...", gDeviceCfg.transportCfg.cfgUart.baudRate);
++    ret = uDeviceOpen(&gDeviceCfg, &devHandle);
++    if (ret == 0) {
++        puts(" done\n");
++    } else {
++        printf(" error: uDeviceOpen failed with %d\n", ret);
++        goto deinit;
++    }
++
++    /* TODO: apply advanced configuration */
++
++    // close device but keep it running
++    uDeviceClose(devHandle, false);
++
++deinit:
++    uDeviceDeinit();
++    uPortDeinit();
++
++    EXAMPLE_FINAL_STATE(ret == 0);
++}
++
++// End of file
+-- 
+2.51.0
+
