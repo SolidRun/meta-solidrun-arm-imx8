@@ -1,7 +1,7 @@
 # use solidrun fork
 UBOOT_SRC:solidrun-imx8 = "git://github.com/SolidRun/u-boot.git;protocol=https"
 SRCBRANCH:solidrun-imx8 = "lf-6.6.52-2.2.0-sr-imx8"
-SRCREV:solidrun-imx8 = "7ee00406e63caa4d9176e8a337621fd9b82f68a5"
+SRCREV:solidrun-imx8 = "01e1031959b96349f3f887a6f6818d4ca60c8dc7"
 
 # deploy extra dtbs for imx-mkimage
 do_deploy:append:solidrun-imx8() {
