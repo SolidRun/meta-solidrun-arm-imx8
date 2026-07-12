@@ -27,4 +27,4 @@ jobs:
           aws_bucket: ${{ secrets.IMAGES_S3_BUCKET }}
           endpoint: ${{ secrets.IMAGES_S3_HOST }}
           source_dir: output
-          destination_dir: LX2k/meta-solidrun-arm-lx2xxx
+          destination_dir: IMX8/meta-solidrun-arm-imx8
