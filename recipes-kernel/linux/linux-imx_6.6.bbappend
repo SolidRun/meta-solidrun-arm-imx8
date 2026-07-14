@@ -4,7 +4,7 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/6.6-solidrun:"
 # use solidrun fork
 LINUX_IMX_SRC:solidrun-imx8 = "git://github.com/SolidRun/linux-stable.git;protocol=https;branch=${SRCBRANCH}"
 SRCBRANCH:solidrun-imx8 = "lf-6.6-sr-imx8"
-SRCREV:solidrun-imx8 = "008c029474ad71213e40609d44fb16d8a5ba3eca"
+SRCREV:solidrun-imx8 = "04d5b42d65c806ce96a2ee8f4a3c586906c75a9c"
 
 # Enable kernel delta configs
 # NXP BSP has disabled the normal way of *.scc fragments ...
