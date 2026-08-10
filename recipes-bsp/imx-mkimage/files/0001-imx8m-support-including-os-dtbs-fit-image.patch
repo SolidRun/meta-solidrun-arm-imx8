@@ -1,0 +1,118 @@
+From 13b2ac56653b50df0a26352290030b27404fc92b Mon Sep 17 00:00:00 2001
+From: Josua Mayer <josua@solid-run.com>
+Date: Sun, 9 Aug 2026 13:52:24 +0300
+Subject: [PATCH] imx8m: support including os-dtbs fit image
+
+Add support for including an optional os-dtbs fit image in the boot
+image. Set OS_DTBS_FIT variable to full path, or copy 'os-dtbs.fit' into
+the iMX8M directory to pick it up.
+
+The os-dtbs are loaded to ramdisk_addr_r for now, which is unused up
+until reaching u-boot cli.
+
+U-Boot will pick it up in board_late_init.
+
+Signed-off-by: Josua Mayer <josua@solid-run.com>
+---
+ iMX8M/mkimage_fit_atf.sh | 17 +++++++++++++++++
+ iMX8M/soc.mak            | 14 +++++++++-----
+ 2 files changed, 26 insertions(+), 5 deletions(-)
+
+diff --git a/iMX8M/mkimage_fit_atf.sh b/iMX8M/mkimage_fit_atf.sh
+index b0a9045..fc15b6b 100755
+--- a/iMX8M/mkimage_fit_atf.sh
++++ b/iMX8M/mkimage_fit_atf.sh
+@@ -63,6 +63,10 @@ else
+ 	ls -lct $BL33 | awk '{print $5}' >&2
+ fi
+ 
++if [ -f $OS_DRBS_FIT ]; then
++	LOADABLES="\"os-dtb\", $LOADABLES"
++fi
++
+ for dtname in $*
+ do
+ 	echo "$dtname size: " >&2
+@@ -139,6 +143,19 @@ cat << __HEADER_EOF
+ __HEADER_EOF
+ fi
+ 
++if [ -f $OS_DTBS_FIT ]; then
++cat << __HEADER_EOF
++		os-dtb {
++			description = "OS DTBs FIT Bundle";
++			data = /incbin/("$OS_DTBS_FIT");
++			type = "firmware";
++			arch = "arm64";
++			compression = "none";
++			load = <$OS_DTBS_FIT_LOAD_ADDR>;
++		};
++__HEADER_EOF
++fi
++
+ cat << __CONF_HEADER_EOF
+ 	};
+ 	configurations {
+diff --git a/iMX8M/soc.mak b/iMX8M/soc.mak
+index e7c762b..918d803 100644
+--- a/iMX8M/soc.mak
++++ b/iMX8M/soc.mak
+@@ -25,6 +25,10 @@ PRINT_FIT_HAB_OFFSET ?= 0x60000
+ DEK_BLOB_LOAD_ADDR = 0x40400000
+ TEE ?= tee.bin
+ 
++# for OS DTBs blob, reuse ramdisk_addr_r
++OS_DTBS_FIT_LOAD_ADDR = 0x50000000
++OS_DTBS_FIT ?= os-dtbs.fit
++
+ dtbs ?=
+ # Supplementary dtbs list. Will be included in the image without any check
+ supp_dtbs ?=
+@@ -159,7 +163,7 @@ u-boot.itb: $(dtb) $(supp_dtbs)
+ 	./$(PAD_IMAGE) $(TEE)
+ 	./$(PAD_IMAGE) bl31.bin
+ 	./$(PAD_IMAGE) u-boot-nodtb.bin $(dtb) $(supp_dtbs)
+-	BL32=$(TEE) DEK_BLOB_LOAD_ADDR=$(DEK_BLOB_LOAD_ADDR) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) ../$(SOC_DIR)/mkimage_fit_atf.sh $(dtb) $(supp_dtbs) > u-boot.its
++	BL32=$(TEE) DEK_BLOB_LOAD_ADDR=$(DEK_BLOB_LOAD_ADDR) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) OS_DTBS_FIT_LOAD_ADDR=$(OS_DTBS_FIT_LOAD_ADDR) OS_DTBS_FIT=$(OS_DTBS_FIT) ../$(SOC_DIR)/mkimage_fit_atf.sh $(dtb) $(supp_dtbs) > u-boot.its
+ 	./mkimage_uboot -E -p $(FIT_EXTERNAL_POSITION) -f u-boot.its u-boot.itb
+ 	@rm -f u-boot.its $(dtb)
+ 
+@@ -171,7 +175,7 @@ u-boot-ddr3l.itb: $(dtb_ddr3l) $(supp_dtbs)
+ 	./$(PAD_IMAGE) $(TEE)
+ 	./$(PAD_IMAGE) bl31.bin
+ 	./$(PAD_IMAGE) u-boot-nodtb.bin $(dtb_ddr3l) $(supp_dtbs)
+-	DEK_BLOB_LOAD_ADDR=$(DEK_BLOB_LOAD_ADDR) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) ../$(SOC_DIR)/mkimage_fit_atf.sh $(dtb_ddr3l) $(supp_dtbs) > u-boot-ddr3l.its
++	DEK_BLOB_LOAD_ADDR=$(DEK_BLOB_LOAD_ADDR) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) OS_DTBS_FIT_LOAD_ADDR=$(OS_DTBS_FIT_LOAD_ADDR) OS_DTBS_FIT=$(OS_DTBS_FIT) ../$(SOC_DIR)/mkimage_fit_atf.sh $(dtb_ddr3l) $(supp_dtbs) > u-boot-ddr3l.its
+ 	./mkimage_uboot -E -p $(FIT_EXTERNAL_POSITION) -f u-boot-ddr3l.its u-boot-ddr3l.itb
+ 	@rm -f u-boot.its $(dtb_ddr3l)
+ 
+@@ -183,7 +187,7 @@ u-boot-ddr3l-evk.itb: $(dtb_ddr3l_evk) $(supp_dtbs)
+ 	./$(PAD_IMAGE) $(TEE)
+ 	./$(PAD_IMAGE) bl31.bin
+ 	./$(PAD_IMAGE) u-boot-nodtb.bin $(dtb_ddr3l_evk) $(supp_dtbs)
+-	DEK_BLOB_LOAD_ADDR=$(DEK_BLOB_LOAD_ADDR) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) ../$(SOC_DIR)/mkimage_fit_atf.sh $(dtb_ddr3l_evk) $(supp_dtbs) > u-boot-ddr3l-evk.its
++	DEK_BLOB_LOAD_ADDR=$(DEK_BLOB_LOAD_ADDR) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) OS_DTBS_FIT_LOAD_ADDR=$(OS_DTBS_FIT_LOAD_ADDR) OS_DTBS_FIT=$(OS_DTBS_FIT) ../$(SOC_DIR)/mkimage_fit_atf.sh $(dtb_ddr3l_evk) $(supp_dtbs) > u-boot-ddr3l-evk.its
+ 	./mkimage_uboot -E -p $(FIT_EXTERNAL_POSITION) -f u-boot-ddr3l-evk.its u-boot-ddr3l-evk.itb
+ 	@rm -f u-boot.its $(dtb_ddr3l_evk)
+ 
+@@ -195,7 +199,7 @@ u-boot-ddr4.itb: $(dtb_ddr4) $(supp_dtbs)
+ 	./$(PAD_IMAGE) $(TEE)
+ 	./$(PAD_IMAGE) bl31.bin
+ 	./$(PAD_IMAGE) u-boot-nodtb.bin $(dtb_ddr4) $(supp_dtbs)
+-	DEK_BLOB_LOAD_ADDR=$(DEK_BLOB_LOAD_ADDR) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) ../$(SOC_DIR)/mkimage_fit_atf.sh $(dtb_ddr4) $(supp_dtbs) > u-boot-ddr4.its
++	DEK_BLOB_LOAD_ADDR=$(DEK_BLOB_LOAD_ADDR) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) OS_DTBS_FIT_LOAD_ADDR=$(OS_DTBS_FIT_LOAD_ADDR) OS_DTBS_FIT=$(OS_DTBS_FIT) ../$(SOC_DIR)/mkimage_fit_atf.sh $(dtb_ddr4) $(supp_dtbs) > u-boot-ddr4.its
+ 	./mkimage_uboot -E -p $(FIT_EXTERNAL_POSITION) -f u-boot-ddr4.its u-boot-ddr4.itb
+ 	@rm -f u-boot.its $(dtb_ddr4)
+ 
+@@ -207,7 +211,7 @@ u-boot-ddr4-evk.itb: $(dtb_ddr4_evk) $(supp_dtbs)
+ 	./$(PAD_IMAGE) $(TEE)
+ 	./$(PAD_IMAGE) bl31.bin
+ 	./$(PAD_IMAGE) u-boot-nodtb.bin $(dtb_ddr4_evk) $(supp_dtbs)
+-	DEK_BLOB_LOAD_ADDR=$(DEK_BLOB_LOAD_ADDR) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) ../$(SOC_DIR)/mkimage_fit_atf.sh $(dtb_ddr4_evk) $(supp_dtbs) > u-boot-ddr4-evk.its
++	DEK_BLOB_LOAD_ADDR=$(DEK_BLOB_LOAD_ADDR) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) OS_DTBS_FIT_LOAD_ADDR=$(OS_DTBS_FIT_LOAD_ADDR) OS_DTBS_FIT=$(OS_DTBS_FIT) ../$(SOC_DIR)/mkimage_fit_atf.sh $(dtb_ddr4_evk) $(supp_dtbs) > u-boot-ddr4-evk.its
+ 	./mkimage_uboot -E -p $(FIT_EXTERNAL_POSITION) -f u-boot-ddr4-evk.its u-boot-ddr4-evk.itb
+ 	@rm -f u-boot.its $(dtb_ddr4_evk)
+ 
+-- 
+2.43.0
+

@@ -2,7 +2,7 @@
 # Copied from meta-freescale/recipes-bsp/imx-mkimage/imx-boot_1.0.bb,
 # keep in sync on bsp upgrades.
 #
-# Adapted to allow including extra dtbs via UBOOT_EXTRA_DTB_NAMES variable in boot image:
+# Adapted to allow including extra dtbs via UBOOT_EXTRA_DTB_NAMES variable, and os-dtbs fit image via UBOOT_EXTRA_OSDTBS variable in boot image:
 #
 #--- a/recipes-bsp/imx-mkimage/imx-boot_1.0.bb
 #+++ b/recipes-bsp/imx-mkimage/imx-boot_1.0.bb
@@ -21,7 +21,7 @@
 #                         # Special target build for i.MX 8DXL with V2X off
 #                         bbnote "building ${IMX_BOOT_SOC_TARGET} - ${REV_OPTION} V2X=NO ${target}"
 #-                        make SOC=${IMX_BOOT_SOC_TARGET} ${REV_OPTION} V2X=NO dtbs=${UBOOT_DTB_NAME_EXTRA} flash_linux_m4
-#+                        make SOC=${IMX_BOOT_SOC_TARGET} ${REV_OPTION} V2X=NO dtbs=${UBOOT_DTB_NAME_EXTRA} supp_dtbs="${UBOOT_EXTRA_DTB_NAMES}" flash_linux_m4
+#+                        make SOC=${IMX_BOOT_SOC_TARGET} ${REV_OPTION} V2X=NO dtbs=${UBOOT_DTB_NAME_EXTRA} supp_dtbs="${UBOOT_EXTRA_DTB_NAMES}" OS_DTBS_FIT="${UBOOT_EXTRA_OSDTBS}" flash_linux_m4
 #                         ;;
 #                     *stmm_capsule)
 #                         # target for flash_evk_stmm_capsule or
@@ -30,12 +30,12 @@
 #                         bbnote "building ${IMX_BOOT_SOC_TARGET} - TEE=tee.bin-stmm ${target}"
 #                         cp ${DEPLOY_DIR_IMAGE}/CRT.* ${BOOT_STAGING}
 #-                        make SOC=${IMX_BOOT_SOC_TARGET} TEE=tee.bin-stmm dtbs=${UBOOT_DTB_NAME} ${REV_OPTION} ${target}
-#+                        make SOC=${IMX_BOOT_SOC_TARGET} TEE=tee.bin-stmm dtbs=${UBOOT_DTB_NAME} supp_dtbs="${UBOOT_EXTRA_DTB_NAMES}" ${REV_OPTION} ${target}
+#+                        make SOC=${IMX_BOOT_SOC_TARGET} TEE=tee.bin-stmm dtbs=${UBOOT_DTB_NAME} supp_dtbs="${UBOOT_EXTRA_DTB_NAMES}" OS_DTBS_FIT="${UBOOT_EXTRA_OSDTBS}" ${REV_OPTION} ${target}
 #                         ;;
 #                     *)
 #                         bbnote "building ${IMX_BOOT_SOC_TARGET} - ${REV_OPTION} ${MKIMAGE_EXTRA_ARGS} ${target}"
 #-                        make SOC=${IMX_BOOT_SOC_TARGET} ${REV_OPTION} ${MKIMAGE_EXTRA_ARGS} dtbs=${UBOOT_DTB_NAME} ${target}
-#+                        make SOC=${IMX_BOOT_SOC_TARGET} ${REV_OPTION} ${MKIMAGE_EXTRA_ARGS} dtbs=${UBOOT_DTB_NAME} supp_dtbs="${UBOOT_EXTRA_DTB_NAMES}" ${target}
+#+                        make SOC=${IMX_BOOT_SOC_TARGET} ${REV_OPTION} ${MKIMAGE_EXTRA_ARGS} dtbs=${UBOOT_DTB_NAME} supp_dtbs="${UBOOT_EXTRA_DTB_NAMES}" OS_DTBS_FIT="${UBOOT_EXTRA_OSDTBS}" ${target}
 #                         ;;
 #                     esac
 #
@@ -89,7 +89,7 @@ do_compile:mx8m-generic-bsp() {
                     *no_v2x)
                         # Special target build for i.MX 8DXL with V2X off
                         bbnote "building ${IMX_BOOT_SOC_TARGET} - ${REV_OPTION} V2X=NO ${target}"
-                        make SOC=${IMX_BOOT_SOC_TARGET} ${REV_OPTION} V2X=NO dtbs=${UBOOT_DTB_NAME_EXTRA} supp_dtbs="${UBOOT_EXTRA_DTB_NAMES}" flash_linux_m4
+                        make SOC=${IMX_BOOT_SOC_TARGET} ${REV_OPTION} V2X=NO dtbs=${UBOOT_DTB_NAME_EXTRA} supp_dtbs="${UBOOT_EXTRA_DTB_NAMES}" OS_DTBS_FIT="${UBOOT_EXTRA_OSDTBS}" flash_linux_m4
                         ;;
                     *stmm_capsule)
                         # target for flash_evk_stmm_capsule or
@@ -97,11 +97,11 @@ do_compile:mx8m-generic-bsp() {
                         cp ${RECIPE_SYSROOT_NATIVE}/${bindir}/mkeficapsule ${BOOT_STAGING}
                         bbnote "building ${IMX_BOOT_SOC_TARGET} - TEE=tee.bin-stmm ${target}"
                         cp ${DEPLOY_DIR_IMAGE}/CRT.* ${BOOT_STAGING}
-                        make SOC=${IMX_BOOT_SOC_TARGET} TEE=tee.bin-stmm dtbs=${UBOOT_DTB_NAME} supp_dtbs="${UBOOT_EXTRA_DTB_NAMES}" ${REV_OPTION} ${target}
+                        make SOC=${IMX_BOOT_SOC_TARGET} TEE=tee.bin-stmm dtbs=${UBOOT_DTB_NAME} supp_dtbs="${UBOOT_EXTRA_DTB_NAMES}" OS_DTBS_FIT="${UBOOT_EXTRA_OSDTBS}" ${REV_OPTION} ${target}
                         ;;
                     *)
                         bbnote "building ${IMX_BOOT_SOC_TARGET} - ${REV_OPTION} ${MKIMAGE_EXTRA_ARGS} ${target}"
-                        make SOC=${IMX_BOOT_SOC_TARGET} ${REV_OPTION} ${MKIMAGE_EXTRA_ARGS} dtbs=${UBOOT_DTB_NAME} supp_dtbs="${UBOOT_EXTRA_DTB_NAMES}" ${target}
+                        make SOC=${IMX_BOOT_SOC_TARGET} ${REV_OPTION} ${MKIMAGE_EXTRA_ARGS} dtbs=${UBOOT_DTB_NAME} supp_dtbs="${UBOOT_EXTRA_DTB_NAMES}" OS_DTBS_FIT="${UBOOT_EXTRA_OSDTBS}" ${target}
                         ;;
                     esac
 
