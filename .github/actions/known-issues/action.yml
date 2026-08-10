@@ -1,0 +1,26 @@
+name: 'Known Issues Workarounds'
+description: 'Applies workarounds for known issues'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Cherry-pick Poky Commits
+      shell: bash {0}
+      run: |
+        cd sources/poky
+        git cherry-pick \
+          679b1842bb0a250f43c030ca905a569b7b4c553a \
+          80593d0ce1edd25489f85021024374c11df3edee \
+          e6cbef9080ed3898c7f4b139b193697665767715 \
+          e380eea705d5a8904ca8f4f8fb1c3526b09d52ec \
+          3bcac51eb27b6e0efe54d44a66730d651cf9f6ac \
+          fb693aab03296183068b218eff7f23aa7a10b6a5 \
+          4f4691984adc231b8654f600aaa08d57c2069d62 \
+          99047ec235e0aa53987fa93e906d97fca3ad205e \
+          65c3ebea05dde5cbc9d249e7949fabbc0047313e \
+          09a2e10262562db36c5118b70b6f51e699fee530 \
+          920a6803d5dbd6fb05fdd1c77a36319652d37353 \
+          1c69324f39dd6450437849995b6d43cbee576a19 \
+          ef43a8a49acf77d199c4738fc753263de3e6e85b \
+          b56134ff90dec996e8aae45ed7e6ad6b1d5a84a0 \
+          3f378fc2453ee3ebc9ccb336d9868136e0c20194

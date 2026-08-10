@@ -75,6 +75,9 @@ jobs:
         with:
           path: sources/meta-solidrun-arm-imx8
 
+      - name: Known Issues
+        uses: ./sources/meta-solidrun-arm-imx8/.github/actions/known-issues
+
       - name: Get build tag
         shell: bash {0}
         id: tag_step
@@ -198,6 +201,9 @@ jobs:
         with:
           path: sources/meta-solidrun-arm-imx8
 
+      - name: Known Issues
+        uses: ./sources/meta-solidrun-arm-imx8/.github/actions/known-issues
+
       - name: Get build tag
         shell: bash {0}
         id: tag_step
@@ -320,6 +326,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: sources/meta-solidrun-arm-imx8
+
+      - name: Known Issues
+        uses: ./sources/meta-solidrun-arm-imx8/.github/actions/known-issues
 
       - name: Get build tag
         shell: bash {0}
